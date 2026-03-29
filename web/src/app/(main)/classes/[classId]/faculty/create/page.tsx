@@ -2,12 +2,12 @@
 
 import React, { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { EditorHeader } from "../create/_components/EditorHeader";
-import PhotoUpload from "../create/_components/PhotoUpload";
-import BasicInfoSection from "../create/_components/BasicInfoSection";
-import ContactInfoSection from "../create/_components/ContactInfoSection";
-import FormNote from "../create/_components/FormNote";
-import FacultyPreview from "../create/_components/FacultyPreview";
+import { EditorHeader } from "./_components/EditorHeader";
+import PhotoUpload from "./_components/PhotoUpload";
+import BasicInfoSection from "./_components/BasicInfoSection";
+import ContactInfoSection from "./_components/ContactInfoSection";
+import FormNote from "./_components/FormNote";
+import FacultyPreview from "./_components/FacultyPreview";
 import { toast } from "sonner";
 
 import {

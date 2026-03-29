@@ -3,13 +3,10 @@
 import React from "react";
 import { User, Briefcase, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/Input";
+import type { ClassFaculty } from "@/store/features/classes/thunks/class-faculty.thunk";
 
 interface BasicInfoSectionProps {
-  formData: {
-    name: string;
-    designation: string;
-    location: string;
-  };
+  formData: Pick<ClassFaculty, "name" | "designation" | "location">;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 

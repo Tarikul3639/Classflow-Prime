@@ -2,16 +2,10 @@
 
 import React from "react";
 import { FacultyCard } from "../../_components/FacultyCard";
+import type { ClassFaculty } from "@/store/features/classes/thunks/class-faculty.thunk";
 
 interface FacultyPreviewProps {
-  formData: {
-    name: string;
-    designation: string;
-    location: string;
-    email: string;
-    phone: string;
-    classroomCode: string;
-  };
+  formData: Omit<ClassFaculty, "facultyId">;
   imagePreview: string | null;
 }
 
@@ -28,9 +22,9 @@ export default function FacultyPreview({
   };
 
   const previewFaculty = {
-    _id: "preview",
+    facultyId: "preview",
     name: formData.name || "Faculty Name",
-    title: formData.designation || "Designation",
+    designation: formData.designation || "Designation",
     location: formData.location || "Office Location",
     email: formData.email || "email@example.com",
     phone: formData.phone || "+1 (234) 567-890",

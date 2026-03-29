@@ -25,7 +25,7 @@ export const EditorHeader = ({
   return (
     <>
       {/* Header - Sticky with backdrop blur */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 md:py-4 transition-all">
+      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 md:px-8 py-3 transition-all">
         <div className="flex items-center justify-between mx-auto">
           <div className="flex items-center gap-3">
             <button

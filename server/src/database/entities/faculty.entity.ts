@@ -33,3 +33,5 @@ export class Faculty implements IFaculty {
   @Prop({ trim: true })
   classroomCode?: string; // Teacher's personal Google Classroom code
 }
+
+export const FacultySchema = SchemaFactory.createForClass(Faculty);

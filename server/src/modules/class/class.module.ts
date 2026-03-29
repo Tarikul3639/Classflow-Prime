@@ -14,6 +14,8 @@ import {
   MaterialSchema,
 } from '../../database/entities/material.entity';
 
+import { Faculty, FacultySchema } from '../../database/entities/faculty.entity';
+
 import { CreateClassController } from './controllers/create-class.controller';
 import { CreateClassService } from './services/create-class.service';
 
@@ -47,6 +49,12 @@ import { TogglePinClassUpdateService } from './services/toggle-pin-class-update.
 import { DeleteSingleClassUpdateController } from './controllers/delete-single-class-update.controller';
 import { DeleteSingleClassUpdateService } from './services/delete-single-class-update.service';
 
+import { ClassFacultyController } from './controllers/class-faculty.controller';
+import { FetchClassFacultiesService } from './services/fetch-class-faculties.service';
+import { CreateClassFacultyService } from './services/create-class-faculty.service';
+import { UpdateClassFacultyService } from './services/update-class-faculty.service';
+import { DeleteClassFacultyService } from './services/delete-class-faculty.service';
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Class.name, schema: ClassSchema }]),
@@ -59,6 +67,8 @@ import { DeleteSingleClassUpdateService } from './services/delete-single-class-u
     MongooseModule.forFeature([
       { name: Material.name, schema: MaterialSchema },
     ]),
+
+    MongooseModule.forFeature([{ name: Faculty.name, schema: FacultySchema }]),
   ],
   controllers: [
     CreateClassController,
@@ -72,6 +82,9 @@ import { DeleteSingleClassUpdateService } from './services/delete-single-class-u
     UpdateClassUpdateController,
     TogglePinClassUpdateController,
     DeleteSingleClassUpdateController,
+
+    // Class Faculty Controller
+    ClassFacultyController,
   ],
   providers: [
     CreateClassService,
@@ -85,6 +98,11 @@ import { DeleteSingleClassUpdateService } from './services/delete-single-class-u
     UpdateClassUpdateService,
     TogglePinClassUpdateService,
     DeleteSingleClassUpdateService,
+    // Class Faculty Services
+    FetchClassFacultiesService,
+    CreateClassFacultyService,
+    UpdateClassFacultyService,
+    DeleteClassFacultyService,
   ],
 })
-export class ClassModule {}
+export class ClassModule { }

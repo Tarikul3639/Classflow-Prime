@@ -1,61 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { FacultyCard } from "./_components/FacultyCard";
+import { useParams } from "next/navigation";
 
-interface Faculty {
-  _id: string;
-  name: string;
-  title: string;
-  location: string;
-  email: string;
-  phone: string;
-  avatar?: string;
-  initials?: string;
-  classroomCode?: string;
-}
+import {
+  fetchClassFaculties,
+  ClassFaculty,
+} from "@/store/features/classes/thunks/class-faculty.thunk";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-export default function FacultyPage({
-  params,
-}: {
-  params: { classId: string };
-}) {
-  const faculties: Faculty[] = [
-    {
-      _id: "1",
-      name: "Dr. Alan Grant",
-      title: "Senior Professor & Head of Dept.",
-      location: "Room 402, Science Block",
-      email: "alan.grant@university.edu",
-      phone: "+1 (234) 567-890",
-      classroomCode: "SCI-402",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAPkjGtPP3qY00d_gM_0LJNAyoZmgt4yS6yiRHjRxLzug8qetgQqjYvZVjXnFaCibYsqYU_snKExi80DFGtwhegzXrnAImernt3lvfaZFzwehstPoa5Hfp7XrVmjxQsOx6NW6VilDd2u3gHuJr6dHvQVVWwg0HqP3gPlIL9-DGZ4ycTbAWUW-d8QLjdtR0X544VpV_oW-hp1XRJ2QgQ8Q_elOH4TCzzNm_-W6al-RrQ65_wrP97hHjj-kfsoibFsWXslBFnI_AO2JKk",
-    },
-    {
-      _id: "2",
-      name: "Sarah Jenkins",
-      title: "Associate Professor",
-      location: "Room 315, Annex B",
-      email: "sarah.j@university.edu",
-      phone: "+1 (234) 567-891",
-      classroomCode: "ANN-315",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC2soKSSI5SdO4i8te6PnDp8UV8SaYhaQw70VSP8EZuy7ZqTn3WjnesX3cscOuUo38oXWVbJ-Xn9dkPb3sb--UUcYqBKgkJt_QTvNZK6_fKZbA9Fw1kJWna5oJksuxzhTx8VkGIpjEOC2BBorPlw_WjVzNixEi5R7fjvTmf1raU9pEliN93iEGnWBZOtyEnkheDuvQ7UChxUGDmZ6nEPPdjIZKYYhQcnuigJgX54DL3rzFz_Hqu4ok7x1-Okz7MUQm_YQ8r8pbDclUE",
-    },
-    {
-      _id: "3",
-      name: "Robert Miller",
-      title: "Assistant Professor",
-      location: "Room 108, Main Hall",
-      email: "r.miller@university.edu",
-      phone: "+1 (234) 567-895",
-      classroomCode: "MAIN-108",
-      initials: "RM",
-    },
-  ];
+export default function FacultyPage() {
+  const params = useParams();
+  const classId = params.classId as string;
+
+  const dispatch = useAppDispatch();
+  const faculties: ClassFaculty[] = useAppSelector(
+    (state) => state.classes.classFaculty.faculties,
+  );
+
+  useEffect(() => {
+    dispatch(fetchClassFaculties({ classId }));
+  }, [classId]);
 
   return (
     <main className="bg-slate-50 p-4 space-y-4 pb-8 mx-auto">
@@ -73,7 +41,7 @@ export default function FacultyPage({
           </p>
         </div>
         <Link
-          href={`/classes/${params.classId}/faculty/1`}
+          href={`/classes/${classId}/faculty/create`}
           className="mt-2 px-4 py-2.5 rounded-lg border border-primary/30 bg-white/50 text-primary font-bold text-[11px] md:text-[12px] lg:text-[13px] hover:bg-blue-50 transition-colors flex items-center gap-2 cursor-pointer"
         >
           <span>Suggest Faculty</span>
@@ -90,7 +58,7 @@ export default function FacultyPage({
       {/* Faculty Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {faculties.map((faculty) => (
-          <FacultyCard faculty={faculty} />
+          <FacultyCard key={faculty.facultyId} faculty={faculty} />
         ))}
       </div>
     </main>
