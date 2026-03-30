@@ -18,6 +18,7 @@ import { updateProfileThunk } from "@/store/features/profile/thunks/update-profi
 import { Loader } from "@/components/ui/Loader";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useFileUpload } from "@/hooks/useCloudinary";
 
 const ProfileSettings: React.FC = () => {
   const router = useRouter();
@@ -87,11 +88,31 @@ const ProfileSettings: React.FC = () => {
     console.log("Opening language settings...");
   };
 
-  const regenerateAvatar = useCallback(() => {
-    const newSeed = Math.random().toString(36).substring(7);
-    const newAvatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${newSeed}`;
-    setUserForm((prev) => ({ ...prev, avatarUrl: newAvatarUrl }));
-  }, [setUserForm]);
+    const { upload, loading: uploadLoading } = useFileUpload();
+  
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+  
+      const promise = upload(file, "avatars");
+  
+      toast.promise(promise, {
+        loading: "Uploading image...",
+        success: "Image uploaded",
+        error: "Failed to upload image",
+      });
+  
+      try {
+        const res = await promise;
+  
+        setUserForm((prev) => ({
+          ...prev,
+          avatarUrl: res.secure_url, //  real URL from Cloudinary
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
   if (status.loading || !user) {
     return <Loader />;
@@ -112,7 +133,8 @@ const ProfileSettings: React.FC = () => {
                   name={userForm.name || ""}
                   role="We are working on it..."
                   email={userForm.email || ""}
-                  onEdit={regenerateAvatar}
+                  onImageUpload={handleAvatarUpload}
+                  isUploading={uploadLoading}
                 />
 
                 <PersonalInformation

@@ -9,7 +9,8 @@ interface ProfilePictureProps {
   name: string;
   role: string;
   email: string;
-  onEdit: () => void;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isUploading: boolean;
 }
 
 export default function ProfilePicture({
@@ -17,7 +18,8 @@ export default function ProfilePicture({
   name,
   role,
   email,
-  onEdit,
+  onImageUpload,
+  isUploading,
 }: ProfilePictureProps) {
   return (
     <div className="flex flex-col items-center text-center">
@@ -33,10 +35,22 @@ export default function ProfilePicture({
           </AvatarFallback>
         </Avatar>
         <button
-          onClick={onEdit}
-          className="absolute bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg border-4 border-white hover:scale-110 transition-transform"
+          className={`absolute group bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg border-4 border-white transition-transform
+    ${isUploading ? "cursor-not-allowed opacity-50" : "cursor-pointer! hover:scale-105 hover:bg-primary/90 active:scale-95"}
+  `}
+          title="Change Profile Picture"
         >
-          <Edit size={14} />
+          {/* Hidden Input */}
+          <input
+            disabled={isUploading}
+            type="file"
+            accept="image/*"
+            onChange={onImageUpload}
+            className={`absolute inset-0 opacity-0 ${
+              isUploading ? "pointer-events-none" : "cursor-pointer"
+            }`}
+          />
+          <Edit size={14} className="pointer-events-none" />
         </button>
       </div>
       <h2 className="mt-5 text-xl font-bold text-slate-900">{name}</h2>
