@@ -1,45 +1,41 @@
 "use client";
 
 import React from "react";
-import { MoreHorizontal, ShieldCheck } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ShieldCheck } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MemberActionMenu from "./MemberActionMenu";
-
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  initials?: string;
-  role: "admin" | "professor" | "student";
-  verified?: boolean;
-  avatarBg?: string;
-  avatarText?: string;
-}
+import {
+  ClassMember,
+  EnrollmentRole,
+} from "@/store/features/classes/thunks/members/class-member.thunk";
 
 interface MemberCardProps {
-  member: Member;
-  onMenuClick?: (memberId: string) => void;
+  member: ClassMember;
+  isMe: boolean;
+  onAssignAssistant: (userId: string) => void;
+  onRevokeAssistant: (userId: string) => void;
+  onRevokeMember: (userId: string) => void;
 }
 
-export default function MemberCard({ member, onMenuClick }: MemberCardProps) {
+export default function MemberCard({
+  member,
+  isMe,
+  onAssignAssistant,
+  onRevokeAssistant,
+  onRevokeMember,
+}: MemberCardProps) {
   const getRoleBadge = (role: string) => {
     switch (role) {
-      case "admin":
+      case EnrollmentRole.INSTRUCTOR:
         return (
           <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-primary uppercase">
-            Admin
+            Instructor
           </span>
         );
-      case "professor":
+      case EnrollmentRole.ASSISTANT:
         return (
           <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-primary uppercase">
-            Professor
+            Assistant
           </span>
         );
       default:
@@ -48,21 +44,19 @@ export default function MemberCard({ member, onMenuClick }: MemberCardProps) {
   };
 
   return (
-    <div className="group flex items-center gap-3 p-4 bg-white rounded-xl border border-slate-200 hover:border-primary/30 transition-all shadow-sm">
+    <div className="group flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 hover:border-primary/30 transition-all shadow-xs max-w-sm">
       <div className="relative">
-        {member.avatar ? (
-          <img
-            alt={member.name}
-            className="w-11 h-11 rounded-full object-cover"
-            src={member.avatar}
-          />
-        ) : (
-          <div
-            className={`w-11 h-11 rounded-full ${member.avatarBg} flex items-center justify-center ${member.avatarText} font-bold text-sm`}
-          >
-            {member.initials}
-          </div>
-        )}
+        <Avatar className="w-11 h-11 rounded-full object-cover bg-primary/30">
+          <AvatarImage src={member.avatarUrl} alt={member.name} />
+          <AvatarFallback className="bg-primary text-white font-bold">
+            {member.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")
+              .toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+
         {member.verified && (
           <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5">
             <ShieldCheck
@@ -74,20 +68,25 @@ export default function MemberCard({ member, onMenuClick }: MemberCardProps) {
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-[13px] md:text-[14px] lg:text-[15px] font-bold truncate">
+          <p className="text-[13px] md:text-[14px] font-bold truncate">
             {member.name}
           </p>
           {getRoleBadge(member.role)}
         </div>
-        <p className="text-[12px] md:text-[13px] lg:text-[14px] text-slate-500 truncate">
+        <p className="text-[12px] md:text-[13px] text-slate-500 truncate">
           {member.email}
         </p>
       </div>
 
-      <MemberActionMenu
-        member={member as any} // Replace with actual member object
-        isAdmin={null as any} // Replace with actual isAdmin value
-      />
+      {!isMe &&
+        member.role !== EnrollmentRole.INSTRUCTOR && (
+          <MemberActionMenu
+            member={member}
+            onAssignAssistant={() => onAssignAssistant(member.userId)}
+            onRevokeAssistant={() => onRevokeAssistant(member.userId)}
+            onRevokeMember={() => onRevokeMember(member.userId)}
+          />
+        )}
     </div>
   );
 }

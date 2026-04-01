@@ -8,37 +8,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-type MemberRole = "admin" | "professor" | "student";
-
-type Member = {
-  user: { _id: string; name: string; email: string; avatarUrl: string };
-  role: MemberRole;
-  isBlocked: boolean;
-};
+import {
+  ClassMember,
+  EnrollmentRole,
+} from "@/store/features/classes/thunks/members/class-member.thunk";
 
 type MemberActionMenuProps = {
-  member: Member;
-  isAdmin: boolean;
-  // onAssignCoAdmin: (userId: string) => void;
-  // onBlockUser: (userId: string) => void;
-  // onUnblockUser: (userId: string) => void;
-  // onRemoveCoAdmin: (userId: string) => void;
-  // onRemoveMember: (userId: string) => void;
+  member: ClassMember;
+  onAssignAssistant: () => void;
+  onRevokeAssistant: () => void;
+  onRevokeMember: () => void;
 };
 
 const MemberActionMenu: React.FC<MemberActionMenuProps> = ({
   member,
-  isAdmin,
-  // onAssignCoAdmin,
-  // onBlockUser,
-  // onUnblockUser,
-  // onRemoveCoAdmin,
-  // onRemoveMember,
+  onAssignAssistant,
+  onRevokeAssistant,
+  onRevokeMember,
 }) => {
-  const itemStyle =
-    "flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-600 cursor-pointer transition-all duration-200 focus:bg-[#399aef]/10 focus:text-[#399aef] group outline-none";
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -60,51 +47,25 @@ const MemberActionMenu: React.FC<MemberActionMenuProps> = ({
         </div>
 
         {/* 1. Assign Co-Admin Area */}
-        {isAdmin && member.role === "admin" && (
-          <DropdownMenuItem
-            // onClick={() => onAssignCoAdmin(member.user._id)}
-            className={itemStyle}
-          >
+        {member.role === EnrollmentRole.LEARNER && (
+          <DropdownMenuItem onClick={onAssignAssistant}>
             <div className="w-1.5 h-1.5 rounded-full bg-purple-500 group-hover:scale-125 transition-transform" />
-            <span>Assign Co-Admin</span>
+            <span>Assign Assistant</span>
           </DropdownMenuItem>
         )}
 
-        {/* 2. Block/Unblock Action */}
-        <DropdownMenuItem
-          // onClick={() =>
-          //   member.isBlocked
-          //     ? onUnblockUser(member.user._id)
-          //     : onBlockUser(member.user._id)
-          // }
-          className={itemStyle}
-        >
-          <div
-            className={`w-1.5 h-1.5 rounded-full ${
-              member.isBlocked ? "bg-emerald-500" : "bg-amber-500"
-            } group-hover:scale-125 transition-transform`}
-          />
-          <span>{member.isBlocked ? "Unblock Access" : "Restrict Access"}</span>
-        </DropdownMenuItem>
-
         {/* 3. Role Management */}
-        {member.role === "professor" && isAdmin && (
-          <DropdownMenuItem
-            // onClick={() => onRemoveCoAdmin(member.user._id)}
-            className={itemStyle}
-          >
+        {member.role === EnrollmentRole.ASSISTANT && (
+          <DropdownMenuItem onClick={onRevokeAssistant}>
             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 group-hover:scale-125 transition-transform" />
-            <span>Revoke Co-Admin</span>
+            <span>Revoke Assistant</span>
           </DropdownMenuItem>
         )}
 
         {/* 4. Danger Zone */}
-        <DropdownMenuItem
-          // onClick={() => onRemoveMember(member.user._id)}
-          className={itemStyle}
-        >
+        <DropdownMenuItem onClick={onRevokeMember} className="text-red-500 focus:text-red-500">
           <div className="w-1.5 h-1.5 rounded-full bg-rose-500 group-hover:scale-125 transition-transform" />
-          <span>Remove Member</span>
+          <span>Revoke Member</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

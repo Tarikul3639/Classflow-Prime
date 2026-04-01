@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { IClass, ClassStatus } from '../interface/class.interface';
+import { IClass, ClassStatus, } from '../interface/class.interface';
 
 export type ClassDocument = HydratedDocument<Class & IClass>;
 

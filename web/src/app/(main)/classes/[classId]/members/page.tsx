@@ -1,27 +1,30 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import MemberSearch from "./_components/MemberSearch";
 import { Filters as RoleFilters } from "@/components/ui/Filters";
 import MemberCard from "./_components/MemberCard";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import {
+  fetchClassMembers,
+  assignAssistant,
+  revokeAssistant,
+  revokeMember,
+  type ClassMember,
+} from "@/store/features/classes/thunks/members/class-member.thunk";
 
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  initials?: string;
-  role: "admin" | "professor" | "student";
-  verified?: boolean;
-  avatarBg?: string;
-  avatarText?: string;
-}
+export default function MembersPage() {
+  const { classId } = useParams();
+  const dispatch = useAppDispatch();
 
-export default function MembersPage({
-  params,
-}: {
-  params: { classId: string };
-}) {
+  const myId = useAppSelector((state) => state.profile.fetchUser.user?._id);
+
+  const { members, loading, error } = useAppSelector(
+    (state) => state.classes.classMembers,
+  );
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
 
@@ -31,60 +34,11 @@ export default function MembersPage({
     { id: "students", label: "Students" },
   ];
 
-  const members: Member[] = [
-    {
-      id: "1",
-      name: "Sarah Jenkins",
-      email: "sarah.j@university.edu",
-      role: "admin",
-      verified: true,
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuC2soKSSI5SdO4i8te6PnDp8UV8SaYhaQw70VSP8EZuy7ZqTn3WjnesX3cscOuUo38oXWVbJ-Xn9dkPb3sb--UUcYqBKgkJt_QTvNZK6_fKZbA9Fw1kJWna5oJksuxzhTx8VkGIpjEOC2BBorPlw_WjVzNixEi5R7fjvTmf1raU9pEliN93iEGnWBZOtyEnkheDuvQ7UChxUGDmZ6nEPPdjIZKYYhQcnuigJgX54DL3rzFz_Hqu4ok7x1-Okz7MUQm_YQ8r8pbDclUE",
-    },
-    {
-      id: "2",
-      name: "Dr. Alan Grant",
-      email: "alan.grant@university.edu",
-      role: "professor",
-      verified: true,
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAPkjGtPP3qY00d_gM_0LJNAyoZmgt4yS6yiRHjRxLzug8qetgQqjYvZVjXnFaCibYsqYU_snKExi80DFGtwhegzXrnAImernt3lvfaZFzwehstPoa5Hfp7XrVmjxQsOx6NW6VilDd2u3gHuJr6dHvQVVWwg0HqP3gPlIL9-DGZ4ycTbAWUW-d8QLjdtR0X544VpV_oW-hp1XRJ2QgQ8Q_elOH4TCzzNm_-W6al-RrQ65_wrP97hHjj-kfsoibFsWXslBFnI_AO2JKk",
-    },
-    {
-      id: "3",
-      name: "Marcus Chen",
-      email: "marcus.c@student.edu",
-      role: "student",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBUZznvGwj0voW-l_fT2YbonJtVfUSWFv-rhvDjNRiEeR483IYrszhb2It_nU3G5cOFGxTzYAtzMiXWit80wKYCdYA_wl-Uncz8R8Ht5Q3VMXw1zWb53w1Dyn0vwWfKSW6HMIsEZLvVaPFpHsZHgd7jmk40PiZk8bo7kXqxmLjrVKUKrwJayL6Tk-Yln31mciTJNgRmGrFEB21AVLaa4KKnJCp4AgQnAA_vEIOKA5KX42tBIfnSG4oOnGuJzSL1G796lQvpMbtZ6T-l",
-    },
-    {
-      id: "4",
-      name: "Emily Johnson",
-      email: "emily.j@student.edu",
-      role: "student",
-      initials: "EJ",
-      avatarBg: "bg-orange-100",
-      avatarText: "text-orange-600",
-    },
-    {
-      id: "5",
-      name: "Alice Freeman",
-      email: "alice.free@student.edu",
-      role: "student",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBE-oK1wSWvUc-UGoREMOM_qxA4WnmMoT5xzJottnxpFU5AbWIsKk7GTsZaprDIt08zyI28ezA0acfFeVI_p9Zd6XEKzJ_E8jnYga8LpXcjvjOkkZr9hYmVu87Tizk0Fi3Of7hjIlQI1FFJ6Jbr7-WVLuXWRxjVl2kPv4bqwSCHU5KUVS2RW51g4d7JG3eNoNr_a-6XEaM7s3HJk5MFymWuFsqjo1HmzgieAAGSOwONHyOJx2LRBO5ETLBtzwj00wYnODL5SA4E_kBI",
-    },
-    {
-      id: "6",
-      name: "David Kim",
-      email: "david.kim@student.edu",
-      role: "student",
-      initials: "DK",
-      avatarBg: "bg-pink-100",
-      avatarText: "text-pink-600",
-    },
-  ];
+  useEffect(() => {
+    if (classId) {
+      dispatch(fetchClassMembers(classId.toString()));
+    }
+  }, [dispatch, classId]);
 
   const filteredMembers = members.filter((member) => {
     const matchesSearch =
@@ -93,18 +47,89 @@ export default function MembersPage({
 
     const matchesFilter =
       activeFilter === "all" ||
-      (activeFilter === "admins" && member.role === "admin") ||
-      (activeFilter === "students" && member.role === "student");
+      (activeFilter === "admins" && member.role === "instructor") ||
+      (activeFilter === "students" && member.role === "learner") ||
+      (activeFilter === "admins" && member.role === "assistant");
 
     return matchesSearch && matchesFilter;
   });
 
   const groupedMembers = {
     Administrator: filteredMembers.filter(
-      (m) => m.role === "admin" || m.role === "professor",
+      (m) => m.role === "instructor" || m.role === "assistant",
     ),
-    Students: filteredMembers.filter((m) => m.role === "student"),
+    Students: filteredMembers.filter((m) => m.role === "learner"),
   };
+
+  const onAssignAssistant = async (userId: string) => {
+    if (!classId) return;
+    const promise = dispatch(
+      assignAssistant({ classId: classId.toString(), userId }),
+    ).unwrap();
+    toast.promise(promise, {
+      loading: "Assistant assigning...",
+      success: "Assistant assign successfully",
+      error: "Failed to assign assistant",
+    });
+
+    try {
+      await promise;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const onRevokeAssistant = async (userId: string) => {
+    if (!classId) return;
+    const promise = dispatch(
+      revokeAssistant({ classId: classId.toString(), userId }),
+    ).unwrap();
+    toast.promise(promise, {
+      loading: "Removing assistant...",
+      success: "Assistant revoked successfully",
+      error: "Failed to revoke assistant",
+    });
+
+    try {
+      await promise;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const onRevokeMember = async (userId: string) => {
+    if (!classId) return;
+    const promise = dispatch(
+      revokeMember({ classId: classId.toString(), userId }),
+    ).unwrap();
+    toast.promise(promise, {
+      loading: "Removing member...",
+      success: "Member revoked successfully",
+      error: "Failed to revoke member",
+    });
+
+    try {
+      await promise;
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  if (loading.fetchMembers) {
+    return (
+      <div className="py-16 text-center text-sm text-slate-500">
+        Loading members...
+      </div>
+    );
+  }
+
+  if (error.fetchMembers) {
+    return (
+      <div className="py-16 text-center text-sm text-red-500">
+        {error.fetchMembers}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -130,11 +155,12 @@ export default function MembersPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {members.map((member) => (
                     <MemberCard
-                      key={member.id}
+                      key={member.userId}
                       member={member}
-                      onMenuClick={(id) =>
-                        console.log("Menu clicked for member ID:", id)
-                      }
+                      isMe={member.userId === myId}
+                      onAssignAssistant={onAssignAssistant}
+                      onRevokeAssistant={onRevokeAssistant}
+                      onRevokeMember={onRevokeMember}
                     />
                   ))}
                 </div>

@@ -88,31 +88,31 @@ const ProfileSettings: React.FC = () => {
     console.log("Opening language settings...");
   };
 
-    const { upload, loading: uploadLoading } = useFileUpload();
-  
-    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (!file) return;
-  
-      const promise = upload(file, "avatars");
-  
-      toast.promise(promise, {
-        loading: "Uploading image...",
-        success: "Image uploaded",
-        error: "Failed to upload image",
-      });
-  
-      try {
-        const res = await promise;
-  
-        setUserForm((prev) => ({
-          ...prev,
-          avatarUrl: res.secure_url, //  real URL from Cloudinary
-        }));
-      } catch (err) {
-        console.error(err);
-      }
-    };
+  const { upload, loading: uploadLoading } = useFileUpload();
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const promise = upload(file, "avatars");
+
+    toast.promise(promise, {
+      loading: "Uploading image...",
+      success: "Image uploaded",
+      error: "Failed to upload image",
+    });
+
+    try {
+      const res = await promise;
+
+      setUserForm((prev) => ({
+        ...prev,
+        avatarUrl: res.secure_url, //  real URL from Cloudinary
+      }));
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (status.loading || !user) {
     return <Loader />;

@@ -14,6 +14,8 @@ import {
   MaterialSchema,
 } from '../../database/entities/material.entity';
 
+import { User, UserSchema } from '../../database/entities/user.entity';
+
 import { Faculty, FacultySchema } from '../../database/entities/faculty.entity';
 
 import { CreateClassController } from './controllers/create-class.controller';
@@ -56,8 +58,15 @@ import { UpdateSingleClassFacultyService } from './services/update-single-class-
 import { DeleteClassFacultyService } from './services/delete-class-faculty.service';
 import { FetchSingleClassFacultyService } from './services/fetch-single-class-faculty.service';
 
+import { ClassMemberController } from './controllers/class-member.controller';
+import { FetchClassMembersService } from './services/fetch-class-members.service';
+import { AssistantAssignClassMemberService } from './services/assistant-assign-class-member.service';
+import { AssistantRevokeClassMemberService } from './services/assistant-revoke-class-member.service';
+import { MemberRevokeClassMemberService } from './services/member-revoke-class-member.service';
+
 @Module({
   imports: [
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Class.name, schema: ClassSchema }]),
     MongooseModule.forFeature([
       { name: Enrollment.name, schema: EnrollmentSchema },
@@ -86,6 +95,9 @@ import { FetchSingleClassFacultyService } from './services/fetch-single-class-fa
 
     // Class Faculty Controller
     ClassFacultyController,
+
+    // Class Member Controller
+    ClassMemberController,
   ],
   providers: [
     CreateClassService,
@@ -105,6 +117,11 @@ import { FetchSingleClassFacultyService } from './services/fetch-single-class-fa
     UpdateSingleClassFacultyService,
     DeleteClassFacultyService,
     FetchSingleClassFacultyService,
+    // Class Member Services
+    FetchClassMembersService,
+    AssistantAssignClassMemberService,
+    AssistantRevokeClassMemberService,
+    MemberRevokeClassMemberService,
   ],
 })
 export class ClassModule { }

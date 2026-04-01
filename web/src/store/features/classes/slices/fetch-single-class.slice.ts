@@ -3,7 +3,7 @@ import { IClassDetails } from "../thunks/fetch-single-class.thunk";
 import { fetchSingleClass } from "../thunks/fetch-single-class.thunk";
 
 interface FetchSingleClassState {
-    classDetails: IClassDetails | null;
+    classDetails: IClassDetails;
     isLoading: boolean;
     error: string | null;
 }
@@ -32,7 +32,7 @@ const fetchSingleClassSlice = createSlice({
     reducers: {
         // reset state when closing the Class Details Modal
         resetClassDetailsState: (state) => {
-            state.classDetails = null;
+            state.classDetails = initialState.classDetails;
             state.isLoading = false;
             state.error = null;
         }
@@ -42,7 +42,7 @@ const fetchSingleClassSlice = createSlice({
             .addCase(fetchSingleClass.pending, (state) => {
                 state.isLoading = true;
                 state.error = null;
-                state.classDetails = null;
+                state.classDetails = initialState.classDetails; // Clear previous class details when starting a new fetch
             })
             .addCase(fetchSingleClass.fulfilled, (state, action) => {
                 state.isLoading = false;
@@ -52,7 +52,7 @@ const fetchSingleClassSlice = createSlice({
             .addCase(fetchSingleClass.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload?.message || "Failed to fetch class details";
-                state.classDetails = null;
+                state.classDetails = initialState.classDetails; // Clear class details on error
             });
     },
 });

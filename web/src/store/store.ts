@@ -25,8 +25,12 @@ import fetchEnrolledClassesReducer from "./features/classes/slices/fetch-enrolle
 import fetchSingleClassUpdateReducer from "./features/classes/slices/fetch-single-class-update.slice";
 import updateClassUpdateReducer from "./features/classes/slices/update-class-update.slice";
 
+// Class Faculty slices
 import classFacultyReducer from "./features/classes/slices/class-faculty.slice";
 import fetchSingleClassFaculty from './features/classes/slices/fetch-single-class-faculty.slice'
+
+// Class Members slices
+import classMemberReducer from "./features/classes/slices/members/class-member.slice";
 
 const classesReducer = combineReducers({
   createClass: createClassReducer,
@@ -41,6 +45,7 @@ const classesReducer = combineReducers({
 
   classFaculty: classFacultyReducer,
   fetchSingleClassFaculty: fetchSingleClassFaculty,
+  classMembers: classMemberReducer,
 });
 
 // Profile slices
