@@ -57,9 +57,9 @@ export class UpdateClassUpdateService {
       `Updating Update - Class: ${classId}, Update: ${updateId}, User: ${userId}, Body: ${JSON.stringify(dto)}`,
     );
 
-    // Step 1: Class exists কিনা check
+    // Step 1: check if class exists
     const classData = await this.classModel.findOne({
-      _id: classObjectId as any,
+      _id: classObjectId,
       isArchived: false,
     });
 
@@ -69,9 +69,11 @@ export class UpdateClassUpdateService {
 
     // Step 2: Permission check
     const isInstructor = classData.instructorId.equals(userObjectId);
-    const isAssistant = classData.assistantIds?.some((id) =>
-      id.equals(userObjectId),
-    );
+    const isAssistant = await this.enrollmentModel.exists({
+      userId: userObjectId,
+      classId: classObjectId,
+      role: EnrollmentRole.ASSISTANT,
+    });
 
     if (!isInstructor && !isAssistant) {
       throw new ForbiddenException(
@@ -79,9 +81,9 @@ export class UpdateClassUpdateService {
       );
     }
 
-    // Step 3: Update exists কিনা check
+    // Step 3: Check if the update exists
     const existingUpdate = await this.classUpdateModel.findOne({
-      _id: updateObjectId as any,
+      _id: updateObjectId,
       classId: classObjectId,
     });
 
@@ -98,17 +100,17 @@ export class UpdateClassUpdateService {
     if (dto.isPinned !== undefined) updateFields.isPinned = dto.isPinned;
     if (dto.eventAt !== undefined) updateFields.eventAt = dto.eventAt;
 
-    // Step 6: ClassUpdate document update করো
+    // Step 6: Update the class update document
     await this.classUpdateModel.findByIdAndUpdate(updateObjectId, {
       $set: updateFields,
     });
 
-    // Step 7: Materials আসলে পুরনোগুলো replace করো
+    // Step 7: Materials update if provided
     if (dto.materials !== undefined) {
-      // পুরনো materials delete করো
+      // Old materials delete
       await this.materialModel.deleteMany({ updateId: updateObjectId });
 
-      // নতুন materials insert করো
+      // New materials create
       if (dto.materials.length > 0) {
         const newMaterials = dto.materials.map((m) => ({
           classId: classObjectId,
@@ -129,7 +131,7 @@ export class UpdateClassUpdateService {
           },
         });
       } else {
-        // খালি array আসলে materials clear করো
+        // If materials array is empty, just clear the materials field
         await this.classUpdateModel.findByIdAndUpdate(updateObjectId, {
           $set: { materials: [] },
         });
@@ -164,19 +166,19 @@ export class UpdateClassUpdateService {
 
     // ── 1. Get all enrolled learners ───────────────────────
     const enrollments = await this.enrollmentModel
-      .find({ classId: classObjectId, role: EnrollmentRole.LEARNER })
+      .find({ classId: classObjectId })
       .select('userId')
       .lean();
 
-    const learnerIds = enrollments.map((e) => e.userId.toString());
+    // Extract userIds from enrollments
+    const enrollmentIds = enrollments.map((e) => e.userId.toString());
 
     // ── 2. Get assistants and instructor ───────────────────
-    const assistantIds = classData.assistantIds?.map((id) => id.toString()) || [];
     const instructorId = classData.instructorId.toString();
 
     // ── 3. Combine all recipient IDs and remove duplicates ──
     const allRecipients = [
-      ...new Set([...learnerIds, ...assistantIds, instructorId]),
+      ...new Set([...enrollmentIds, instructorId]),
     ].filter((id) => id !== userId); // remove whoever posted
 
     // ── 4. Send notifications ───────────────────────────────

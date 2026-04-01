@@ -26,13 +26,6 @@ export class Class implements IClass {
   instructorId: Types.ObjectId;
 
   @Prop({
-    type: [Types.ObjectId],
-    ref: 'User',
-    default: [],
-  })
-  assistantIds?: Types.ObjectId[];
-
-  @Prop({
     trim: true,
     maxlength: 1000,
   })

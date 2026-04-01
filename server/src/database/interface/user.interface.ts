@@ -1,3 +1,5 @@
+import { Types } from 'mongoose';
+
 export enum UserRole {
   USER = 'student',
   ADMIN = 'admin',
@@ -5,7 +7,7 @@ export enum UserRole {
 }
 
 export interface IUser {
-  _id?: string; // MongoDB ObjectId as string
+  _id?: Types.ObjectId | string; // MongoDB ObjectId as string
   name: string;
   role: UserRole;
   email: string;

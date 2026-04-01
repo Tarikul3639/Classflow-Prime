@@ -8,6 +8,11 @@ import { Model, Types } from 'mongoose';
 
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import {
+    Enrollment,
+    EnrollmentDocument,
+} from '../../../database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import {
     Faculty,
     FacultyDocument,
 } from '../../../database/entities/faculty.entity';
@@ -23,6 +28,8 @@ export class UpdateSingleClassFacultyService {
         @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
         @InjectModel(Faculty.name)
         private readonly facultyModel: Model<FacultyDocument>,
+        @InjectModel(Enrollment.name)
+        private readonly enrollmentModel: Model<EnrollmentDocument>,
     ) { }
 
     async execute(
@@ -31,7 +38,7 @@ export class UpdateSingleClassFacultyService {
         facultyId: string,
         dto: UpdateSingleClassFacultyRequestDto,
     ): Promise<ClassFacultyResponseDto> {
-        console.log('Update...', userId, classId, facultyId, dto);
+        // console.log('Update...', userId, classId, facultyId, dto);
 
         const userObjectId = new Types.ObjectId(userId);
         const classObjectId = new Types.ObjectId(classId);
@@ -40,11 +47,16 @@ export class UpdateSingleClassFacultyService {
         const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
 
-        if (
-            !existingClass.instructorId.equals(userObjectId) &&
-            !existingClass.assistantIds?.some((id) => id.equals(userObjectId))
-        ) {
-            throw new ForbiddenException('Only the instructor or assistants can update faculties');
+        const isAssistant = await this.enrollmentModel.findOne({
+            classId: classObjectId,
+            userId: userObjectId,
+            role: EnrollmentRole.ASSISTANT,
+        });
+
+        if (!existingClass.instructorId.equals(userObjectId) && !isAssistant) {
+            throw new ForbiddenException(
+                'Only the instructor or assistants can update faculties',
+            );
         }
 
         const updateData = Object.fromEntries(
@@ -55,7 +67,7 @@ export class UpdateSingleClassFacultyService {
             throw new NotFoundException('No valid fields provided for update');
         }
 
-        console.log('Fields: ', updateData);
+        // console.log('Fields: ', updateData);
 
         const faculty = await this.facultyModel.findOneAndUpdate(
             { _id: facultyObjectId as any, classId: classObjectId },

@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface ISession {
-  _id?: string;
+  _id?: Types.ObjectId | string;
   userId: Types.ObjectId;
   token: string; // hashed token
   expiresAt: Date;

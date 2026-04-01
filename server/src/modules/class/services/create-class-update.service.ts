@@ -16,10 +16,8 @@ import {
   MaterialDocument,
 } from '../../../database/entities/material.entity';
 import { CreateClassUpdateRequestDto } from '../dto/create-class-update.dto';
-
 import { NotificationService } from '../../notification/services/notification.service';
 import { NotificationType } from '../../../database/entities/notification.entity';
-
 import {
   Enrollment,
   EnrollmentDocument,
@@ -36,45 +34,57 @@ export class CreateClassUpdateService {
     @InjectModel(Enrollment.name)
     private enrollmentModel: Model<EnrollmentDocument>,
     private notificationService: NotificationService,
-  ) { }
+  ) {}
 
   async execute(
     classId: string,
     userId: string,
     dto: CreateClassUpdateRequestDto,
   ) {
+    console.log('--- EXECUTING CREATE UPDATE SERVICE ---', { userId, title: dto.title });
+    
     const userObjId = new Types.ObjectId(userId);
     const classObjId = new Types.ObjectId(classId);
 
-    // Check Class ID validity and existence
+    // ── Validate Class ID format ───────────────────────────────────────────
     if (!Types.ObjectId.isValid(classObjId)) {
       throw new NotFoundException('Invalid Class ID format');
     }
 
+    // ── Fetch the target class from the database ───────────────────────────
     const targetClass = await this.classModel.findById(classObjId).exec();
 
     if (!targetClass) {
-      console.log(`Class with ID ${classId} not found in DB`);
       throw new NotFoundException('Class not found');
     }
 
-    // Check if the user is the instructor or assistant of the class
+    // ── Check if the user is the instructor of the class ───────────────────
     const isInstructor = targetClass.instructorId.equals(userObjId);
 
-    const isAssistant = targetClass.assistantIds?.some((id) =>
-      id.equals(userObjId),
-    );
+    // ── Check if the user is an assistant of the class ────────────────────
+    const isAssistant = await this.enrollmentModel.exists({
+      classId: classObjId,
+      userId: userObjId,
+      role: EnrollmentRole.ASSISTANT,
+    });
+
+    // ── Only instructors and assistants are allowed to post updates ────────
     if (!isInstructor && !isAssistant) {
       throw new ForbiddenException(
         'You do not have permission to post updates',
       );
     }
 
-    // Start transaction for creating update and associated materials
+    // ── Start a MongoDB session and transaction ────────────────────────────
+    // This ensures the class update and its materials are created atomically.
+    // If anything fails, the entire operation is rolled back.
     const session = await this.classModel.db.startSession();
     session.startTransaction();
 
+    let newUpdateId: Types.ObjectId;
+
     try {
+      // ── Create the class update document ──────────────────────────────
       const [newUpdate] = await this.classUpdateModel.create(
         [
           {
@@ -89,6 +99,7 @@ export class CreateClassUpdateService {
         { session },
       );
 
+      // ── If materials are provided, create and link them ────────────────
       if (dto.materials && dto.materials.length > 0) {
         const materialsToCreate = dto.materials.map((m) => ({
           classId: targetClass._id,
@@ -100,80 +111,94 @@ export class CreateClassUpdateService {
           uploadedBy: userObjId,
         }));
 
+        // Insert all materials in a single bulk operation
         const createdMaterials = await this.materialModel.insertMany(
           materialsToCreate,
           { session },
         );
+
+        // Extract the IDs of the newly created materials
         const materialIds = createdMaterials.map((m) => m._id);
 
+        // Update the class update document to reference the material IDs
         await this.classUpdateModel.updateOne(
           { _id: newUpdate._id },
-          { $set: { materials: materialIds } }, // Update the ClassUpdate with material references
+          { $set: { materials: materialIds } },
           { session },
         );
       }
 
-      const data = await this.classUpdateModel
-        .findById(newUpdate._id)
-        .populate('postedBy', 'name avatarUrl')
-        .populate('materials')
-        .exec();
+      // ── Save the new update ID before committing ───────────────────────
+      // We store this outside the try block scope so we can use it after commit.
+      newUpdateId = newUpdate._id as Types.ObjectId;
 
+      // ── Commit the transaction — all DB writes are now permanent ──────
       await session.commitTransaction();
-
-      /**   
-       * After successfully creating the class update and associated materials,
-       * we need to notify all relevant users (learners, assistants, instructor).
-       * This is done after the transaction commits to ensure we only notify if the update was created successfully.
-       */
-
-      // ── 1. Get all enrolled learners ───────────────────────
-      const enrollments = await this.enrollmentModel
-        .find({ classId: classObjId, role: EnrollmentRole.LEARNER })
-        .select('userId')
-        .lean();
-
-      const learnerIds = enrollments.map((e) => e.userId.toString());
-
-      // ── 2. Get assistants from class document ──────────────
-      const assistantIds = (targetClass.assistantIds ?? []).map((id) =>
-        id.toString(),
-      );
-
-      // ── 3. Include the instructor ──────────────────────────
-      const instructorId = targetClass.instructorId.toString();
-
-      // ── 4. Merge all, exclude the poster ──────────────────
-      const allRecipients = [
-        ...new Set([...learnerIds, ...assistantIds, instructorId]),
-      ].filter((id) => id !== userId); // remove whoever posted
-
-      // ── 5. Fire notification ───────────────────────────────
-      if (allRecipients.length > 0) {
-        await this.notificationService.createBulk({
-          recipientIds: allRecipients,
-          senderId: userObjId as any,
-          title: targetClass.name,
-          message: `A new update has been posted please check the latest update in the class.`,
-          type: NotificationType.UPDATE,
-          metadata: {
-            classId,
-            updateId: data?._id.toString(),
-          },
-        });
-      }
-
-      return {
-        success: true,
-        message: 'Class update created successfully',
-        update: data,
-      };
     } catch (error) {
+      // ── If anything failed, roll back all changes ──────────────────────
       await session.abortTransaction();
       console.error('Transaction Error:', error);
       throw new InternalServerErrorException('Failed to create class update');
     } finally {
+      // ── Always close the session regardless of success or failure ──────
       session.endSession();
     }
+
+    // ── Fetch the fully populated update AFTER the transaction closes ──────
+    // This is intentionally outside the try/catch to avoid calling
+    // abortTransaction() on an already-committed session if populate fails.
+    const data = await this.classUpdateModel
+      .findById(newUpdateId)
+      .populate('postedBy', 'name avatarUrl')
+      .populate('materials')
+      .exec();
+
+    // ── Fetch all enrolled learners AND assistants in a single DB query ────
+    // Using $in on the role field avoids making two separate round-trips.
+    const allEnrollments = await this.enrollmentModel
+      .find({
+        classId: classObjId,
+        role: { $in: [EnrollmentRole.LEARNER, EnrollmentRole.ASSISTANT] },
+      })
+      .select('userId role')
+      .lean();
+
+    // ── Separate learner and assistant IDs from the combined result ────────
+    const learnerIds = allEnrollments
+      .filter((e) => e.role === EnrollmentRole.LEARNER)
+      .map((e) => e.userId.toString());
+
+    const assistantIds = allEnrollments
+      .filter((e) => e.role === EnrollmentRole.ASSISTANT)
+      .map((e) => e.userId.toString());
+
+    // ── Include the class instructor ──────────────────────────────────────
+    const instructorId = targetClass.instructorId.toString();
+
+    // ── Merge all recipients and remove the poster to avoid self-notification
+    const allRecipients = [
+      ...new Set([...learnerIds, ...assistantIds, instructorId]),
+    ].filter((id) => id !== userId);
+
+    // ── Send bulk notifications to all recipients (if any) ────────────────
+    if (allRecipients.length > 0) {
+      await this.notificationService.createBulk({
+        recipientIds: allRecipients,
+        senderId: userObjId.toString(),
+        title: targetClass.name,
+        message: `A new update has been posted. Please check the latest update in the class.`,
+        type: NotificationType.UPDATE,
+        metadata: {
+          classId,
+          updateId: data?._id.toString(),
+        },
+      });
+    }
+
+    return {
+      success: true,
+      message: 'Class update created successfully',
+      update: data,
+    };
   }
 }

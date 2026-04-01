@@ -8,7 +8,7 @@ export enum AccountProvider {
 }
 
 export interface IAccount {
-  _id?: string;
+  _id?: Types.ObjectId | string; // MongoDB ObjectId as string
   userId: Types.ObjectId; // User _id
   accountId: string; // Provider-specific user ID
   providerId: AccountProvider;

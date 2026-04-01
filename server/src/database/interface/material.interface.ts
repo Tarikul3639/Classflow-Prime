@@ -9,7 +9,7 @@ export enum MaterialType {
 }
 
 export interface IMaterial {
-  _id?: string;
+  _id?: Types.ObjectId | string;
   classId: Types.ObjectId; // Which class this material belongs to
   updateId: Types.ObjectId; // Which update this material belongs to
   type: MaterialType; // Type of material (file, image, video, link)

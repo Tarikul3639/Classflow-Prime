@@ -10,7 +10,7 @@ import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import {
     Enrollment,
     EnrollmentDocument,
-} from 'src/database/entities/enrollment.entity';
+} from '../../../database/entities/enrollment.entity';
 import {
     Faculty,
     FacultyDocument,
@@ -36,22 +36,19 @@ export class FetchSingleClassFacultyService {
         const objectClassId = new Types.ObjectId(classId);
         const objectFacultyId = new Types.ObjectId(facultyId);
 
-        console.log("Single Faculty: ", objectClassId, objectFacultyId, objectUserId);
         const existingClass = await this.classModel.findById(objectClassId);
         if (!existingClass) throw new NotFoundException('Class not found');
+
         const enrollment = await this.enrollmentModel.findOne({
             classId: objectClassId,
             userId: objectUserId,
         });
-        if (
-            !enrollment && !existingClass.instructorId.equals(objectUserId) &&
-            !existingClass.assistantIds?.some((id) => id.equals(objectUserId))
-        ) {
+        if (!enrollment && !existingClass.instructorId.equals(objectUserId)) {
             throw new ForbiddenException('You are not enrolled in this class');
         }
 
         const faculty = await this.facultyModel
-            .findOne({ _id: objectFacultyId as any, classId: objectClassId })
+            .findOne({ _id: objectFacultyId, classId: objectClassId })
             .lean()
             .exec();
         if (!faculty) throw new NotFoundException('Faculty not found');

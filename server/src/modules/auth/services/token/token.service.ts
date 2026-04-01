@@ -27,7 +27,7 @@ export class TokenService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(Session.name)
     private readonly sessionModel: Model<SessionDocument>,
-  ) {}
+  ) { }
 
   private get jwtAccessTokenExpiresIn(): StringValue {
     return this.configService.get<StringValue>(
@@ -84,7 +84,7 @@ export class TokenService {
     // 2) Prepare JWT payload with session ID (sid) and device info
     const payload: IJwtPayload = {
       userId,
-      sid: session._id,
+      sid: session._id.toString(),
       email,
       role,
       ip,

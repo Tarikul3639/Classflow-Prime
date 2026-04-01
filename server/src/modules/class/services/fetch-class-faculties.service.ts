@@ -10,7 +10,8 @@ import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import {
     Enrollment,
     EnrollmentDocument,
-} from 'src/database/entities/enrollment.entity';
+} from '../../../database/entities/enrollment.entity';
+
 import {
     Faculty,
     FacultyDocument,
@@ -31,18 +32,18 @@ export class FetchClassFacultiesService {
         userId: string,
         classId: string,
     ): Promise<FetchClassFacultiesResponseDto> {
-        const existingClass = await this.classModel.findById(classId);
+        const userObjectId = new Types.ObjectId(userId);
+        const classObjectId = new Types.ObjectId(classId);
+
+        const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
 
         const enrollment = await this.enrollmentModel.findOne({
-            classId: new Types.ObjectId(classId),
-            userId: new Types.ObjectId(userId),
+            classId: classObjectId,
+            userId: userObjectId,
         });
-        if (
-            !enrollment &&
-            existingClass.instructorId.toString() !== userId &&
-            !existingClass.assistantIds?.some((id) => id.toString() === userId)
-        ) {
+
+        if (!enrollment && !existingClass.instructorId.equals(userObjectId)) {
             throw new ForbiddenException('You are not enrolled in this class');
         }
 

@@ -10,7 +10,7 @@ export enum GroupPlatform {
 }
 
 export interface IClassGroup {
-  _id?: string;
+  _id?: Types.ObjectId | string; // MongoDB ObjectId as string
   classId: Types.ObjectId; // Which class this group belongs to
   name: string; // Group name (e.g., "Project Team A")
   description?: string; // Optional description of the group

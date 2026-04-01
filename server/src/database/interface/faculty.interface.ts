@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface IFaculty {
-  _id?: string;
+  _id?: Types.ObjectId | string; // MongoDB ObjectId as string
   classId: Types.ObjectId; // Which class this faculty belongs to
   name: string;
   avatarUrl?: string; // Optional avatar image URL

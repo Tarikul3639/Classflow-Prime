@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 import { FetchClassOverviewResponseDto } from '../dto/fetch-class-overview.dto';
 
 @Injectable()
@@ -9,7 +10,7 @@ export class FetchClassOverviewService {
   constructor(
     @InjectModel(Class.name)
     private readonly classModel: Model<ClassDocument>,
-  ) {}
+  ) { }
 
   async execute(
     userId: string,
@@ -18,12 +19,47 @@ export class FetchClassOverviewService {
     const classObjectId = new Types.ObjectId(classId);
     const userObjectId = new Types.ObjectId(userId);
     const pipeline: PipelineStage[] = [
+      { $match: { _id: classObjectId } },
+
+      // Check if user is instructor or assistant via enrollment
       {
-        $match: {
-          _id: classObjectId,
-          $or: [{ instructorId: userObjectId }, { assistantIds: userObjectId }],
+        $lookup: {
+          from: 'enrollments',
+          let: { cid: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$classId', '$$cid'] },
+                    { $eq: ['$userId', userObjectId] },
+                  ],
+                },
+              },
+            },
+            { $project: { role: 1 } },
+          ],
+          as: 'userEnrollment',
         },
       },
+
+      {
+        $addFields: {
+          isInstructor: { $eq: ['$instructorId', userObjectId] },
+          isAssistant: {
+            $in: [
+              EnrollmentRole.ASSISTANT,
+              { $map: { input: '$userEnrollment', as: 'e', in: '$$e.role' } },
+            ],
+          },
+        },
+      },
+
+      {
+        $match: { $or: [{ isInstructor: true }, { isAssistant: true }] },
+      },
+
+      // Count students
       {
         $lookup: {
           from: 'enrollments',
@@ -35,6 +71,8 @@ export class FetchClassOverviewService {
           as: 'studentCountArray',
         },
       },
+
+      // Count events
       {
         $lookup: {
           from: 'classupdates',
@@ -51,15 +89,10 @@ export class FetchClassOverviewService {
           as: 'eventCountArray',
         },
       },
-      {
-        $unwind: { path: '$eventCountArray', preserveNullAndEmptyArrays: true },
-      },
-      {
-        $unwind: {
-          path: '$studentCountArray',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+
+      { $unwind: { path: '$eventCountArray', preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: '$studentCountArray', preserveNullAndEmptyArrays: true } },
+
       {
         $project: {
           _id: 0,

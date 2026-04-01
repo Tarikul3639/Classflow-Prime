@@ -3,30 +3,43 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import { FetchClassesResponseDto } from '../dto/fetch-enrolled-classes.dto';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 
 @Injectable()
 export class FetchEnrolledClassesService {
   constructor(
     @InjectModel(Class.name)
     private readonly classModel: Model<ClassDocument>,
-  ) {}
+  ) { }
 
   async execute(userId: string): Promise<FetchClassesResponseDto> {
     const userObjectId = new Types.ObjectId(userId);
 
     const pipeline: PipelineStage[] = [
-      // Step 1: Current user enrolled কিনা আগে check করো
+      // 1️) Lookup all enrollments for this class to count students
       {
         $lookup: {
           from: 'enrollments',
-          let: { currentClassId: '$_id' },
+          let: { classId: '$_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$classId', '$$classId'] } } },
+          ],
+          as: 'allEnrollments',
+        },
+      },
+
+      // 2️) Lookup current user's enrollment (to check if student)
+      {
+        $lookup: {
+          from: 'enrollments',
+          let: { classId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$classId', '$$currentClassId'] },
-                    { $eq: ['$userId', userObjectId] }, // ← schema: userId
+                    { $eq: ['$classId', '$$classId'] },
+                    { $eq: ['$userId', userObjectId] },
                   ],
                 },
               },
@@ -36,33 +49,7 @@ export class FetchEnrolledClassesService {
         },
       },
 
-      // Step 2: Access check — instructor/assistant/student
-      {
-        $match: {
-          $expr: {
-            $or: [
-              { $eq: ['$instructorId', userObjectId] },
-              { $in: [userObjectId, { $ifNull: ['$assistantIds', []] }] }, // ← assistantIds
-              { $gt: [{ $size: '$currentUserEnrollment' }, 0] }, // ← student
-            ],
-          },
-        },
-      },
-
-      // Step 3: মোট student count
-      {
-        $lookup: {
-          from: 'enrollments',
-          let: { currentClassId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$classId', '$$currentClassId'] } } },
-            { $count: 'total' },
-          ],
-          as: 'studentCountArray',
-        },
-      },
-
-      // Step 4: Instructor details
+      // 3️) Lookup instructor details
       {
         $lookup: {
           from: 'users',
@@ -71,27 +58,52 @@ export class FetchEnrolledClassesService {
           as: 'instructorDetails',
         },
       },
+      { $unwind: { path: '$instructorDetails', preserveNullAndEmptyArrays: true } },
+
+      // 4️) Add isAssistant field from enrollments
       {
-        $unwind: {
-          path: '$instructorDetails',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: '$studentCountArray',
-          preserveNullAndEmptyArrays: true,
+        $addFields: {
+          isAssistant: {
+            $in: [
+              userObjectId,
+              {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: '$allEnrollments',
+                      cond: { $eq: ['$$this.role', EnrollmentRole.ASSISTANT] },
+                    },
+                  },
+                  as: 'e',
+                  in: '$$e.userId',
+                },
+              },
+            ],
+          },
         },
       },
 
-      // Step 5: Project
+      // 5️) Access control: only instructor / assistant / enrolled student
+      {
+        $match: {
+          $expr: {
+            $or: [
+              { $eq: ['$instructorId', userObjectId] },
+              { $eq: ['$isAssistant', true] },
+              { $gt: [{ $size: '$currentUserEnrollment' }, 0] },
+            ],
+          },
+        },
+      },
+
+      // 6️) Project final response
       {
         $project: {
           _id: 0,
           classId: { $toString: '$_id' },
           title: '$name',
           department: { $ifNull: ['$department', 'General'] },
-          students: { $ifNull: ['$studentCountArray.total', 0] },
+          students: { $size: '$allEnrollments' },
           instructor: { $ifNull: ['$instructorDetails.name', 'Staff'] },
           avatarUrl: { $ifNull: ['$instructorDetails.avatarUrl', null] },
           semester: { $ifNull: ['$semester', 'TBA'] },
@@ -104,7 +116,8 @@ export class FetchEnrolledClassesService {
               else: 'active',
             },
           },
-          isInstructor: { $eq: ['$instructorId', userObjectId] }, // ← bonus
+          isInstructor: { $eq: ['$instructorId', userObjectId] },
+          isAssistant: 1,
         },
       },
     ];

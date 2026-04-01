@@ -8,7 +8,7 @@ export enum UpdateCategory {
 }
 
 export interface IClassUpdate {
-  _id?: string;
+  _id?: Types.ObjectId | string;
   classId: Types.ObjectId; // ID of the class this update belongs to
   title: string; // Short title for the update (e.g., "Midterm Exam Announcement")
   description: string; // Detailed description of the update

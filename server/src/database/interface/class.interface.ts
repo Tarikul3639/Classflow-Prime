@@ -7,11 +7,10 @@ export enum ClassStatus {
 }
 
 export interface IClass {
-  _id?: string;
+  _id?: Types.ObjectId | string;
   name: string;
   enrollCode: string; // unique code for enrolling
   instructorId: Types.ObjectId; // ID of the instructor
-  assistantIds?: Types.ObjectId[]; // IDs of assistants
   department?: string; // e.g., "Computer Science"
   semester?: string; // e.g., "Fall 2024"
   allowEnroll?: boolean; // Whether students can enroll using the enroll code

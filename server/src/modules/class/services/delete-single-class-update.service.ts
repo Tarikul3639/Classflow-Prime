@@ -6,6 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 import {
     ClassUpdate,
     ClassUpdateDocument,
@@ -18,6 +20,8 @@ export class DeleteSingleClassUpdateService {
     constructor(
         @InjectModel(Class.name)
         private readonly classModel: Model<ClassDocument>,
+        @InjectModel(Enrollment.name)
+        private readonly enrollmentModel: Model<EnrollmentDocument>,
         @InjectModel(ClassUpdate.name)
         private readonly classUpdateModel: Model<ClassUpdateDocument>,
     ) { }
@@ -42,7 +46,11 @@ export class DeleteSingleClassUpdateService {
         }
         // Step 2: Permission check
         const isInstructor = classData.instructorId.equals(userObjectId);
-        const isAssistant = classData.assistantIds?.some((id) => id.equals(userObjectId));
+        const isAssistant = await this.enrollmentModel.exists({
+            userId: userObjectId,
+            classId: classObjectId,
+            role: EnrollmentRole.ASSISTANT,
+        });
 
         if (!isInstructor && !isAssistant) {
             throw new ForbiddenException('You do not have permission to delete this update');

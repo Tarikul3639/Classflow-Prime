@@ -21,7 +21,7 @@ export class ClassUpdate implements IClassUpdate {
   @Prop({ type: Date, index: true })
   eventAt?: Date; // Exam ba CT er date if applicable
 
-  @Prop({ type: [Types.ObjectId], ref: 'ClassMaterial', default: [] })
+  @Prop({ type: [Types.ObjectId], ref: 'Material', default: [] })
   materials: Types.ObjectId[]; // Populate with material details when needed
 
   @Prop({ default: false, index: true })

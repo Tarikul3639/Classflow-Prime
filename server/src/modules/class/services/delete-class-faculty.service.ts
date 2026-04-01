@@ -8,6 +8,11 @@ import { Model, Types } from 'mongoose';
 
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import {
+  Enrollment,
+  EnrollmentDocument,
+} from '../../../database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import {
   Faculty,
   FacultyDocument,
 } from '../../../database/entities/faculty.entity';
@@ -18,6 +23,8 @@ import { DeleteClassFacultyResponseDto } from '../dto/class-faculty.dto';
 export class DeleteClassFacultyService {
   constructor(
     @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
+    @InjectModel(Enrollment.name)
+    private readonly enrollmentModel: Model<EnrollmentDocument>,
     @InjectModel(Faculty.name)
     private readonly facultyModel: Model<FacultyDocument>,
   ) { }
@@ -27,7 +34,6 @@ export class DeleteClassFacultyService {
     classId: string,
     facultyId: string,
   ): Promise<DeleteClassFacultyResponseDto> {
-
     const userObjectId = new Types.ObjectId(userId);
     const classObjectId = new Types.ObjectId(classId);
     const facultyObjectId = new Types.ObjectId(facultyId);
@@ -35,15 +41,18 @@ export class DeleteClassFacultyService {
     const existingClass = await this.classModel.findById(classObjectId);
     if (!existingClass) throw new NotFoundException('Class not found');
 
-    if (
-      !existingClass.instructorId.equals(userObjectId) &&
-      !existingClass.assistantIds?.some((id) => id.equals(userObjectId))
-    ) {
+    const isAssistant = await this.enrollmentModel.exists({
+      userId: userObjectId,
+      classId: classObjectId,
+      role: EnrollmentRole.ASSISTANT,
+    });
+
+    if (!existingClass.instructorId.equals(userObjectId) && !isAssistant) {
       throw new ForbiddenException('Only the instructor can remove faculties');
     }
 
     const faculty = await this.facultyModel.findOneAndDelete({
-      _id: facultyObjectId as any,
+      _id: facultyObjectId,
       classId: classObjectId,
     });
 

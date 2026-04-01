@@ -31,7 +31,7 @@ export class MemberRevokeClassMemberService {
         // Validate class existence and instructor permissions
         const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
-        if (!existingClass.instructorId.equals(userId) && !existingClass.assistantIds?.some(id => id.equals(userId))) {
+        if (!existingClass.instructorId.equals(userObjectId)) {
             throw new ForbiddenException('Only the instructor can revoke members');
         }
         // Validate enrollment existence

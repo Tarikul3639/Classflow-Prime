@@ -9,7 +9,7 @@
   "scope": "/",
   "background_color": "#ffffff",
   "theme_color": "#eff6ff",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "purpose": "maskable",

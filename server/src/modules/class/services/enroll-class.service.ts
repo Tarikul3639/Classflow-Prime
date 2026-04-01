@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
@@ -19,17 +19,28 @@ export class EnrollClassService {
     private readonly classModel: Model<ClassDocument>,
     @InjectModel(Enrollment.name)
     private readonly enrollmentModel: Model<EnrollmentDocument>,
-  ) {}
+  ) { }
 
   async execute(
     userId: string,
     dto: EnrollClassRequestDto,
   ): Promise<EnrollClassResponseDto> {
+
+    // ── Validate userId string before converting to ObjectId ──────────────
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
     const userObjId = new Types.ObjectId(userId);
 
-    // 1. Single Pipeline Validation
+    // ── Single aggregation pipeline to validate class and user state ───────
+    // This avoids multiple round-trips by checking enrollment status,
+    // instructor status, and class settings all at once.
     const pipeline: PipelineStage[] = [
+      // Match the class by enroll code
       { $match: { enrollCode: dto.enrollCode } },
+
+      // Look up any existing enrollment for this user in this class
       {
         $lookup: {
           from: 'enrollments',
@@ -49,18 +60,47 @@ export class EnrollClassService {
           as: 'userEnrollment',
         },
       },
+
+      // Look up assistant enrollments to check if this user is an assistant.
+      // Assistants are stored in the Enrollment collection (not on the class doc),
+      // so we need a separate lookup instead of relying on a class-level field.
+      {
+        $lookup: {
+          from: 'enrollments',
+          let: { cid: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$classId', '$$cid'] },
+                    { $eq: ['$userId', userObjId] },
+                    { $eq: ['$role', EnrollmentRole.ASSISTANT] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'assistantEnrollment',
+        },
+      },
+
       {
         $project: {
           name: 1,
           allowEnroll: 1,
           isArchived: 1,
           instructorId: 1,
-          assistantIds: 1,
+
+          // True if the user already has any enrollment record in this class
           isAlreadyEnrolled: { $gt: [{ $size: '$userEnrollment' }, 0] },
-          isInstructor: {
+
+          // True if the user is the instructor OR an assistant —
+          // renamed from isInstructor to avoid confusion
+          isPrivilegedUser: {
             $or: [
               { $eq: ['$instructorId', userObjId] },
-              { $in: [userObjId, { $ifNull: ['$assistantIds', []] }] },
+              { $gt: [{ $size: '$assistantEnrollment' }, 0] },
             ],
           },
         },
@@ -72,7 +112,8 @@ export class EnrollClassService {
       .exec()
       .then((results) => results[0]);
 
-    // 2. Run Business Logic Checks
+    // ── Business logic checks ──────────────────────────────────────────────
+
     if (!classInfo) {
       return {
         success: false,
@@ -89,10 +130,11 @@ export class EnrollClassService {
       };
     }
 
-    if (classInfo.isInstructor) {
+    // Instructors and assistants cannot enroll as learners
+    if (classInfo.isPrivilegedUser) {
       return {
         success: false,
-        message: 'Teacher or Assistants cannot enroll as students.',
+        message: 'Teachers or assistants cannot enroll as students.',
         data: { classId: classInfo._id.toString() },
       };
     }
@@ -100,12 +142,12 @@ export class EnrollClassService {
     if (!classInfo.allowEnroll || classInfo.isArchived) {
       return {
         success: false,
-        message: 'This class is currently closed for new enrolls.',
+        message: 'This class is currently closed for new enrollments.',
         data: { classId: classInfo._id.toString() },
       };
     }
 
-    // 3. Perform the Write Operation
+    // ── Perform the enrollment write ───────────────────────────────────────
     try {
       await this.enrollmentModel.create({
         userId: userObjId,
@@ -116,7 +158,7 @@ export class EnrollClassService {
 
       return {
         success: true,
-        message: `Successfully enrolled ${classInfo.name}`,
+        message: `Successfully enrolled in ${classInfo.name}`,
         data: { classId: classInfo._id.toString() },
       };
     } catch (error) {

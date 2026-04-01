@@ -3,13 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import { FetchClassResponseDto } from '../dto/fetch-class.dto';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 
 @Injectable()
 export class FetchClassService {
   constructor(
     @InjectModel(Class.name)
     private readonly classModel: Model<ClassDocument>,
-  ) {}
+  ) { }
 
   async execute(
     userId: string,
@@ -19,45 +20,35 @@ export class FetchClassService {
     const userObjectId = new Types.ObjectId(userId);
 
     const pipeline: PipelineStage[] = [
-      // Step 1: Class খোঁজো
+      // 1️) Match the class (not archived)
       {
-        $match: {
-          _id: classObjectId,
-          isArchived: false, // ← archived class দেখাবো না
-        },
+        $match: { _id: classObjectId, isArchived: false },
       },
 
-      // Step 2: মোট enrolled student count
+      // 2️) Lookup all enrollments for this class
       {
         $lookup: {
           from: 'enrollments',
-          let: { currentClassId: '$_id' },
+          let: { classId: '$_id' },
           pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: ['$classId', '$$currentClassId'],
-                },
-              },
-            },
-            { $count: 'total' },
+            { $match: { $expr: { $eq: ['$classId', '$$classId'] } } },
           ],
-          as: 'studentCountArray',
+          as: 'allEnrollments',
         },
       },
 
-      // Step 3: Current user enrolled কিনা (userId ← schema অনুযায়ী)
+      // 3️) Lookup current user enrollment (to check if student)
       {
         $lookup: {
           from: 'enrollments',
-          let: { currentClassId: '$_id' },
+          let: { classId: '$_id' },
           pipeline: [
             {
               $match: {
                 $expr: {
                   $and: [
-                    { $eq: ['$classId', '$$currentClassId'] },
-                    { $eq: ['$userId', userObjectId] }, // ← schema: userId
+                    { $eq: ['$classId', '$$classId'] },
+                    { $eq: ['$userId', userObjectId] },
                   ],
                 },
               },
@@ -67,7 +58,7 @@ export class FetchClassService {
         },
       },
 
-      // Step 4: Instructor details (schema: name, avatarUrl)
+      // 4️) Lookup instructor details
       {
         $lookup: {
           from: 'users',
@@ -76,71 +67,78 @@ export class FetchClassService {
           as: 'instructorDetails',
         },
       },
+      { $unwind: { path: '$instructorDetails', preserveNullAndEmptyArrays: true } },
+
+      // 5️) Add fields: isAssistant & members count
       {
-        $unwind: {
-          path: '$instructorDetails',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $unwind: {
-          path: '$studentCountArray',
-          preserveNullAndEmptyArrays: true,
+        $addFields: {
+          isAssistant: {
+            $in: [
+              userObjectId,
+              {
+                $map: {
+                  input: {
+                    $filter: {
+                      input: '$allEnrollments',
+                      cond: { $eq: ['$$this.role', EnrollmentRole.ASSISTANT] },
+                    },
+                  },
+                  as: 'e',
+                  in: '$$e.userId',
+                },
+              },
+            ],
+          },
+          members: {
+            $add: [
+              { $size: '$allEnrollments' }, // total enrolled
+              1, // instructor
+            ],
+          },
         },
       },
 
-      // Step 5: Access check — instructor/assistant/enrolled student
+      // 6️) Access control: only instructor / assistant / enrolled student
       {
         $match: {
           $expr: {
             $or: [
               { $eq: ['$instructorId', userObjectId] },
-              { $in: [userObjectId, { $ifNull: ['$assistantIds', []] }] },
+              { $eq: ['$isAssistant', true] },
               { $gt: [{ $size: '$currentUserEnrollment' }, 0] },
             ],
           },
         },
       },
 
-      // Step 6: Project
+      // 7️) Project the final response
       {
         $project: {
           _id: 0,
           classId: { $toString: '$_id' },
-          name: '$name', // ← schema: name (title না)
+          name: 1,
           department: { $ifNull: ['$department', 'General'] },
           semester: { $ifNull: ['$semester', 'TBA'] },
-          about: { $ifNull: ['$about', null] }, // ← schema: about
-          themeColor: '$themeColor',
+          about: { $ifNull: ['$about', null] },
+          themeColor: 1,
           coverImage: { $ifNull: ['$coverImage', null] },
-          status: { $ifNull: ['$status', 'active'] },
-          allowEnroll: '$allowEnroll', // ← schema: allowEnroll
+          status: 1,
+          allowEnroll: 1,
 
-          // Members count
-          members: {
-            $add: [
-              { $ifNull: ['$studentCountArray.total', 0] }, // enrolled students
-              { $size: { $ifNull: ['$assistantIds', []] } }, // assistants
-              1, // instructor
-            ],
-          },
+          members: 1,
 
-          // Instructor info (schema: name, avatarUrl)
-          instructor: { $ifNull: ['$instructorDetails.name', 'Unknown'] },
-          avatarUrl: { $ifNull: ['$instructorDetails.avatarUrl', null] },
+          instructor: '$instructorDetails.name',
+          avatarUrl: '$instructorDetails.avatarUrl',
 
-          // Current user role
           isInstructor: { $eq: ['$instructorId', userObjectId] },
-          isAssistant: {
-            $in: [userObjectId, { $ifNull: ['$assistantIds', []] }],
-          },
+          isAssistant: 1,
         },
       },
     ];
 
     const classData = await this.classModel.aggregate(pipeline).exec();
 
-    if (classData.length === 0) {
+    if (!classData.length) {
       return {
         success: false,
         message: 'Class not found or access denied',

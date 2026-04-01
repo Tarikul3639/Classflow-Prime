@@ -6,6 +6,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 import {
     ClassUpdate,
     ClassUpdateDocument,
@@ -20,6 +22,8 @@ export class TogglePinClassUpdateService {
         private readonly classModel: Model<ClassDocument>,
         @InjectModel(ClassUpdate.name)
         private readonly classUpdateModel: Model<ClassUpdateDocument>,
+        @InjectModel(Enrollment.name)
+        private readonly enrollmentModel: Model<EnrollmentDocument>,
     ) { }
 
     async execute(
@@ -44,7 +48,11 @@ export class TogglePinClassUpdateService {
 
         // Step 2: Permission check
         const isInstructor = classData.instructorId.equals(userObjectId);
-        const isAssistant = classData.assistantIds?.some((id) => id.equals(userObjectId));
+        const isAssistant = await this.enrollmentModel.exists({
+            userId: userObjectId,
+            classId: classObjectId,
+            role: EnrollmentRole.ASSISTANT,
+        });
 
         if (!isInstructor && !isAssistant) {
             throw new ForbiddenException('You do not have permission to pin/unpin this update');
@@ -56,8 +64,6 @@ export class TogglePinClassUpdateService {
             { $set: { isPinned: dto.isPinned } },
             { new: true },
         );
-
-        console.log(update);
 
         if (!update) {
             throw new NotFoundException('Update not found');
