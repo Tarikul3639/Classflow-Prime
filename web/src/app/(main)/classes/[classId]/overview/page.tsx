@@ -82,16 +82,6 @@ export default function OverviewPage() {
   return (
     <main className="bg-slate-50 p-4 space-y-4 mx-auto">
       {/* About */}
-      <div className="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-2">
-          <Info size={22} className="text-primary" />
-          <h3 className="text-lg font-bold text-slate-900">About This Class</h3>
-        </div>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {" "}
-          {data?.about?.trim() || "No description available."}
-        </p>
-      </div>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 gap-4">
