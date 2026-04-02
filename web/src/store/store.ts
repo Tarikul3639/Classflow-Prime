@@ -32,6 +32,9 @@ import fetchSingleClassFaculty from './features/classes/slices/fetch-single-clas
 // Class Members slices
 import classMemberReducer from "./features/classes/slices/members/class-member.slice";
 
+// Class Groups slices
+import classGroupReducer from "./features/classes/slices/groups/class-group.slice";
+
 const classesReducer = combineReducers({
   createClass: createClassReducer,
   enrollClass: enrollClass,
@@ -46,6 +49,7 @@ const classesReducer = combineReducers({
   classFaculty: classFacultyReducer,
   fetchSingleClassFaculty: fetchSingleClassFaculty,
   classMembers: classMemberReducer,
+  classGroups: classGroupReducer,
 });
 
 // Profile slices

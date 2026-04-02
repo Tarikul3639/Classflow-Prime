@@ -74,7 +74,7 @@ export interface UpdateCategoryConfig {
     label: string;
 }
 
-export const UPDATE_TYPE_CONFIG: Record<UpdateCategory, UpdateCategoryConfig> = {
+    export const UPDATE_TYPE_CONFIG: Record<UpdateCategory, UpdateCategoryConfig> = {
     announcement: {
         icon: Megaphone,
         iconBg: "bg-green-100",

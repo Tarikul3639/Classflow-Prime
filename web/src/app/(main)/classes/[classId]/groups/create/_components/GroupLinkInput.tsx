@@ -4,20 +4,17 @@ import React from "react";
 import { Link as LinkIcon } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ClassGroup, GroupPlatform } from "@/types/group.types";
 
 interface GroupLinkInputProps {
-  formData: {
-    link?: string;
-  };
+  formData: Omit<ClassGroup, "groupId" | "createdAt" | "updatedAt">;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedPlatform: string;
-  onPlatformChange: (platformId: string) => void;
+  onPlatformChange: (platform: GroupPlatform) => void;
 }
 
 export default function GroupLinkInput({
   formData,
   onInputChange,
-  selectedPlatform,
   onPlatformChange,
 }: GroupLinkInputProps) {
   return (
@@ -27,14 +24,15 @@ export default function GroupLinkInput({
       <Select
         label="Platform"
         description="Choose the platform where this group is hosted"
-        value={selectedPlatform}
-        onChange={(e) => onPlatformChange(e.target.value)}
+        value={formData.platform}
+        onChange={(e) => onPlatformChange(e.target.value as GroupPlatform)}
         options={[
-          { value: "slack", label: "Slack" },
-          { value: "discord", label: "Discord" },
-          { value: "telegram", label: "Telegram" },
-          { value: "whatsapp", label: "WhatsApp" },
-          { value: "messenger", label: "Facebook Messenger" },
+          { value: GroupPlatform.WHATSAPP, label: "WhatsApp" },
+          { value: GroupPlatform.DISCORD, label: "Discord" },
+          { value: GroupPlatform.TELEGRAM, label: "Telegram" },
+          { value: GroupPlatform.FACEBOOK, label: "Facebook" },
+          { value: GroupPlatform.MESSENGER, label: "Messenger" },
+          { value: GroupPlatform.OTHER, label: "Other" },
         ]}
       />
 

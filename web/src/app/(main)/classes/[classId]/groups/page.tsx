@@ -1,65 +1,38 @@
 "use client";
 
 import React from "react";
-import { MessageCircle, Radio, Send, Plus, ExternalLink } from "lucide-react";
+import { MessageCircle, Radio, Send, Plus } from "lucide-react";
 import Link from "next/link";
 import { GroupCard } from "./_components/GroupCard";
+import { useRouter, useParams } from "next/navigation";
+import { GroupPlatform, ClassGroup } from "@/types/group.types";
 
-interface Group {
-  _id: string;
-  name: string;
-  platform: string;
-  platformColor: string;
-  platformBg: string;
-  icon: React.ElementType;
-  iconBg: string;
-  iconColor: string;
-  description: string;
-}
+const groups: ClassGroup[] = [
+  {
+    groupId: "1",
+    name: "Class Chat - Section A",
+    description: "Discussion & announcements",
+    link: "https://chat.whatsapp.com/example",
+    platform: GroupPlatform.WHATSAPP,
+    createdBy: "user1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    groupId: "2",
+    name: "Study Circle",
+    description: "Voice + study sessions",
+    link: "https://discord.gg/example",
+    platform: GroupPlatform.DISCORD,
+    createdBy: "user1",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-export default function GroupsPage({
-  params,
-}: {
-  params: { classId: string };
-}) {
-  const groups: Group[] = [
-    {
-      _id: "1",
-      name: "Class Chat - Section A",
-      platform: "WhatsApp",
-      platformColor: "text-emerald-600",
-      platformBg: "bg-emerald-50",
-      icon: MessageCircle,
-      iconBg: "bg-emerald-50",
-      iconColor: "text-emerald-600",
-      description:
-        "The primary group for instant announcements, peer discussions, and quick help with assignments.",
-    },
-    {
-      _id: "2",
-      name: "Study Circle & Voice",
-      platform: "Discord",
-      platformColor: "text-indigo-600",
-      platformBg: "bg-indigo-50",
-      icon: Radio,
-      iconBg: "bg-indigo-50",
-      iconColor: "text-indigo-600",
-      description:
-        "Voice channels for group study sessions and organized threads for different topics.",
-    },
-    {
-      _id: "3",
-      name: "Resource Library",
-      platform: "Telegram",
-      platformColor: "text-sky-600",
-      platformBg: "bg-sky-50",
-      icon: Send,
-      iconBg: "bg-sky-50",
-      iconColor: "text-sky-600",
-      description:
-        "Unofficial repository for lecture notes, past papers, and shared academic materials.",
-    },
-  ];
+export default function GroupsPage() {
+  const router = useRouter();
+  const { classId } = useParams();
 
   return (
     <main className="p-4 space-y-4 pb-8 mx-auto">
@@ -70,17 +43,17 @@ export default function GroupsPage({
         </div>
         <div>
           <h4 className="font-bold text-slate-900 text-base">
-            Add New Group Link
+            Add New Group
           </h4>
           <p className="text-sm text-slate-600 mt-1">
             Help your classmates by sharing relevant group links
           </p>
         </div>
         <Link
-          href={`/classes/${params.classId}/groups/1`}
+          href={`/classes/${classId}/groups/create`}
           className="mt-2 px-4 py-2.5 rounded-lg border border-primary/30 bg-white/50 text-primary font-bold text-[11px] md:text-[12px] lg:text-[13px] hover:bg-blue-50 transition-colors flex items-center gap-2 cursor-pointer"
         >
-          <span>Suggest Link</span>
+          <span>Crete Group</span>
         </Link>
       </div>
 
@@ -94,7 +67,7 @@ export default function GroupsPage({
       {/* Groups Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {groups.map((group) => {
-          return <GroupCard key={group._id} group={group} />;
+          return <GroupCard key={group.groupId} group={group} />;
         })}
       </div>
     </main>

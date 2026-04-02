@@ -13,6 +13,10 @@ import {
   Material,
   MaterialSchema,
 } from '../../database/entities/material.entity';
+import {
+  ClassGroup,
+  ClassGroupSchema,
+} from '../../database/entities/group.entity';
 
 import { User, UserSchema } from '../../database/entities/user.entity';
 
@@ -64,6 +68,13 @@ import { AssistantAssignClassMemberService } from './services/assistant-assign-c
 import { AssistantRevokeClassMemberService } from './services/assistant-revoke-class-member.service';
 import { MemberRevokeClassMemberService } from './services/member-revoke-class-member.service';
 
+import { ClassGroupController } from './controllers/class-group.controller';
+import { FetchClassGroupsService } from './services/fetch-class-groups.service';
+import { FetchSingleClassGroupService } from './services/fetch-single-class-group.service';
+import { CreateClassGroupService } from './services/create-class-group.service';
+import { UpdateClassGroupService } from './services/update-class-group.service';
+import { DeleteClassGroupService } from './services/delete-class-group.service';
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
@@ -79,6 +90,7 @@ import { MemberRevokeClassMemberService } from './services/member-revoke-class-m
     ]),
 
     MongooseModule.forFeature([{ name: Faculty.name, schema: FacultySchema }]),
+    MongooseModule.forFeature([{ name: ClassGroup.name, schema: ClassGroupSchema }]),
   ],
   controllers: [
     CreateClassController,
@@ -95,9 +107,10 @@ import { MemberRevokeClassMemberService } from './services/member-revoke-class-m
 
     // Class Faculty Controller
     ClassFacultyController,
-
     // Class Member Controller
     ClassMemberController,
+    // Class Group Controller
+    ClassGroupController,
   ],
   providers: [
     CreateClassService,
@@ -122,6 +135,12 @@ import { MemberRevokeClassMemberService } from './services/member-revoke-class-m
     AssistantAssignClassMemberService,
     AssistantRevokeClassMemberService,
     MemberRevokeClassMemberService,
+    // Class Group Services
+    FetchClassGroupsService,
+    FetchSingleClassGroupService,
+    CreateClassGroupService,
+    UpdateClassGroupService,
+    DeleteClassGroupService,
   ],
 })
 export class ClassModule { }

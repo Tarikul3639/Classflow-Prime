@@ -4,12 +4,10 @@ import React from "react";
 import { Hash } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { ClassGroup} from "@/types/group.types";
 
 interface GroupBasicInfoProps {
-  formData: {
-    name: string;
-    description: string;
-  };
+  formData: Omit<ClassGroup, "groupId" | "createdAt" | "updatedAt">;
   onInputChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;

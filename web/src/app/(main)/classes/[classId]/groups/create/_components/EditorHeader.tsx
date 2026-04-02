@@ -10,7 +10,6 @@ interface EditorHeaderProps {
   isNew: boolean;
   isLoading: boolean;
   error?: string | null;
-  onSubmit: () => void;
 }
 
 export const EditorHeader = ({
@@ -18,7 +17,6 @@ export const EditorHeader = ({
   isNew,
   isLoading,
   error,
-  onSubmit,
 }: EditorHeaderProps) => {
   const router = useRouter();
 
@@ -57,7 +55,8 @@ export const EditorHeader = ({
             </Link>
 
             <button
-              onClick={onSubmit}
+              type="submit"
+              form="groupForm"
               disabled={isLoading}
               className="group relative flex items-center justify-center gap-2 px-6 py-2.5 md:py-3 rounded-2xl bg-[#399aef] text-white overflow-hidden transition-all duration-500 hover:bg-[#2d82cc] hover:shadow-[0_0_20px_rgba(57,154,239,0.4)] active:scale-[0.96] disabled:opacity-50 cursor-pointer"
             >
