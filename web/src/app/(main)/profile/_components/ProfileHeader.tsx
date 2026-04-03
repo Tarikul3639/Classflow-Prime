@@ -16,7 +16,7 @@ export default function ProfileHeader({
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.profile.updateProfile.status); // Assuming user data is stored here
   return (
-    <header className="sticky top-0 z-10 bg-slate-50 pb-4 pt-4 px-4 lg:px-8 border-b border-slate-200">
+    <header className="sticky top-0 bg-slate-50 pb-4 pt-4 px-4 lg:px-8 border-b border-slate-200 z-50">
       <div className="flex items-center gap-3 mx-auto">
         <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary">
           <User className="size-5.5" />

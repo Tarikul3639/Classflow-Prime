@@ -4,64 +4,23 @@ import React from "react";
 import ClassCard from "./ClassCard";
 import Link from "next/link";
 
+export enum ClassStatus {
+  ACTIVE = 'active',
+  ENDED = 'ended',
+  UPCOMING = 'upcoming',
+}
+
 interface ClassProps {
   classId: string;
   className: string;
   themeColor?: string;
   coverImage?: string;
   role: string;
-  status: string;
+  status: ClassStatus;
   enrolledAt: Date;
 }
 
 export default function EnrolledClasses({ classes }: { classes: ClassProps[] }) {
-  // const cls: ClassProps[] = [
-  //   {
-  //     classId: "CLS101",
-  //     className: "Mathematics 101",
-  //     themeColor: "#4CAF50",
-  //     coverImage: "https://example.com/images/math.jpg",
-  //     role: "student",
-  //     status: "active",
-  //     enrolledAt: new Date("2025-01-10T09:30:00Z"),
-  //   },
-  //   {
-  //     classId: "CLS102",
-  //     className: "Physics Fundamentals",
-  //     themeColor: "#2196F3",
-  //     coverImage: "https://example.com/images/physics.jpg",
-  //     role: "teacher",
-  //     status: "active",
-  //     enrolledAt: new Date("2025-02-05T11:00:00Z"),
-  //   },
-  //   {
-  //     classId: "CLS103",
-  //     className: "Chemistry Basics",
-  //     themeColor: "#FF9800",
-  //     coverImage: "https://example.com/images/chemistry.jpg",
-  //     role: "student",
-  //     status: "ended",
-  //     enrolledAt: new Date("2025-03-01T14:15:00Z"),
-  //   },
-  //   {
-  //     classId: "CLS104",
-  //     className: "English Literature",
-  //     themeColor: "#9C27B0",
-  //     coverImage: "https://example.com/images/english.jpg",
-  //     role: "admin",
-  //     status: "active",
-  //     enrolledAt: new Date("2025-01-20T08:00:00Z"),
-  //   },
-  //   {
-  //     classId: "CLS105",
-  //     className: "Computer Science",
-  //     themeColor: "#607D8B",
-  //     coverImage: "https://example.com/images/cs.jpg",
-  //     role: "student",
-  //     status: "ended",
-  //     enrolledAt: new Date("2025-03-15T16:45:00Z"),
-  //   },
-  // ];
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">

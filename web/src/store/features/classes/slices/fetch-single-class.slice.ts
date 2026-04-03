@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { IClassDetails } from "../thunks/fetch-single-class.thunk";
 import { fetchSingleClass } from "../thunks/fetch-single-class.thunk";
+import { ClassStatus } from "@/store/features/profile/profile.types";
 
 interface FetchSingleClassState {
     classDetails: IClassDetails;
@@ -19,7 +20,7 @@ const initialState: FetchSingleClassState = {
         themeColor: "#3B82F6",
         coverImage: "",
         avatarUrl: null,
-        status: "active",
+        status: ClassStatus.ACTIVE,
         isInstructor: false,
         isAssistant: false,
     },

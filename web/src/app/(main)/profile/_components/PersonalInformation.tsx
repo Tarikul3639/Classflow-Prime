@@ -20,7 +20,7 @@ export default function PersonalInformation({
   onBioChange,
 }: PersonalInformationProps) {
   return (
-    <div className="mt-8 pt-6 border-t border-slate-100">
+    <div className="mt-8 pt-6 border-none">
       <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
         Personal Information
       </h3>

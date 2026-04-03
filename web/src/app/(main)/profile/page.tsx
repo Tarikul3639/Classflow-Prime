@@ -1,7 +1,7 @@
 "use client";
 
-import React, { use, useCallback, useState } from "react";
-// Import form ./_components
+import React, { useEffect, useState } from "react";
+import { UserX } from "lucide-react";
 import ProfileHeader from "./_components/ProfileHeader";
 import ProfilePicture from "./_components/ProfilePicture";
 import PersonalInformation from "./_components/PersonalInformation";
@@ -9,38 +9,71 @@ import LogoutButton from "./_components/LogoutButton";
 import EnrolledClasses from "./_components/EnrolledClasses";
 import Preferences from "./_components/Preferences";
 import VersionInfo from "./_components/VersionInfo";
+import { EmptyState } from "@/components/ui/EmptyState";
+
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import {
-  // signoutAllThunk,
-  signoutCurrentThunk,
-} from "@/store/features/auth/thunks/signout.thunk";
+import { signoutCurrentThunk } from "@/store/features/auth/thunks/signout.thunk";
 import { updateProfileThunk } from "@/store/features/profile/thunks/update-profile.thunk";
-import { Loader } from "@/components/ui/Loader";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useFileUpload } from "@/hooks/useCloudinary";
+import { TopLoader } from "@/components/ui/TopLoader";
+import { usePushNotification } from "@/hooks/usePushNotification";
 
 const ProfileSettings: React.FC = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { user, status } = useAppSelector((state) => state.profile.fetchUser); // Assuming user data is stored here
-  const { loading } = useAppSelector(
+
+  const { user, status } = useAppSelector((state) => state.profile.fetchUser);
+  const { loading: logoutLoading } = useAppSelector(
     (state) => state.auth.signout.signoutCurrent,
-  ); // For logout feedback
+  );
+
+  const userId = useAppSelector((state) => state.profile.fetchUser.user?._id);
+  const {
+    isSubscribed,
+    toggleNotification,
+    loading: notificationLoading,
+  } = usePushNotification(userId ?? null);
 
   const [userForm, setUserForm] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    bio: user?.bio || "",
-    avatarUrl: user?.avatarUrl || "",
+    name: "",
+    email: "",
+    bio: "",
+    avatarUrl: "",
   });
 
   const [initialUserForm, setInitialUserForm] = useState(userForm);
+  const [notificationError, setNotificationError] = useState<string | null>(
+    null,
+  );
+
+  // Sync Redux user data with local form state
+  useEffect(() => {
+    if (user) {
+      const data = {
+        name: user.name || "",
+        email: user.email || "",
+        bio: user.bio || "",
+        avatarUrl: user.avatarUrl || "",
+      };
+      setUserForm(data);
+      setInitialUserForm(data);
+    }
+  }, [user]);
 
   const [preferences, setPreferences] = useState({
-    notifications: true,
+    notifications: isSubscribed,
     darkMode: false,
   });
+
+  // Sync push notification state with preferences
+  useEffect(() => {
+    setPreferences((prev) => ({
+      ...prev,
+      notifications: isSubscribed,
+    }));
+  }, [isSubscribed]);
 
   const isChanged =
     JSON.stringify(userForm) !== JSON.stringify(initialUserForm);
@@ -50,42 +83,63 @@ const ProfileSettings: React.FC = () => {
   };
 
   const handleSave = () => {
-    if (!isChanged) return console.log("No changes to save");
-    dispatch(updateProfileThunk(userForm))
-      .unwrap()
-      .then((res) => {
+    if (!isChanged) return;
+
+    const promise = dispatch(updateProfileThunk(userForm)).unwrap();
+
+    toast.promise(promise, {
+      loading: "Saving changes...",
+      success: (res) => {
         setInitialUserForm(userForm);
-        toast.success("Profile updated successfully", {
-          description: res.message,
-          position: "top-center",
-        });
-      })
-      .catch((err) => {
-        toast.error("Failed to update profile", {
-          description: err,
-          position: "top-center",
-        });
-      });
+        return res.message || "Profile updated successfully";
+      },
+      error: (err) => err || "Failed to update profile",
+    });
+  };
+
+  const handleNotificationToggle = async () => {
+    setNotificationError(null);
+
+    const promise = toggleNotification();
+
+    toast.promise(promise, {
+      loading: "Updating notification settings...",
+      success: () => {
+        return isSubscribed
+          ? "Notifications disabled successfully"
+          : "Notifications enabled successfully";
+      },
+      error: (err) => {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Failed to update notification settings";
+        setNotificationError(errorMessage);
+        console.error("Notification error:", err);
+        return errorMessage;
+      },
+    });
   };
 
   const handleToggle = (field: keyof typeof preferences) => {
-    setPreferences((prev) => ({ ...prev, [field]: !prev[field] }));
+    if (field === "notifications") {
+      handleNotificationToggle();
+    } else {
+      setPreferences((prev) => ({ ...prev, [field]: !prev[field] }));
+    }
   };
 
   const handleLogout = async () => {
-    dispatch(signoutCurrentThunk())
-      .unwrap()
-      .then((res) => {
-        toast.success(res.message, { position: "top-center" });
-        router.push("/sign-in");
-      })
-      .catch((err) =>
-        toast("Logout Failed", { description: err, position: "top-center" }),
-      );
-  };
+    const promise = dispatch(signoutCurrentThunk()).unwrap();
 
-  const handleLanguageSettings = () => {
-    console.log("Opening language settings...");
+    toast.promise(promise, {
+      loading: "Logging out...",
+      success: () => {
+        router.push("/sign-in");
+        return "Logged out successfully";
+      },
+      error: (err) => err || "Logout failed",
+    });
   };
 
   const { upload, loading: uploadLoading } = useFileUpload();
@@ -97,78 +151,96 @@ const ProfileSettings: React.FC = () => {
     const promise = upload(file, "avatars");
 
     toast.promise(promise, {
-      loading: "Uploading image...",
-      success: "Image uploaded",
-      error: "Failed to upload image",
+      loading: "Uploading avatar...",
+      success: (res) => {
+        setUserForm((prev) => ({ ...prev, avatarUrl: res.secure_url }));
+        return "Avatar updated successfully";
+      },
+      error: "Avatar upload failed",
     });
-
-    try {
-      const res = await promise;
-
-      setUserForm((prev) => ({
-        ...prev,
-        avatarUrl: res.secure_url, //  real URL from Cloudinary
-      }));
-    } catch (err) {
-      console.error(err);
-    }
   };
 
-  if (status.loading || !user) {
-    return <Loader />;
-  }
-
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <main className="relative flex flex-col min-h-screen bg-slate-50">
+      {/* Fixed Header */}
       <ProfileHeader onSave={handleSave} isChanged={isChanged} />
 
-      <div className="flex-1 overflow-y-auto pb-24 lg:pb-8">
-        <div className="mx-auto px-4 lg:px-8 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column - Profile Info */}
-            <div className="lg:col-span-5 space-y-5">
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                <ProfilePicture
-                  imageUrl={userForm.avatarUrl || ""}
-                  name={userForm.name || ""}
-                  role="We are working on it..."
-                  email={userForm.email || ""}
-                  onImageUpload={handleAvatarUpload}
-                  isUploading={uploadLoading}
-                />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* ── State 1: Loading ── */}
+        {status.loading && (
+          <div className="flex-1 flex items-center justify-center">
+            <TopLoader isLoading={status.loading} />
+          </div>
+        )}
 
-                <PersonalInformation
-                  name={userForm.name || ""}
-                  email={userForm.email || ""}
-                  bio={userForm.bio || "White space for bio..."}
-                  onNameChange={(value) => handleChange("name", value)}
-                  onBioChange={(value) => handleChange("bio", value)}
-                />
+        {/* ── State 2: User found ── */}
+        {!status.loading && user && (
+          <div className="flex-1 overflow-y-auto pb-24 lg:pb-8">
+            <div className="mx-auto px-4 lg:px-8 py-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left Column */}
+                <div className="lg:col-span-5 space-y-5">
+                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <ProfilePicture
+                      imageUrl={userForm.avatarUrl}
+                      name={userForm.name}
+                      username={userForm.email.split("@")[0]}
+                      email={userForm.email}
+                      onImageUpload={handleAvatarUpload}
+                      isUploading={uploadLoading}
+                    />
+                    <PersonalInformation
+                      name={userForm.name}
+                      email={userForm.email}
+                      bio={userForm.bio || "No bio added yet"}
+                      onNameChange={(value) => handleChange("name", value)}
+                      onBioChange={(value) => handleChange("bio", value)}
+                    />
+                    <div className="pt-4 mt-4 border-t border-slate-100">
+                      <LogoutButton
+                        isLoading={logoutLoading}
+                        onLogout={handleLogout}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                <LogoutButton isLoading={loading} onLogout={handleLogout} />
+                {/* Right Column */}
+                <div className="lg:col-span-7 space-y-5">
+                  {user.enrolledClasses?.length > 0 && (
+                    <EnrolledClasses classes={user.enrolledClasses} />
+                  )}
+                  <Preferences
+                    notifications={preferences.notifications}
+                    darkMode={preferences.darkMode}
+                    onNotificationsToggle={() => handleToggle("notifications")}
+                    onDarkModeToggle={() => handleToggle("darkMode")}
+                    onLanguageClick={() => console.log("Language settings")}
+                    notificationLoading={notificationLoading}
+                    notificationError={notificationError}
+                  />
+                  <VersionInfo />
+                </div>
               </div>
             </div>
-
-            {/* Right Column - Classes & Preferences */}
-            <div className="lg:col-span-7 space-y-5">
-              {user.enrolledClasses.length > 0 && (
-                <EnrolledClasses classes={user.enrolledClasses} />
-              )}
-
-              <Preferences
-                notifications={preferences.notifications}
-                darkMode={preferences.darkMode}
-                onNotificationsToggle={() => handleToggle("notifications")}
-                onDarkModeToggle={() => handleToggle("darkMode")}
-                onLanguageClick={handleLanguageSettings}
-              />
-
-              <VersionInfo />
-            </div>
           </div>
-        </div>
+        )}
+
+        {/* ── State 3: No user + not loading ── */}
+        {!status.loading && !user && (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <EmptyState
+              icon={UserX}
+              title="Profile Not Found"
+              description="We couldn't retrieve your profile data at this moment."
+              actionLabel="Try Reloading"
+              onAction={() => window.location.reload()}
+            />
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 };
 

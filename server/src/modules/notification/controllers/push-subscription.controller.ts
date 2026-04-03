@@ -15,6 +15,15 @@ export class PushSubscriptionController {
         await this.pushSubscriptionService.save(body.userId, body.subscription);
         return { success: true, message: 'Push subscription saved' };
     }
+
+    @Post('unsubscribe')
+    @HttpCode(HttpStatus.OK)
+    async unsubscribe(
+        @Body() body: { userId: string; endpoint: string },
+    ) {
+        await this.pushSubscriptionService.remove(body.userId, body.endpoint);
+        return { success: true, message: 'Push subscription removed' };
+    }
 }
 
 interface PushSubscriptionDto {

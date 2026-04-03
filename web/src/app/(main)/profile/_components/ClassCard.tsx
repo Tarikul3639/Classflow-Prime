@@ -1,12 +1,17 @@
 "use client";
 
+export enum ClassStatus {
+  ACTIVE = 'active',
+  ENDED = 'ended',
+  UPCOMING = 'upcoming',
+}
 interface ClassCardProps {
   classId: string;
   className: string;
   themeColor?: string;
   coverImage?: string;
   role: string;
-  status: string;
+  status: ClassStatus;
   enrolledAt: Date;
 }
 
@@ -17,7 +22,7 @@ export default function ClassCard({
   status,
   enrolledAt,
 }: ClassCardProps) {
-  const isEnded = status === "ended";
+  const isEnded = status === ClassStatus.ENDED;
 
   return (
     <div

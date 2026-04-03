@@ -1,13 +1,13 @@
 "use client";
 
 import React from "react";
-import { Edit, Verified } from "lucide-react";
+import { Edit, CheckCircle2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ProfilePictureProps {
   imageUrl: string;
   name: string;
-  role: string;
+  username: string;
   email: string;
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isUploading: boolean;
@@ -16,48 +16,57 @@ interface ProfilePictureProps {
 export default function ProfilePicture({
   imageUrl,
   name,
-  role,
+  username,
   email,
   onImageUpload,
   isUploading,
 }: ProfilePictureProps) {
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="relative group">
-        <Avatar className="h-28 w-28 rounded-full bg-cover bg-center border-4 border-slate-50 shadow-lg">
+      {/* Avatar */}
+      <div className="relative mb-4">
+        <Avatar className="h-24 w-24 rounded-full border-[3px] border-white shadow-md">
           <AvatarImage
             className="w-full h-full object-cover"
             src={imageUrl}
             alt={name}
           />
-          <AvatarFallback className="w-full h-full text-3xl font-black">
+          <AvatarFallback className="text-2xl font-bold bg-blue-50 text-primary">
             {name.charAt(0)}
           </AvatarFallback>
         </Avatar>
+
+        {/* Upload button */}
         <button
-          className={`absolute group bottom-0 right-0 bg-primary text-white p-1.5 rounded-full shadow-lg border-4 border-white transition-transform
-    ${isUploading ? "cursor-not-allowed opacity-50" : "cursor-pointer! hover:scale-105 hover:bg-primary/90 active:scale-95"}
-  `}
-          title="Change Profile Picture"
+          disabled={isUploading}
+          className={`absolute bottom-0.5 right-0.5 w-7 h-7 rounded-full bg-primary border-2 border-slate-200 flex items-center justify-center transition-transform z-10
+            ${isUploading ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-110 active:scale-95"}`}
+          title="Change profile picture"
         >
-          {/* Hidden Input */}
           <input
             disabled={isUploading}
             type="file"
             accept="image/*"
             onChange={onImageUpload}
-            className={`absolute inset-0 opacity-0 ${
-              isUploading ? "pointer-events-none" : "cursor-pointer"
-            }`}
+            title="Change profile picture"
+            className={`absolute inset-0 opacity-0 rounded-full ${isUploading ? "pointer-events-none" : "cursor-pointer hover:cursor-pointer"}`}
           />
-          <Edit size={14} className="pointer-events-none" />
+          <Edit size={12} className="text-white pointer-events-none" />
         </button>
       </div>
-      <h2 className="mt-5 text-xl font-bold text-slate-900">{name}</h2>
-      <p className="text-slate-500 font-medium text-sm">{role}</p>
-      <div className="mt-3 flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-primary font-medium text-xs">
-        <Verified size={14} />
-        {email}
+
+      {/* Name */}
+      <h2 className="text-[17px] font-bold text-slate-900 leading-tight">
+        {name}
+      </h2>
+
+      {/* Username */}
+      <p className="text-sm text-slate-400 mt-0.5 mb-2.5">@{username}</p>
+
+      {/* Email badge */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50">
+        <CheckCircle2 size={13} className="text-primary shrink-0" />
+        <span className="text-xs font-medium text-primary">{email}</span>
       </div>
     </div>
   );

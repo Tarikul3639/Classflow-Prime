@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { Filters as FilterChips } from "@/components/ui/Filters";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { BellOff } from "lucide-react";
+import { BellOff, Loader2, GraduationCap } from "lucide-react";
+import { TopLoader } from "@/components/ui/TopLoader";
 
 import CreateUpdateCard from "./_components/CreateUpdateCard";
 import DateHeader from "./_components/DateHeader";
@@ -33,22 +34,19 @@ export default function UpdatesPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { updates, loading } = useAppSelector(
+  const { updates, loading, error } = useAppSelector(
     (state) => state.classes.fetchClassUpdates,
   );
   const { classDetails } = useAppSelector(
     (state) => state.classes.fetchSingleClass,
   );
 
-  const { error } = useAppSelector((state) => state.classes.fetchClassUpdates);
+  useEffect(() => {
+    if (!classId || !classDetails?.classId) return;
+    if (updates.length > 0) return;
 
-useEffect(() => {
-  if (!classId || !classDetails?.classId) return;
-
-  if (updates.length > 0) return; // already fetched
-
-  dispatch(fetchClassUpdate(classId));
-}, [dispatch, classId, classDetails?.classId]);
+    dispatch(fetchClassUpdate(classId));
+  }, [dispatch, classId, classDetails?.classId]);
 
   const filters: Filter[] = [
     { id: "all", label: "All Updates" },
@@ -58,7 +56,7 @@ useEffect(() => {
     })),
   ];
 
-  // ১. Filter by search & category
+  // 1. Filter Logic
   const filteredUpdates = updates.filter((u) => {
     const matchesSearch =
       u.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,8 +65,8 @@ useEffect(() => {
     return matchesSearch && matchesFilter;
   });
 
-  // ২. Sort updates: pinned first, then by eventAt/createdAt descending
-  const sortedUpdates = filteredUpdates.sort((a, b) => {
+  // 2. Sorting Logic (Pinned first, then by date)
+  const sortedUpdates = [...filteredUpdates].sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
     return (
@@ -77,7 +75,7 @@ useEffect(() => {
     );
   });
 
-  // ৩. Group by relative date
+  // 3. Grouping Logic
   const grouped: Record<string, typeof sortedUpdates> = {};
   sortedUpdates.forEach((u) => {
     const dateKey = formatRelativeDate(u.eventAt ?? u.createdAt, {
@@ -89,7 +87,7 @@ useEffect(() => {
     grouped[dateKey].push(u);
   });
 
-  // ৪. Sort headers: Today > Tomorrow > Yesterday > others descending
+  // 4. Header Sorting
   const priority = ["Today", "Tomorrow", "Yesterday"];
   const sortedDateKeys = Object.keys(grouped).sort((a, b) => {
     const aP = priority.indexOf(a);
@@ -100,27 +98,17 @@ useEffect(() => {
   });
 
   const handleTogglePin = async (updateId: string, isPinned: boolean) => {
-    // 1. Optimistic UI update
     const promise = dispatch(
       togglePinClassUpdate({ classId, updateId, isPinned }),
     ).unwrap();
 
-    // 2. Show toast notifications based on the promise state
     toast.promise(promise, {
       loading: "Updating pin status...",
-      success: () => {
-        return !isPinned
-          ? "Update pinned successfully"
-          : "Update unpinned successfully";
-      },
-      error: (err) => {
-        return err.message || "Failed to update pin status";
-      },
-      position: "top-center",
+      success: !isPinned ? "Pinned successfully" : "Unpinned successfully",
+      error: (err) => err.message || "Failed to update pin",
     });
   };
 
-  // Delete handler
   const handleDelete = async (updateId: string) => {
     const promise = dispatch(
       deleteSingleClassUpdate({ classId, updateId }),
@@ -129,15 +117,19 @@ useEffect(() => {
     toast.promise(promise, {
       loading: "Deleting update...",
       success: "Update deleted successfully",
-      error: (err) => err.message || "Failed to delete the update",
-      position: "top-center",
+      error: (err) => err.message || "Failed to delete",
     });
   };
 
+  const isAdmin = classDetails?.isInstructor || classDetails?.isAssistant;
+  const isEmpty = sortedDateKeys.length === 0;
+
   return (
-    <div className="min-h-screen">
-      {/* Search + Filters */}
-      <div className="p-4 flex flex-col gap-3 bg-slate-100/50 mx-auto w-full">
+    <main className="relative bg-slate-50 flex flex-col">
+      <TopLoader isLoading={loading.update} />
+
+      {/* Header: Search + Filters */}
+      <div className="shrink-0 p-4 flex flex-col gap-3 bg-white border-b border-slate-200">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
         <FilterChips
           filters={filters}
@@ -146,60 +138,69 @@ useEffect(() => {
         />
       </div>
 
-      <div className="px-4 py-2 space-y-4 pb-8 mx-auto w-full">
-        {/* Create Card */}
-        {(classDetails?.isInstructor || classDetails?.isAssistant) && (
-          <CreateUpdateCard classId={classId} />
+      {/* Content Area */}
+      <div className="flex-1 flex flex-col px-4 py-4 space-y-6 pb-24 lg:pb-8">
+        {/* Create Card Area */}
+        {isAdmin && (
+          <div className="shrink-0">
+            <CreateUpdateCard classId={classId} />
+          </div>
         )}
 
-        {/* Updates grouped by date */}
-        {sortedDateKeys.map((dateKey) => (
-          <div key={dateKey} className="space-y-3">
-            <DateHeader label={dateKey} />
-            <div className="space-y-3">
-              {grouped[dateKey].map((update) => {
-                const config =
-                  UPDATE_TYPE_CONFIG[update.category as UpdateCategory];
-                return (
-                  <UpdateCard
-                    key={update._id}
-                    icon={config.icon}
-                    iconBg={config.iconBg}
-                    iconColor={config.iconColor}
-                    title={update.title}
-                    createdAt={update.createdAt}
-                    updatedAt={update.updatedAt}
-                    eventAt={update.eventAt ?? undefined}
-                    description={update.description}
-                    materials={update.materials}
-                    postedBy={update.postedBy}
-                    isPinned={update.isPinned}
-                    onTogglePin={() =>
-                      handleTogglePin(update._id, update.isPinned)
-                    }
-                    onEdit={() =>
-                      router.push(`/classes/${classId}/updates/${update._id}`)
-                    }
-                    onDelete={() => handleDelete(update._id)}
-                    showActions={
-                      classDetails?.isInstructor || classDetails?.isAssistant
-                    }
-                  />
-                );
-              })}
-            </div>
+        {isEmpty ? (
+          <div className="flex-1 flex items-center justify-center py-10">
+            <EmptyState
+              icon={GraduationCap}
+              title={searchQuery ? "No matches found" : "No updates yet"}
+              description={
+                searchQuery
+                  ? `Couldn't find anything for "${searchQuery}"`
+                  : "Important announcements and class updates will appear here."
+              }
+            />
           </div>
-        ))}
-
-        {/* Empty state */}
-        {sortedDateKeys.length === 0 && !loading && (
-          <EmptyState
-            icon={BellOff}
-            title="No updates yet"
-            description="New announcements will appear here."
-          />
+        ) : (
+          <div className="space-y-8">
+            {sortedDateKeys.map((dateKey) => (
+              <section key={dateKey} className="space-y-3">
+                <DateHeader label={dateKey} />
+                <div className="space-y-3">
+                  {grouped[dateKey].map((update) => {
+                    const config =
+                      UPDATE_TYPE_CONFIG[update.category as UpdateCategory];
+                    return (
+                      <UpdateCard
+                        key={update._id}
+                        icon={config.icon}
+                        iconBg={config.iconBg}
+                        iconColor={config.iconColor}
+                        title={update.title}
+                        createdAt={update.createdAt}
+                        updatedAt={update.updatedAt}
+                        eventAt={update.eventAt ?? undefined}
+                        description={update.description}
+                        materials={update.materials}
+                        postedBy={update.postedBy}
+                        isPinned={update.isPinned}
+                        onTogglePin={() =>
+                          handleTogglePin(update._id, update.isPinned)
+                        }
+                        onEdit={() =>
+                          router.push(
+                            `/classes/${classId}/updates/${update._id}`,
+                          )
+                        }
+                        onDelete={() => handleDelete(update._id)}
+                        showActions={isAdmin}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

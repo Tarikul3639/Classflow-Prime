@@ -9,6 +9,15 @@ export interface IRequestStatus {
 }
 
 /**
+ * Status enum for class enrollment.
+ */
+export enum ClassStatus {
+    ACTIVE = 'active',
+    ENDED = 'ended',
+    UPCOMING = 'upcoming',
+}
+
+/**
  * User model.
  */
 export type IUser = {
@@ -24,7 +33,7 @@ export type IUser = {
         themeColor?: string;
         coverImage?: string;
         role: string;
-        status: string;
+        status: ClassStatus;
         enrolledAt: Date;
     }[];
 };
