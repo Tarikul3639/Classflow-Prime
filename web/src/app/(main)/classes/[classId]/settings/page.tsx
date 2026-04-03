@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import ClassInfoCard from "./_components/ClassInfoCard";
 import NotificationSettings from "./_components/NotificationSettings";
@@ -31,12 +31,11 @@ export default function ClassSettingsPage() {
     (state) => state.classes.classSettings,
   );
 
-  // Fetch class code on mount
   useEffect(() => {
     if (classId) {
       dispatch(fetchClassSettings({ classId: classId as string }));
     }
-  }, [classId]);
+  }, [classId, dispatch]);
 
   const handleLeaveClass = async () => {
     const promise = dispatch(
@@ -54,7 +53,6 @@ export default function ClassSettingsPage() {
       router.push("/classes");
     } catch (error) {
       console.error("Error leaving class:", error);
-      return;
     }
   };
 
@@ -74,7 +72,6 @@ export default function ClassSettingsPage() {
       router.push("/classes");
     } catch (error) {
       console.error("Error deleting class:", error);
-      return;
     }
   };
 
@@ -94,7 +91,6 @@ export default function ClassSettingsPage() {
       router.back();
     } catch (error) {
       console.error("Error marking class as ended:", error);
-      return;
     }
   };
 
@@ -113,7 +109,6 @@ export default function ClassSettingsPage() {
       await promise;
     } catch (error) {
       console.error("Error fetching class code:", error);
-      return;
     }
   };
 
@@ -132,7 +127,6 @@ export default function ClassSettingsPage() {
       await promise;
     } catch (error) {
       console.error("Error toggling joining allowed status:", error);
-      return;
     }
   };
 
@@ -143,11 +137,11 @@ export default function ClassSettingsPage() {
   );
 
   return (
-    <div className="relative bg-slate-50 px-3 lg:px-6 py-6">
+    <div className="h-full bg-slate-50">
       {loading ? (
         <TopLoader isLoading={loading} />
       ) : (
-        <div className="mx-auto grid gap-6">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           <ClassInfoCard
             className={classDetails.name}
             classCode={classCode}

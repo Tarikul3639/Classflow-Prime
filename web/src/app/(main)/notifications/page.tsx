@@ -109,7 +109,7 @@ const Notifications: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col h-full bg-slate-50">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
         <div className="px-4 lg:px-8 pt-4 pb-4">

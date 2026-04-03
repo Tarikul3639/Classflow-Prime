@@ -91,9 +91,9 @@ export default function DangerZone({
                       </div>
                       <button
                         onClick={() => setShowEndedDialog(true)}
-                        className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-amber-500/30 bg-amber-50 text-amber-700 font-semibold text-xs sm:text-sm hover:bg-amber-100 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                        className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm sm:rounded-lg border border-amber-500/30 bg-amber-50 text-amber-700 font-semibold text-xs sm:text-sm hover:bg-amber-100 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                       >
-                        Mark as Ended
+                        <span className="hidden sm:block">Mark as</span> Ended
                       </button>
                     </div>
                   </div>
@@ -119,7 +119,7 @@ export default function DangerZone({
                   </div>
                   <button
                     onClick={() => setShowDeleteDialog(true)}
-                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 border-red-500/30 font-semibold text-xs sm:text-sm bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-sm sm:rounded-lg border-2 border-red-500/30 font-semibold text-xs sm:text-sm bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   >
                     Delete
                   </button>
