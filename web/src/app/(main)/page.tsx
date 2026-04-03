@@ -108,7 +108,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200 px-4 py-3">
+      <header className="hidden sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200 px-4 py-3">
         <div className="flex items-center gap-4 mx-auto">
           {/* Left Side: Profile & Identity */}
           <div className="flex items-center gap-3">

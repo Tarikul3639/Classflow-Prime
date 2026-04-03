@@ -137,7 +137,7 @@ export default function ClassSettingsPage() {
   );
 
   return (
-    <div className="h-full bg-slate-50">
+    <div className="relative h-full bg-slate-50">
       {loading ? (
         <TopLoader isLoading={loading} />
       ) : (
