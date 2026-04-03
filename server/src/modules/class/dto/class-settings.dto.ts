@@ -31,7 +31,7 @@ export class MarkClassAsEndedResponseDto {
     };
 }
 
-export class ClassCodeResponseDto {
+export class FetchClassSettingsResponseDto {
     @ApiProperty({ example: true })
     success: boolean;
 
@@ -41,5 +41,32 @@ export class ClassCodeResponseDto {
     @ApiProperty({ example: { code: 'ABC123' } })
     data: {
         code: string;
+        isJoiningAllowed: boolean;
+    };
+}
+
+export class RegenerateClassCodeResponseDto {
+    @ApiProperty({ example: true })
+    success: boolean;
+    @ApiProperty({ example: 'Class code regenerated successfully.' })
+    message: string;
+    @ApiProperty({ example: { code: 'NEW456' } })
+    data: {
+        code: string;
+    };
+}
+
+
+export class ToggleJoiningAllowedResponseDto {
+    @ApiProperty({ example: true })
+    success: boolean;
+
+    @ApiProperty({ example: 'Joining allowed status updated successfully.' })
+    message: string;
+
+    @ApiProperty({ example: { classId: '123', isJoiningAllowed: true } })
+    data: {
+        classId: string;
+        isJoiningAllowed: boolean;
     };
 }

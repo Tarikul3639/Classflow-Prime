@@ -4,18 +4,21 @@ import {
     leaveClass,
     deleteClass,
     markClassAsEnded,
-    fetchClassCode,
+    fetchClassSettings,
     regenerateClassCode,
+    toggleJoiningAllowed,
 } from "../../thunks/settings/class-setting.thunk";
 
 interface ClassActionsState {
     classCode: string | null;
+    isJoiningAllowed: boolean;
     loading: {
         leaveClass: boolean;
         deleteClass: boolean;
         markAsEnded: boolean;
         fetchClassCode: boolean;
         regenerateClassCode: boolean;
+        toggleJoiningAllowed: boolean;
     };
     error: {
         leaveClass: string | null;
@@ -23,17 +26,20 @@ interface ClassActionsState {
         markAsEnded: string | null;
         fetchClassCode: string | null;
         regenerateClassCode: string | null;
+        toggleJoiningAllowed: string | null;
     };
 }
 
 const initialState: ClassActionsState = {
     classCode: null,
+    isJoiningAllowed: true,
     loading: {
         leaveClass: false,
         deleteClass: false,
         markAsEnded: false,
         fetchClassCode: false,
         regenerateClassCode: false,
+        toggleJoiningAllowed: false,
     },
     error: {
         leaveClass: null,
@@ -41,6 +47,7 @@ const initialState: ClassActionsState = {
         markAsEnded: null,
         fetchClassCode: null,
         regenerateClassCode: null,
+        toggleJoiningAllowed: null,
     },
 };
 
@@ -96,15 +103,18 @@ const classActionsSlice = createSlice({
         });
 
         // ─── Fetch Class Code ──────────────────────────────────────────
-        builder.addCase(fetchClassCode.pending, (state) => {
+        builder.addCase(fetchClassSettings.pending, (state) => {
             state.loading.fetchClassCode = true;
             state.error.fetchClassCode = null;
+            state.classCode = null; // Clear old code while fetching new one
+            state.isJoiningAllowed = true; // Reset to default while fetching
         });
-        builder.addCase(fetchClassCode.fulfilled, (state, action) => {
+        builder.addCase(fetchClassSettings.fulfilled, (state, action) => {
             state.loading.fetchClassCode = false;
             state.classCode = action.payload.code;
+            state.isJoiningAllowed = action.payload.isJoiningAllowed;
         });
-        builder.addCase(fetchClassCode.rejected, (state, action) => {
+        builder.addCase(fetchClassSettings.rejected, (state, action) => {
             state.loading.fetchClassCode = false;
             state.error.fetchClassCode = action.payload || "Failed to fetch class code.";
         });
@@ -121,6 +131,18 @@ const classActionsSlice = createSlice({
         builder.addCase(regenerateClassCode.rejected, (state, action) => {
             state.loading.regenerateClassCode = false;
             state.error.regenerateClassCode = action.payload || "Failed to regenerate class code.";
+        });
+
+        // ─── Toggle Joining Allowed ─────────────────────────────────────
+        builder.addCase(toggleJoiningAllowed.pending, (state) => {
+            // No loading state for toggle, but could add if desired
+            state.error.toggleJoiningAllowed = null;
+        });
+        builder.addCase(toggleJoiningAllowed.fulfilled, (state, action) => {
+            state.isJoiningAllowed = !state.isJoiningAllowed; // toggle the state
+        });
+        builder.addCase(toggleJoiningAllowed.rejected, (state, action) => {
+            state.error.toggleJoiningAllowed = action.payload || "Failed to toggle joining allowed.";
         });
     },
 });

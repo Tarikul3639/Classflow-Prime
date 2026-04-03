@@ -59,16 +59,19 @@ export const markClassAsEnded = createAsyncThunk<
 
 // ─── Fetch Class Code ──────────────────────────────────────────
 
-export const fetchClassCode = createAsyncThunk<
-    { classId: string; code: string },
+export const fetchClassSettings = createAsyncThunk<
+    { classId: string; code: string, isJoiningAllowed: boolean },
     { classId: string },
     { rejectValue: string }
 >(
-    "classes/fetchClassCode",
+    "classes/fetchClassSettings",
     async ({ classId }, { rejectWithValue }) => {
         try {
-            const { data } = await apiClient.get(`classes/${classId}/code`);
-            return { classId, code: data.data.code };
+            const { data } = await apiClient.get(`classes/${classId}/settings`);
+            return {
+                classId, code: data.data.code,
+                isJoiningAllowed: data.data.isJoiningAllowed,
+            };
         } catch (error) {
             return rejectWithValue(extractAxiosError(error));
         }
@@ -87,6 +90,24 @@ export const regenerateClassCode = createAsyncThunk<
         try {
             const { data } = await apiClient.patch(`classes/${classId}/code/regenerate`);
             return { classId, code: data.data.code };
+        } catch (error) {
+            return rejectWithValue(extractAxiosError(error));
+        }
+    }
+);
+
+// ─── Toggle Joining Allowed ─────────────────────────────────────
+
+export const toggleJoiningAllowed = createAsyncThunk<
+    { classId: string; isJoiningAllowed: boolean },
+    { classId: string },
+    { rejectValue: string }
+>(
+    "classes/toggleJoiningAllowed",
+    async ({ classId }, { rejectWithValue }) => {
+        try {
+            const { data } = await apiClient.patch(`classes/${classId}/joining`);
+            return { classId, isJoiningAllowed: data.data.isJoiningAllowed };
         } catch (error) {
             return rejectWithValue(extractAxiosError(error));
         }

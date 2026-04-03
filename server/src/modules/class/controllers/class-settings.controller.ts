@@ -16,14 +16,17 @@ import {
     LeaveClassResponseDto,
     DeleteClassResponseDto,
     MarkClassAsEndedResponseDto,
-    ClassCodeResponseDto,
+    FetchClassSettingsResponseDto,
+    RegenerateClassCodeResponseDto,
+    ToggleJoiningAllowedResponseDto,
 } from '../dto/class-settings.dto';
 
 import { LeaveClassService } from '../services/leave-class.service';
 import { DeleteClassService } from '../services/delete-class.service';
 import { MarkClassAsEndedService } from '../services/mark-class-as-ended.service';
-import { FetchClassCodeService } from '../services/fetch-class-code.service';
+import { FetchClassSettingsService } from '../services/fetch-class-settings.service';
 import { RegenerateClassCodeService } from '../services/regenerate-class-code.service';
+import { ClassJoinAllowedToggleService } from '../services/class-join-allowed-toggle.service';
 
 @ApiTags('Class Actions')
 @Controller('classes/:classId')
@@ -32,8 +35,9 @@ export class ClassActionsController {
         private readonly leaveClassService: LeaveClassService,
         private readonly deleteClassService: DeleteClassService,
         private readonly markClassAsEndedService: MarkClassAsEndedService,
-        private readonly fetchClassCodeService: FetchClassCodeService,
+        private readonly fetchClassSettingsService: FetchClassSettingsService,
         private readonly regenerateClassCodeService: RegenerateClassCodeService,
+        private readonly classJoinAllowedToggleService: ClassJoinAllowedToggleService,
     ) {}
 
     @Post('leave')
@@ -75,14 +79,14 @@ export class ClassActionsController {
         );
     }
 
-    @Get('code')
+    @Get('settings')
     @ApiOperation({ summary: 'Fetch class join code' })
-    @ApiResponse({ status: 200, type: ClassCodeResponseDto })
+    @ApiResponse({ status: 200, type: FetchClassSettingsResponseDto })
     async fetchClassCode(
         @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
-    ): Promise<ClassCodeResponseDto> {
-        return await this.fetchClassCodeService.execute(
+    ): Promise<FetchClassSettingsResponseDto> {
+        return await this.fetchClassSettingsService.execute(
             user.userId.toString(),
             classId,
         );
@@ -90,12 +94,25 @@ export class ClassActionsController {
 
     @Patch('code/regenerate')
     @ApiOperation({ summary: 'Regenerate class join code' })
-    @ApiResponse({ status: 200, type: ClassCodeResponseDto })
+    @ApiResponse({ status: 200, type: RegenerateClassCodeResponseDto })
     async regenerateClassCode(
         @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
-    ): Promise<ClassCodeResponseDto> {
+    ): Promise<RegenerateClassCodeResponseDto> {
         return await this.regenerateClassCodeService.execute(
+            user.userId.toString(),
+            classId,
+        );
+    }
+
+    @Patch('joining')
+    @ApiOperation({ summary: 'Toggle joining allowed for the class' })
+    @ApiResponse({ status: 200, description: 'Joining allowed status toggled successfully' })
+    async toggleJoiningAllowed(
+        @CurrentUser() user: IJwtPayload,
+        @Param('classId') classId: string,
+    ): Promise<ToggleJoiningAllowedResponseDto> {
+        return await this.classJoinAllowedToggleService.execute(
             user.userId.toString(),
             classId,
         );

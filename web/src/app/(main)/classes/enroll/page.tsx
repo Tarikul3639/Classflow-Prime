@@ -72,7 +72,7 @@ export default function EnrollClassPage() {
 
         // Redirect to class page if classId is returned
         if (response.data.classId) {
-          router.push(`/classes/${response.data.classId}/overview`);
+          router.push(`/classes/${response.data.classId}/updates`);
           dispatch(resetEnrollState());
         }
       })

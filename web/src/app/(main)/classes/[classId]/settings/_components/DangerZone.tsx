@@ -1,32 +1,49 @@
 "use client";
 
 import React, { useState } from "react";
-import { LogOut, Trash2, Archive, AlertTriangle } from "lucide-react";
+import { LogOut, Trash2, Archive, AlertTriangle, DoorOpen } from "lucide-react";
 import ConfirmDialog from "./ConfirmDialog";
+import { Toggle } from "@/components/ui/Toggle";
 
+// ─────────────────────────────────────────────
+// Props
+// ─────────────────────────────────────────────
 interface DangerZoneProps {
   className: string;
   isInstructor: boolean;
+  isJoiningAllowed: boolean;
+  isClassEnded: boolean;
   onLeaveClass: () => void;
   onDeleteClass: () => void;
   onMarkAsEnded: () => void;
+  onToggleJoining: () => void;
 }
 
+// ─────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────
 export default function DangerZone({
   className,
   isInstructor,
+  isJoiningAllowed,
+  isClassEnded,
   onLeaveClass,
   onDeleteClass,
   onMarkAsEnded,
+  onToggleJoining,
 }: DangerZoneProps) {
+  // ── Dialog visibility state ──
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEndedDialog, setShowEndedDialog] = useState(false);
 
   return (
     <>
+      {/* ── Card ── */}
       <div className="bg-white rounded-xl shadow-sm border border-red-200 p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-4">
+
+        {/* ── Header ── */}
+        <div className="flex items-center gap-2 mb-1">
           <AlertTriangle size={20} className="text-red-600" />
           <h3 className="text-base font-bold text-slate-900">Danger Zone</h3>
         </div>
@@ -34,88 +51,117 @@ export default function DangerZone({
           Irreversible actions that will affect your class data
         </p>
 
+        {/* ── Actions ── */}
         <div className="space-y-3">
-          {/* Mark as Ended */}
+
+          {/* ── INSTRUCTOR VIEW ── */}
           {isInstructor ? (
             <>
-              <div className="border border-slate-200 rounded-lg p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Archive size={18} className="text-amber-600 shrink-0" />
-                      <h4 className="font-semibold text-slate-900 text-sm truncate">
-                        Mark Semester Ended
-                      </h4>
-                    </div>
-                    <p className="text-xs text-slate-600">
-                      Archive this class. You can still view it but won't
-                      receive updates.
-                    </p>
+              {/* Allow Joining + Mark as Ended — only when class is still active */}
+              {!isClassEnded && (
+                <>
+                  {/* Toggle: Allow new students to join */}
+                  <div className="border border-slate-200 rounded-lg px-4">
+                    <Toggle
+                      icon={DoorOpen}
+                      iconClassName="rounded-sm text-amber-600 bg-amber-50"
+                      title="Allow Joining"
+                      description="Control whether new students can join this class."
+                      enabled={isJoiningAllowed}
+                      onToggle={onToggleJoining}
+                    />
                   </div>
-                  <button
-                    onClick={() => setShowEndedDialog(true)}
-                    className="flex items-center gap-1 px-4 py-2 rounded-sm border border-amber-500/30 bg-amber-50 text-amber-700 font-semibold text-sm hover:bg-amber-100 transition-colors duration-300 cursor-pointer shrink-0"
-                  >
-                    <span>Mark</span>
-                    <span className="hidden md:block">as Ended</span>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Delete Class (only for instructors) */}
+
+                  {/* Mark Semester as Ended */}
+                  <div className="border border-slate-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="p-1.5 rounded-sm bg-amber-50 shrink-0">
+                          <Archive size={18} className="text-amber-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="font-semibold text-slate-900 text-sm truncate">
+                            Mark Semester Ended
+                          </h4>
+                          <p className="text-xs text-slate-600 truncate">
+                            Archive this class. You can still view it but won't
+                            receive updates.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setShowEndedDialog(true)}
+                        className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-amber-500/30 bg-amber-50 text-amber-700 font-semibold text-xs sm:text-sm hover:bg-amber-100 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
+                      >
+                        Mark as Ended
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Delete Class — always visible for instructor */}
               <div className="border border-red-200 rounded-lg p-4 bg-red-50/30">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Trash2 size={18} className="text-red-600 shrink-0" />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="p-1.5 rounded-sm bg-red-100 shrink-0">
+                      <Trash2 size={18} className="text-red-600" />
+                    </div>
+                    <div className="min-w-0">
                       <h4 className="font-semibold text-slate-900 text-sm truncate">
                         Delete Class
                       </h4>
+                      <p className="text-xs text-slate-600 truncate">
+                        Permanently delete all class data. This action cannot
+                        be undone.
+                      </p>
                     </div>
-                    <p className="text-xs text-slate-600">
-                      Permanently delete all class data. This action cannot be
-                      undone.
-                    </p>
                   </div>
                   <button
                     onClick={() => setShowDeleteDialog(true)}
-                    className="flex items-center gap-1 px-4 py-2 rounded-sm border-2 border-red-500/30 font-semibold text-sm bg-red-500 text-white hover:bg-red-600 transition-colors duration-300 cursor-pointer shrink-0"
+                    className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border-2 border-red-500/30 font-semibold text-xs sm:text-sm bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                   >
-                    <span>Delete</span>
+                    Delete
                   </button>
                 </div>
               </div>
             </>
+
           ) : (
-            // Leave Class (only for students)
+            /* ── STUDENT VIEW ── */
+            /* Leave Class — only option for students */
             <div className="border border-slate-200 rounded-lg p-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <LogOut size={18} className="text-orange-600 shrink-0" />
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="p-1.5 rounded-sm bg-orange-50 shrink-0">
+                    <LogOut size={18} className="text-orange-600" />
+                  </div>
+                  <div className="min-w-0">
                     <h4 className="font-semibold text-slate-900 text-sm truncate">
                       Leave Class
                     </h4>
+                    <p className="text-xs text-slate-600 truncate">
+                      Remove yourself from this class. You'll lose access
+                      immediately.
+                    </p>
                   </div>
-                  <p className="text-xs text-slate-600">
-                    Remove yourself from this class. You'll lose access
-                    immediately.
-                  </p>
                 </div>
                 <button
                   onClick={() => setShowLeaveDialog(true)}
-                  className="flex items-center gap-1 px-4 py-2 rounded-sm border border-orange-500/30 bg-orange-50 text-orange-700 font-semibold text-sm hover:bg-orange-100 transition-colors duration-300 cursor-pointer shrink-0"
+                  className="flex items-center gap-1 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-orange-500/30 bg-orange-50 text-orange-700 font-semibold text-xs sm:text-sm hover:bg-orange-100 transition-colors cursor-pointer shrink-0 whitespace-nowrap"
                 >
-                  <span>Leave</span>
-                  <span className="hidden md:block">Class</span>
+                  Leave Class
                 </button>
               </div>
             </div>
           )}
+
         </div>
       </div>
 
-      {/* Dialogs */}
+      {/* ── Confirm Dialogs ── */}
+
+      {/* Mark as Ended Dialog */}
       <ConfirmDialog
         isOpen={showEndedDialog}
         onClose={() => setShowEndedDialog(false)}
@@ -133,6 +179,7 @@ export default function DangerZone({
         }
       />
 
+      {/* Leave Class Dialog */}
       <ConfirmDialog
         isOpen={showLeaveDialog}
         onClose={() => setShowLeaveDialog(false)}
@@ -150,6 +197,7 @@ export default function DangerZone({
         }
       />
 
+      {/* Delete Class Dialog */}
       <ConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}

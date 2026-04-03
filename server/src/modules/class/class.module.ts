@@ -34,9 +34,6 @@ import { EnrollClassController } from './controllers/enroll-class.controller';
 import { FetchClassController } from './controllers/fetch-class.controller';
 import { FetchClassService } from './services/fetch-class.service';
 
-import { FetchClassOverviewController } from './controllers/fetch-class-overview.controller';
-import { FetchClassOverviewService } from './services/fetch-class-overview.service';
-
 import { FetchClassUpdateController } from './controllers/fetch-class-update.controller';
 import { FetchClassUpdateService } from './services/fetch-class-update.service';
 
@@ -79,8 +76,9 @@ import { ClassActionsController } from './controllers/class-settings.controller'
 import { LeaveClassService } from './services/leave-class.service';
 import { DeleteClassService } from './services/delete-class.service';
 import { MarkClassAsEndedService } from './services/mark-class-as-ended.service';
-import { FetchClassCodeService } from './services/fetch-class-code.service';
+import { FetchClassSettingsService } from './services/fetch-class-settings.service';
 import { RegenerateClassCodeService } from './services/regenerate-class-code.service';
+import { ClassJoinAllowedToggleService } from './services/class-join-allowed-toggle.service';
 
 @Module({
   imports: [
@@ -104,7 +102,6 @@ import { RegenerateClassCodeService } from './services/regenerate-class-code.ser
     FetchClassesController,
     EnrollClassController,
     FetchClassController,
-    FetchClassOverviewController,
     FetchClassUpdateController,
     CreateClassUpdateController,
     FetchSingleClassUpdateController,
@@ -126,7 +123,6 @@ import { RegenerateClassCodeService } from './services/regenerate-class-code.ser
     FetchEnrolledClassesService,
     EnrollClassService,
     FetchClassService,
-    FetchClassOverviewService,
     FetchClassUpdateService,
     CreateClassUpdateService,
     FetchSingleClassUpdateService,
@@ -154,8 +150,9 @@ import { RegenerateClassCodeService } from './services/regenerate-class-code.ser
     LeaveClassService,
     DeleteClassService,
     MarkClassAsEndedService,
-    FetchClassCodeService,
+    FetchClassSettingsService,
     RegenerateClassCodeService,
+    ClassJoinAllowedToggleService,
   ],
 })
 export class ClassModule { }

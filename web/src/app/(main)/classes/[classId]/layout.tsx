@@ -44,11 +44,6 @@ export default function ClassLayout({
 
   const tabs = [
     {
-      id: "overview",
-      label: "Overview",
-      href: `/classes/${params.classId}/overview`,
-    },
-    {
       id: "updates",
       label: "Updates",
       href: `/classes/${params.classId}/updates`,
@@ -59,14 +54,14 @@ export default function ClassLayout({
       href: `/classes/${params.classId}/faculty`,
     },
     {
-      id: "members",
-      label: "Members",
-      href: `/classes/${params.classId}/members`,
-    },
-    {
       id: "groups",
       label: "Groups",
       href: `/classes/${params.classId}/groups`,
+    },
+    {
+      id: "members",
+      label: "Members",
+      href: `/classes/${params.classId}/members`,
     },
     {
       id: "settings",

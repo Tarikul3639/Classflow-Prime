@@ -5,5 +5,5 @@ export default function ClassPage({
 }: {
   params: { classId: string };
 }) {
-  redirect(`/classes/${params.classId}/overview`);
+  redirect(`/classes/${params.classId}/updates`);
 }

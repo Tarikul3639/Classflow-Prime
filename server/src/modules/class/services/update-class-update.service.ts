@@ -20,7 +20,10 @@ import {
 import { UpdateClassUpdateRequestDto } from '../dto/update-class-update.dto';
 import { UpdateClassUpdateResponseDto } from '../dto/update-class-update.dto';
 
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
+import {
+  Enrollment,
+  EnrollmentDocument,
+} from '../../../database/entities/enrollment.entity';
 import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 
 import { NotificationService } from '../../notification/services/notification.service';
@@ -61,11 +64,14 @@ export class UpdateClassUpdateService {
     // Step 1: check if class exists
     const classData = await this.classModel.findOne({
       _id: classObjectId,
-      status: ClassStatus.ACTIVE,
     });
 
     if (!classData) {
       throw new NotFoundException('Class not found');
+    }
+
+    if (classData.status === ClassStatus.ENDED) {
+      throw new ForbiddenException('Cannot modify updates of an ended class');
     }
 
     // Step 2: Permission check
@@ -178,9 +184,9 @@ export class UpdateClassUpdateService {
     const instructorId = classData.instructorId.toString();
 
     // ── 3. Combine all recipient IDs and remove duplicates ──
-    const allRecipients = [
-      ...new Set([...enrollmentIds, instructorId]),
-    ].filter((id) => id !== userId); // remove whoever posted
+    const allRecipients = [...new Set([...enrollmentIds, instructorId])].filter(
+      (id) => id !== userId,
+    ); // remove whoever posted
 
     // ── 4. Send notifications ───────────────────────────────
     if (allRecipients.length > 0) {

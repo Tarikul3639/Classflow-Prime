@@ -156,7 +156,7 @@ const Classes: React.FC = () => {
           <main className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] md:grid-cols-[repeat(auto-fit,minmax(300px,300px))] justify-start">
             {filteredClasses.map((cls) => (
               <Link
-                href={`/classes/${cls.classId}/overview`}
+                href={`/classes/${cls.classId}/updates`}
                 key={cls.classId}
                 className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col w-full h-full sm:max-w-75 sm:min-w-70"
                 style={{

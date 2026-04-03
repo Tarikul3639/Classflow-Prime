@@ -1,6 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiClient } from "@/lib/api/axios";
 
+export enum ClassStatus {
+    ACTIVE = 'active',
+    ENDED = 'ended',
+    UPCOMING = 'upcoming',
+}
+
 export interface IClassDetails {
     classId: string;
     department: string;
@@ -11,7 +17,7 @@ export interface IClassDetails {
     themeColor: string;
     coverImage?: string;
     avatarUrl?: string | null;
-    status: "active" | "archived";
+    status: ClassStatus;
     isInstructor: boolean; // ← bonus field to indicate if the current user is the instructor
     isAssistant: boolean; // ← bonus field to indicate if the current user is an assistant
 }
@@ -31,7 +37,7 @@ export const fetchSingleClass = createAsyncThunk<
 >("classes/fetchSingleUpdate", async (classId, { rejectWithValue }) => {
     try {
         const { data } = await apiClient.get<FetchClassResponse>(`/classes/${classId}`);
-        
+
         if (!data.success) {
             return rejectWithValue({
                 message: data.message || "Failed to fetch class details",

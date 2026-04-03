@@ -60,7 +60,7 @@ export class SignInService {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       await this.handleFailure(t);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('No account found with this email');
     }
 
     // 3️) Load Account for password verification

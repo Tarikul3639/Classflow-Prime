@@ -19,6 +19,7 @@ export class FetchSingleClassUpdateService {
   ): Promise<FetchSingleClassUpdateResponseDto> {
     const updateObjectId = new Types.ObjectId(updateId);
     const classObjectId = new Types.ObjectId(classId);
+    const userObjectId = new Types.ObjectId(userId);
 
     const pipeline: PipelineStage[] = [
       // ১. নির্দিষ্ট আপডেটটি খুঁজে বের করা (যা নির্দিষ্ট ক্লাসের আন্ডারে)

@@ -23,6 +23,7 @@ import {
   EnrollmentDocument,
 } from '../../../database/entities/enrollment.entity';
 import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { ClassStatus } from '../../../database/interface/class.interface';
 
 @Injectable()
 export class CreateClassUpdateService {
@@ -34,7 +35,7 @@ export class CreateClassUpdateService {
     @InjectModel(Enrollment.name)
     private enrollmentModel: Model<EnrollmentDocument>,
     private notificationService: NotificationService,
-  ) {}
+  ) { }
 
   async execute(
     classId: string,
@@ -42,7 +43,7 @@ export class CreateClassUpdateService {
     dto: CreateClassUpdateRequestDto,
   ) {
     console.log('--- EXECUTING CREATE UPDATE SERVICE ---', { userId, title: dto.title });
-    
+
     const userObjId = new Types.ObjectId(userId);
     const classObjId = new Types.ObjectId(classId);
 
@@ -56,6 +57,10 @@ export class CreateClassUpdateService {
 
     if (!targetClass) {
       throw new NotFoundException('Class not found');
+    }
+
+    if (targetClass.status === ClassStatus.ENDED) {
+      throw new ForbiddenException('Cannot post updates to an ended class');
     }
 
     // ── Check if the user is the instructor of the class ───────────────────

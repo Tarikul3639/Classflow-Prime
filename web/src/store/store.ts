@@ -17,7 +17,6 @@ const authReducer = combineReducers({
 // Classes slices
 import createClassReducer from "./features/classes/slices/create-class.slice";
 import enrollClass from "./features/classes/slices/enroll-class.slice";
-import fetchClassOverviewReducer from "./features/classes/slices/fetch-class-overview.slice";
 import fetchClassUpdatesReducer from "./features/classes/slices/fetch-class-updates.slice";
 import createClassUpdateReducer from "./features/classes/slices/create-class-update.slice";
 import fetchSingleClassReducer from "./features/classes/slices/fetch-single-class.slice";
@@ -35,10 +34,12 @@ import classMemberReducer from "./features/classes/slices/members/class-member.s
 // Class Groups slices
 import classGroupReducer from "./features/classes/slices/groups/class-group.slice";
 
+// Class Settings slices
+import classSettingsReducer from "./features/classes/slices/settings/class-setting.slice";
+
 const classesReducer = combineReducers({
   createClass: createClassReducer,
   enrollClass: enrollClass,
-  fetchClassOverview: fetchClassOverviewReducer,
   fetchClassUpdates: fetchClassUpdatesReducer,
   createClassUpdate: createClassUpdateReducer,
   fetchSingleClass: fetchSingleClassReducer,
@@ -50,6 +51,7 @@ const classesReducer = combineReducers({
   fetchSingleClassFaculty: fetchSingleClassFaculty,
   classMembers: classMemberReducer,
   classGroups: classGroupReducer,
+  classSettings: classSettingsReducer,
 });
 
 // Profile slices

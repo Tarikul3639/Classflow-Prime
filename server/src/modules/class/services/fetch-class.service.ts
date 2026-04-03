@@ -20,9 +20,9 @@ export class FetchClassService {
     const userObjectId = new Types.ObjectId(userId);
 
     const pipeline: PipelineStage[] = [
-      // 1️) Match the class (not archived)
+      // 1️) Match the class
       {
-        $match: { _id: classObjectId, status: { $ne: 'ended' } },
+        $match: { _id: classObjectId },
       },
 
       // 2️) Lookup all enrollments for this class

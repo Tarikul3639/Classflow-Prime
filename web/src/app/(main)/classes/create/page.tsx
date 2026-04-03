@@ -60,7 +60,7 @@ export default function CreateClassPage() {
       .unwrap()
       .then((res) => {
         console.log("🎯 Class created successfully:", res);
-        router.push(`/classes/${res.data.classId}/overview`);
+        router.push(`/classes/${res.data.classId}/updates`);
         despatch(resetForm());
       })
       .catch((err) => {

@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { ClassStatus } from '../../../database/interface/class.interface';
 import {
     Enrollment,
     EnrollmentDocument,
@@ -44,8 +45,14 @@ export class UpdateSingleClassFacultyService {
         const classObjectId = new Types.ObjectId(classId);
         const facultyObjectId = new Types.ObjectId(facultyId);
 
+        // Check if class exists
         const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
+
+        // Check if class is ended
+        if (existingClass.status === ClassStatus.ENDED) {
+            throw new ForbiddenException('Cannot update faculty in an ended class');
+        }
 
         const isAssistant = await this.enrollmentModel.findOne({
             classId: classObjectId,

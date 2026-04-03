@@ -5,7 +5,7 @@ import { Model, Types } from 'mongoose';
 import { customAlphabet } from 'nanoid';
 
 import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassCodeResponseDto } from '../dto/class-settings.dto';
+import { RegenerateClassCodeResponseDto } from '../dto/class-settings.dto';
 
 @Injectable()
 export class RegenerateClassCodeService {
@@ -13,14 +13,14 @@ export class RegenerateClassCodeService {
         @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
     ) { }
 
-    private generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 8);
+    private generateCode = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6);
 
-    async execute(userId: string, classId: string): Promise<ClassCodeResponseDto> {
+    async execute(userId: string, classId: string): Promise<RegenerateClassCodeResponseDto> {
         const userObjectId = new Types.ObjectId(userId);
         const classObjectId = new Types.ObjectId(classId);
 
         // Check if class exists
-        const existingClass = await this.classModel.findById(classId);
+        const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
 
         // Only instructor can regenerate code

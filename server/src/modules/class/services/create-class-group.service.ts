@@ -8,6 +8,7 @@ import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrol
 import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 import { ClassGroup, GroupDocument } from '../../../database/entities/group.entity';
 import { CreateClassGroupRequestDto } from '../dto/class-group.dto';
+import { ClassStatus } from '../../../database/interface/class.interface';
 
 @Injectable()
 export class CreateClassGroupService {
@@ -25,6 +26,11 @@ export class CreateClassGroupService {
         const existingClass = await this.classModel.findById(classObjectId);
         if (!existingClass) throw new NotFoundException('Class not found');
 
+        if (existingClass.status === ClassStatus.ENDED) {
+            throw new ForbiddenException('Cannot add groups to an ended class');
+        }
+
+        // Find if the user is an assistant for the class
         const isAssistant = await this.enrollmentModel.findOne({ classId: classObjectId, userId: userObjectId, role: EnrollmentRole.ASSISTANT });
 
         if (!existingClass.instructorId.equals(userObjectId) && !isAssistant) {
