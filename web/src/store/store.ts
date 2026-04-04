@@ -66,6 +66,9 @@ const profileReducer = combineReducers({
 // Notifications slices
 import notificationReducer from "./features/notifications/slices/notification.slice";
 
+// Dashboard slices
+import dashboardReducer from "./features/dashboard/slice/dashboard.slice";
+
 // Root store
 export const store = configureStore({
   reducer: {
@@ -73,6 +76,7 @@ export const store = configureStore({
     classes: classesReducer,
     profile: profileReducer,
     notification: notificationReducer,
+    dashboard: dashboardReducer,
   },
 });
 

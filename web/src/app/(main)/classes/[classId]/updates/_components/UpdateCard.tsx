@@ -4,11 +4,7 @@ import React from "react";
 import { type LucideIcon, CalendarClock } from "lucide-react";
 import UpdateActionMenu from "./UpdateActionMenu";
 import UpdateMaterial from "./UpdateMaterials";
-import type {
-  Material,
-  PostedBy,
-  UpdateEngagement,
-} from "@/types/update.types";
+import type { Material, PostedBy, UpdateEngagement } from "@/types/update.types";
 import { formatRelativeDate } from "@/utils/date.utils";
 
 interface UpdateCardProps {
@@ -24,7 +20,6 @@ interface UpdateCardProps {
   isPinned?: boolean;
   createdAt: string;
   updatedAt?: string;
-
   onTogglePin?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -54,9 +49,7 @@ export default function UpdateCard({
       <div className="flex justify-between items-start gap-2">
         <div className="flex items-center gap-3 min-w-0">
           {Icon && (
-            <div
-              className={`w-10 h-10 shrink-0 rounded-full ${iconBg} flex items-center justify-center ${iconColor}`}
-            >
+            <div className={`w-10 h-10 shrink-0 rounded-full ${iconBg} flex items-center justify-center ${iconColor}`}>
               <Icon size={18} />
             </div>
           )}
@@ -64,17 +57,13 @@ export default function UpdateCard({
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               {isPinned && (
-                <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
+                <span className="text-[11px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
                   Pinned
                 </span>
               )}
-
-              <h4 className="text-sm font-bold text-slate-900 truncate">
-                {title}
-              </h4>
+              <h4 className="text-sm font-bold text-slate-900 truncate">{title}</h4>
             </div>
 
-            {/* Timestamp */}
             <div className="flex items-center gap-2 text-slate-500 text-xs">
               {updatedAt && updatedAt !== createdAt ? (
                 <span>
@@ -84,7 +73,7 @@ export default function UpdateCard({
                     showYear: false,
                     relativeDaysLimit: 3,
                     showTimeAfterLimit: false,
-                  })}{" "}
+                  })}
                 </span>
               ) : (
                 <span>
@@ -94,7 +83,7 @@ export default function UpdateCard({
                     showYear: false,
                     relativeDaysLimit: 3,
                     showTimeAfterLimit: false,
-                  })}{" "}
+                  })}
                 </span>
               )}
             </div>
@@ -120,6 +109,7 @@ export default function UpdateCard({
           </span>
         </div>
       )}
+
       {/* Description */}
       <p className="text-sm text-slate-600 leading-relaxed">{description}</p>
 
@@ -137,21 +127,13 @@ export default function UpdateCard({
         <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
           <div className="w-5 h-5 rounded-full bg-slate-200 overflow-hidden shrink-0">
             {postedBy.avatarUrl ? (
-              <img
-                src={postedBy.avatarUrl}
-                alt={postedBy.name}
-                className="w-full h-full object-cover"
-              />
+              <img src={postedBy.avatarUrl} alt={postedBy.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[9px] font-bold text-slate-500">
-                {postedBy.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
+              <div className="w-full h-full flex items-center justify-center text-[11px] font-bold text-slate-500">
+                {postedBy.name.split(" ").map((n) => n[0]).join("")}
               </div>
             )}
           </div>
-
           <span className="text-xs text-slate-400">{postedBy.name}</span>
         </div>
       )}
