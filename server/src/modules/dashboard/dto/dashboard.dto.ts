@@ -17,12 +17,12 @@ export class UiConfigDto {
 export class DashboardClassDto {
   @ApiProperty() _id: string;
   @ApiProperty() name: string;
-  @ApiProperty() enrollCode: string;
   @ApiPropertyOptional() department?: string;
   @ApiPropertyOptional() semester?: string;
   @ApiProperty() themeColor: string;
   @ApiPropertyOptional() coverImage?: string | null;
   @ApiProperty({ enum: ClassStatus }) status: ClassStatus;
+  @ApiProperty() allowEnroll: boolean;
   @ApiProperty() instructorName: string; // populated from User
   @ApiProperty() studentCount: number; // computed
 }
@@ -86,11 +86,19 @@ export class DashboardGroupDto {
   @ApiProperty() memberCount: number; // computed from Enrollment
 }
 
-// ─── Root response ────────────────────────────────────────────────────────────
+// ─── Nested data shape ────────────────────────────────────────────────────────
 
-export class DashboardResponseDto {
+export class DashboardDataDto {
   @ApiProperty({ type: [DashboardClassDto] }) classes: DashboardClassDto[];
   @ApiProperty({ type: [DashboardUpdateDto] }) updates: DashboardUpdateDto[];
   @ApiProperty({ type: [DashboardFacultyDto] }) faculty: DashboardFacultyDto[];
   @ApiProperty({ type: [DashboardGroupDto] }) groups: DashboardGroupDto[];
+}
+
+// ─── Root response ────────────────────────────────────────────────────────────
+
+export class DashboardResponseDto {
+  @ApiProperty() success: boolean;
+  @ApiProperty() message: string;
+  @ApiProperty({ type: DashboardDataDto }) data: DashboardDataDto;
 }

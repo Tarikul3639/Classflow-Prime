@@ -11,29 +11,23 @@ interface StatCardProps {
   badgeColor?: string;
 }
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  badge,
-  badgeColor,
-}: StatCardProps) {
+function StatCard({ icon: Icon, label, value, badge, badgeColor }: StatCardProps) {
   return (
-    <div className="flex flex-col gap-1 rounded-2xl p-5 bg-white shadow-sm border border-slate-100">
-      <div className="flex items-center justify-between mb-2">
-        <Icon className="text-primary" size={22} />
+    <div className="flex flex-col gap-1 rounded-2xl p-3 sm:p-4 lg:p-5 bg-white shadow-sm border border-slate-100">
+      <div className="flex items-center justify-between mb-1 sm:mb-2">
+        <Icon className="text-primary" size={18} />
         {badge && (
-          <span
-            className={`text-xs font-bold px-2 py-0.5 rounded-full ${badgeColor}`}
-          >
+          <span className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 rounded-full ${badgeColor}`}>
             {badge}
           </span>
         )}
       </div>
-      <p className="text-slate-500 text-xs font-medium tracking-wide uppercase">
+      <p className="text-slate-500 text-[10px] sm:text-xs font-medium tracking-wide uppercase">
         {label}
       </p>
-      <p className="text-slate-900 text-2xl font-bold leading-none">{value}</p>
+      <p className="text-slate-900 text-xl sm:text-2xl lg:text-3xl font-bold leading-none">
+        {value}
+      </p>
     </div>
   );
 }
@@ -58,7 +52,7 @@ export default function DashboardStats({
       icon: BookOpen,
       label: "Enrolled Classes",
       value: String(enrolledCount),
-      badge: `${activeCount} active`,
+      badge: `${activeCount} Active`,
       badgeColor: "bg-green-100 text-green-600",
     },
     {
@@ -85,7 +79,7 @@ export default function DashboardStats({
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 px-4 sm:px-6 py-4">
       {stats.map((stat, i) => (
         <StatCard key={i} {...stat} />
       ))}

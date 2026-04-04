@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 
 import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
 import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { Class, ClassDocument } from '../../../database/entities/class.entity';
 import { ClassUpdate, ClassUpdateDocument } from '../../../database/entities/update.entity';
 import { Material, MaterialDocument } from '../../../database/entities/material.entity';
 import { Faculty, FacultyDocument } from '../../../database/entities/faculty.entity';
@@ -26,23 +27,19 @@ import {
 
 // ─── Internal populated types ─────────────────────────────────────────────────
 
-// Instructor name is populated from instructorId
 interface PopulatedInstructor {
     name: string;
 }
 
-// Class document after instructorId is populated
 interface PopulatedClass extends Omit<IClass, 'instructorId'> {
     _id: Types.ObjectId;
     instructorId: PopulatedInstructor;
 }
 
-// Enrollment document after classId is populated with PopulatedClass
 interface PopulatedEnrollment extends Omit<EnrollmentDocument, 'classId'> {
     classId: PopulatedClass;
 }
 
-// Result shape from the studentCount aggregation
 interface StudentCountAggResult {
     _id: Types.ObjectId;
     count: number;
@@ -53,6 +50,9 @@ export class DashboardService {
     constructor(
         @InjectModel(Enrollment.name)
         private readonly enrollmentModel: Model<EnrollmentDocument>,
+
+        @InjectModel(Class.name)
+        private readonly classModel: Model<ClassDocument>,
 
         @InjectModel(ClassUpdate.name)
         private readonly updateModel: Model<ClassUpdateDocument>,
@@ -70,22 +70,48 @@ export class DashboardService {
     async execute(userId: string): Promise<DashboardResponseDto> {
         const userObjectId = new Types.ObjectId(userId);
 
-        console.log("User ID: ",userObjectId);
+        // ── Step 1: Collect all classes this user belongs to ──────────────────
+        //
+        // Enrollment only stores LEARNER and ASSISTANT roles.
+        // Instructors are identified via Class.instructorId directly.
+        // Query both sources in parallel, then union their class IDs.
 
-        // ── Step 1: Enrolled classes ──────────────────────────────────────────
-        const enrollments = await this.enrollmentModel
-            .find({ userId: userObjectId })
-            .populate<{ classId: PopulatedClass }>({
-                path: 'classId',
-                populate: { path: 'instructorId', select: 'name' },
-            })
-            .lean<PopulatedEnrollment[]>();
+        const [enrollments, instructedClasses] = await Promise.all([
+            // Classes where user is a LEARNER or ASSISTANT
+            this.enrollmentModel
+                .find({
+                    userId: userObjectId,
+                    role: { $in: [EnrollmentRole.LEARNER, EnrollmentRole.ASSISTANT] },
+                })
+                .populate<{ classId: PopulatedClass }>({
+                    path: 'classId',
+                    populate: { path: 'instructorId', select: 'name' },
+                })
+                .lean<PopulatedEnrollment[]>(),
 
-            console.log("All Enrollment: ", enrollments);
+            // Classes where user is the instructor
+            this.classModel
+                .find({ instructorId: userObjectId })
+                .populate<{ instructorId: PopulatedInstructor }>('instructorId', 'name')
+                .lean<PopulatedClass[]>(),
+        ]);
 
-        const classIds = enrollments
+        // IDs from enrollment
+        const enrolledClassIds = enrollments
             .map((e) => e.classId?._id)
             .filter(Boolean) as Types.ObjectId[];
+
+        // Instructed classes — deduplicate against enrolled ones
+        const enrolledIdSet = new Set(enrolledClassIds.map((id) => id.toString()));
+        const uniqueInstructedClasses = instructedClasses.filter(
+            (cls) => !enrolledIdSet.has((cls._id as Types.ObjectId).toString()),
+        );
+        const instructedClassIds = uniqueInstructedClasses.map(
+            (cls) => cls._id as Types.ObjectId,
+        );
+
+        // Union of all class IDs
+        const classIds = [...enrolledClassIds, ...instructedClassIds];
 
         // ── Step 2: Parallel queries ──────────────────────────────────────────
         const [updates, faculty, groups, studentCounts] = await Promise.all([
@@ -103,8 +129,14 @@ export class DashboardService {
                 .find({ classId: { $in: classIds } })
                 .lean<IClassGroup[]>(),
 
+            // Only count LEARNER role as students
             this.enrollmentModel.aggregate<StudentCountAggResult>([
-                { $match: { classId: { $in: classIds }, role: EnrollmentRole.LEARNER } },
+                {
+                    $match: {
+                        classId: { $in: classIds },
+                        role: EnrollmentRole.LEARNER,
+                    },
+                },
                 { $group: { _id: '$classId', count: { $sum: 1 } } },
             ]),
         ]);
@@ -132,29 +164,53 @@ export class DashboardService {
             materialsByUpdate.get(key)!.push(mat);
         }
 
-        const classNameMap = new Map<string, string>(
-            enrollments.map((e) => [
+        // Class name map — built from both sources
+        const classNameMap = new Map<string, string>([
+            ...enrollments.map((e): [string, string] => [
                 e.classId?._id?.toString(),
                 e.classId?.name ?? 'Unknown',
             ]),
-        );
+            ...uniqueInstructedClasses.map((cls): [string, string] => [
+                (cls._id as Types.ObjectId).toString(),
+                cls.name ?? 'Unknown',
+            ]),
+        ]);
 
         // ── Step 5: Shape DTOs ────────────────────────────────────────────────
-        const classDto: DashboardClassDto[] = enrollments.map((e) => {
+
+        const enrolledClassDto: DashboardClassDto[] = enrollments.map((e) => {
             const cls = e.classId;
             return {
                 _id: cls._id.toString(),
                 name: cls.name,
-                enrollCode: cls.enrollCode,
                 department: cls.department,
                 semester: cls.semester,
-                themeColor: cls.themeColor ?? '',   // DTO: string (required)
+                themeColor: cls.themeColor ?? '',
                 coverImage: cls.coverImage ?? null,
                 status: cls.status,
+                allowEnroll: cls.allowEnroll ?? true,
                 instructorName: cls.instructorId?.name ?? 'Unknown',
                 studentCount: studentCountMap.get(cls._id.toString()) ?? 0,
             };
         });
+
+        const instructedClassDto: DashboardClassDto[] = uniqueInstructedClasses.map((cls) => ({
+            _id: (cls._id as Types.ObjectId).toString(),
+            name: cls.name,
+            department: cls.department,
+            semester: cls.semester,
+            themeColor: cls.themeColor ?? '',
+            coverImage: cls.coverImage ?? null,
+            status: cls.status,
+            allowEnroll: cls.allowEnroll ?? true,
+            instructorName: cls.instructorId?.name ?? 'Unknown',
+            studentCount: studentCountMap.get((cls._id as Types.ObjectId).toString()) ?? 0,
+        }));
+
+        const classDto: DashboardClassDto[] = [
+            ...enrolledClassDto,
+            ...instructedClassDto,
+        ];
 
         const updateDto: DashboardUpdateDto[] = updates.map((u) => {
             const mats: DashboardMaterialDto[] = (
@@ -207,10 +263,14 @@ export class DashboardService {
         }));
 
         return {
-            classes: classDto,
-            updates: updateDto,
-            faculty: facultyDto,
-            groups: groupDto,
+            success: true,
+            message: 'Dashboard data fetched successfully',
+            data: {
+                classes: classDto,
+                updates: updateDto,
+                faculty: facultyDto,
+                groups: groupDto,
+            },
         };
     }
 }

@@ -22,10 +22,12 @@ import RecentUpdates from "./_components/RecentUpdates";
 import Faculty from "./_components/Faculty";
 import StudyGroups from "./_components/StudyGroups";
 import DashboardSkeleton from "./_components/DashboardSkeleton";
+import Welcome from "./_components/Welcome";
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
 
+  const user = useAppSelector((state) => state.profile.fetchUser.user);
   const isLoading = useAppSelector(selectDashboardLoading);
   const error = useAppSelector(selectDashboardError);
   const classes = useAppSelector(selectClasses);
@@ -62,26 +64,10 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            {/* Welcome */}
-            <div className="px-6 pt-6 pb-2">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-                Good morning, Alex!
-              </h1>
-              <p className="text-slate-500 mt-1 text-sm">
-                You have{" "}
-                <span className="font-semibold text-slate-700">
-                  {upcoming.length} upcoming event
-                  {upcoming.length !== 1 ? "s" : ""}
-                </span>{" "}
-                and{" "}
-                <span className="font-semibold text-slate-700">
-                  {pinnedUpdates.length} pinned update
-                  {pinnedUpdates.length !== 1 ? "s" : ""}
-                </span>{" "}
-                across your classes.
-              </p>
-            </div>
+            {/* Welcome banner */}
+            <Welcome user={user} />
 
+            {/* Count */}
             <DashboardStats
               enrolledCount={classes.length}
               activeCount={activeClasses.length}

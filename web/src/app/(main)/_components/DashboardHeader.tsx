@@ -1,54 +1,116 @@
 "use client";
 
-import { Search, Bell } from "lucide-react";
+import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ComingSoonDialog } from "@/components/ui/ComingSoonDialog";
+
+const SECOND_COLORS = [
+  "text-indigo-500",
+  "text-violet-500",
+  "text-purple-500",
+  "text-pink-500",
+  "text-rose-500",
+  "text-orange-500",
+  "text-amber-500",
+  "text-yellow-500",
+  "text-lime-500",
+  "text-emerald-500",
+  "text-teal-500",
+  "text-cyan-500",
+  "text-sky-500",
+  "text-blue-500",
+] as const;
+
+function LiveClock() {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const id = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!time) return null;
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  let h = time.getHours();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  const sec = time.getSeconds();
+  const secColor = SECOND_COLORS[sec % SECOND_COLORS.length];
+  const dateStr = time.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+
+  return (
+    <div className="flex items-baseline gap-1 select-none">
+      {/* Hours */}
+      <span className="text-[17px] font-bold tracking-tight text-slate-900 tabular-nums">
+        {pad(h)}
+      </span>
+
+      {/* Blinking colon — animate-pulse is built-in Tailwind */}
+      <span className="text-[17px] font-bold text-primary animate-pulse">
+        :
+      </span>
+
+      {/* Minutes */}
+      <span className="text-[17px] font-bold tracking-tight text-slate-900 tabular-nums">
+        {pad(time.getMinutes())}
+      </span>
+
+      {/* Seconds — color shifts every second */}
+      <span className={"text-[13px] font-semibold tabular-nums ml-0.5 transition-colors duration-700 " + secColor}>
+        {pad(sec)}
+      </span>
+
+      {/* AM/PM */}
+      <span className="text-[11px] font-semibold text-slate-400 ml-0.5">
+        {ampm}
+      </span>
+
+      {/* Divider */}
+      <span className="w-px h-4 bg-slate-200 mx-2 self-center" />
+
+      {/* Date */}
+      <span className="text-[11px] font-medium text-slate-400 tracking-wide">
+        {dateStr}
+      </span>
+    </div>
+  );
+}
 
 export default function DashboardHeader() {
+  const [showDialog, setShowDialog] = useState(false);
   return (
-    <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-slate-200 px-4 py-3">
-      <div className="flex items-center gap-4 mx-auto">
-        {/* Left: Profile & Identity */}
-        <div className="flex items-center gap-3">
-          <div className="relative group cursor-pointer">
-            <div
-              className="size-11 rounded-xl ring-2 ring-primary/10 bg-cover bg-center shadow-sm transition-transform group-hover:scale-105"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuClNnw6aauNG2u0MAaUdo4ceSc6pryAsYYQBSLldRLmEEyjwRzswwlPm0ykikSqyo50QI8GfPxSAga7wjXvcEzps9DYx8yQtRa7bMole4kgdoR8AT1YkLNfxsoc3HM0X8iQLh1EsR-yDgfqRzzt_l5KwJMJpoHFqbl6NLJdfptBT6SnN9hs3KZfBEAc2jy56wyEFGDUnjAqY3SnflCRblIB9QvN8EDapruEYXcYqAUTqh-8RwQ8DB0y1K7tv48PMq2KZNdivzE1Zfdv")',
-              }}
+    <>
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-4">
+        {/* Search */}
+        <div className="flex-1 max-w-sm">
+          <div className="relative">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
-            <span className="absolute -bottom-1 -right-1 size-3.5 bg-green-500 rounded-full border-2 border-white shadow-sm" />
-          </div>
-
-          <div className="hidden sm:block w-px h-8 bg-slate-200" />
-
-          <div className="flex flex-col">
-            <h2 className="text-lg font-bold leading-none tracking-tight text-slate-900 mb-1">
-              Dashboard
-            </h2>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 uppercase tracking-wider">
-                v2.0
-              </span>
-              <p className="text-[12px] font-medium text-primary/80">
-                ClassFlow
-              </p>
-            </div>
+            <input
+              onClick={() => setShowDialog(true)}
+              type="text"
+              placeholder="Search classes, updates..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white border border-transparent focus:border-primary/30 transition-all"
+            />
           </div>
         </div>
 
         <div className="flex-1" />
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-2">
-          <button className="flex items-center justify-center size-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-white hover:shadow-md hover:text-primary transition-all border border-transparent hover:border-slate-100">
-            <Search size={19} />
-          </button>
-          <button className="relative flex items-center justify-center size-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-white hover:shadow-md hover:text-primary transition-all border border-transparent hover:border-slate-100">
-            <Bell size={19} />
-            <span className="absolute top-2.5 right-2.5 size-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
-          </button>
-        </div>
-      </div>
-    </header>
+        {/* Live clock */}
+        <LiveClock />
+      </header>
+
+      {/* Coming soon dialog for search */}
+      <ComingSoonDialog feature="Dashboard search" onClose={() => setShowDialog(false)} open={showDialog} />
+    </>
   );
 }

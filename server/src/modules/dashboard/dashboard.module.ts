@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
+
+import { Class, ClassSchema } from "../../database/entities/class.entity";
 import { Enrollment, EnrollmentSchema } from "../../database/entities/enrollment.entity";
 import { ClassUpdate, ClassUpdateSchema } from "../../database/entities/update.entity";
 import { Material, MaterialSchema } from "../../database/entities/material.entity";
@@ -13,6 +15,7 @@ import { DashboardController } from "./controllers/dashboard.controller";
 @Module({
     imports: [
         MongooseModule.forFeature([
+            { name: Class.name, schema: ClassSchema },
             { name: Enrollment.name, schema: EnrollmentSchema },
             { name: ClassUpdate.name, schema: ClassUpdateSchema },
             { name: Material.name, schema: MaterialSchema },

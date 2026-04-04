@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, Users, Plus, UserPlus, BookOpen, LayersPlus } from "lucide-react";
+import {
+  Search,
+  Users,
+  Plus,
+  UserPlus,
+  BookOpen,
+  LayersPlus,
+} from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  IClass,
-  fetchEnrolledClasses,
-} from "@/store/features/classes/thunks/fetch-enrolled-classes.thunk";
+import { fetchEnrolledClasses } from "@/store/features/classes/thunks/fetch-enrolled-classes.thunk";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toast } from "sonner";
 import { TopLoader } from "@/components/ui/TopLoader";
@@ -28,7 +32,7 @@ const Classes: React.FC = () => {
 
   useEffect(() => {
     if (classes.length > 0) return; // Don't fetch again if we already have classes in state
-    setTimeout(() => {}, 5000);
+    setTimeout(() => { }, 5000);
     dispatch(fetchEnrolledClasses())
       .unwrap()
       .then(() => {
@@ -55,7 +59,7 @@ const Classes: React.FC = () => {
     );
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col bg-slate-50">
       {/* Sticky Header */}
       <header className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
         <div className="px-4 lg:px-8 pt-4 pb-4">
@@ -137,11 +141,10 @@ const Classes: React.FC = () => {
               <button
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
-                className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
-                  activeFilter === filter.id
+                className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${activeFilter === filter.id
                     ? "bg-primary text-white shadow-sm shadow-primary/20"
                     : "bg-slate-200 text-slate-600 border border-transparent hover:border-slate-200"
-                }`}
+                  }`}
               >
                 {filter.label}
               </button>
@@ -151,7 +154,7 @@ const Classes: React.FC = () => {
       </header>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto pb-24 lg:pb-8">
+      <div className="flex-1 overflow-y-auto">
         <div className="mx-auto px-4 lg:px-8 py-6 relative">
           <main className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] md:grid-cols-[repeat(auto-fit,minmax(300px,300px))] justify-start">
             {filteredClasses.map((cls) => (

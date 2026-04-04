@@ -13,41 +13,25 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React from "react";
-import {
-    DashboardUpdateItem
-} from "@/store/features/dashboard/dashboard.types";
-import { MATERIAL_TYPE_CONFIG } from "@/types/update.types";
+import { EmptyState } from "@/components/ui/EmptyState";
 
-
-
-function timeAgo(date: Date) {
-    const diff = Date.now() - date.getTime();
-    const hrs = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (hrs < 1) return "Just now";
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${days}d ago`;
-}
-
-function formatEventDate(date: Date) {
-    return date.toLocaleDateString("en-GB", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-    });
-}
+import { DashboardUpdateItem } from "@/store/features/dashboard/dashboard.types";
+import { UPDATE_TYPE_CONFIG, UpdateCategory } from "@/types/update.types";
+import { formatRelativeDate } from "@/utils/date.utils";
+import { is } from "date-fns/locale";
 
 function UpdateCard({ update }: { update: DashboardUpdateItem }) {
-    const cfg = MATERIAL_TYPE_CONFIG[update.category.toLowerCase() as keyof typeof MATERIAL_TYPE_CONFIG];
+    const cfg =
+        UPDATE_TYPE_CONFIG[update.category.toLowerCase() as UpdateCategory];
     const CatIcon = cfg.icon;
 
     return (
-        <div className="p-4 bg-white rounded-2xl border border-slate-100 flex items-start gap-3 hover:border-slate-200 transition-colors">
+        <Link href={`classes/${update.classId}/updates`} className="p-4 bg-white rounded-2xl border border-slate-100 flex items-start gap-3 hover:border-slate-200 transition-colors">
             {/* Category icon */}
             <div
-                className={`size-9 rounded-xl ${cfg.bgColor} flex items-center justify-center shrink-0`}
+                className={`size-9 rounded-xl ${cfg.iconBg} flex items-center justify-center shrink-0`}
             >
-                <CatIcon className={cfg.color} size={17} />
+                <CatIcon className={cfg.iconColor} size={17} />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -57,7 +41,7 @@ function UpdateCard({ update }: { update: DashboardUpdateItem }) {
                         <Pin size={11} className="text-amber-500 shrink-0" />
                     )}
                     <span
-                        className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${cfg.bgColor} ${cfg.color}`}
+                        className={`text-[11px] font-bold px-1.5 py-0.5 rounded ${cfg.iconBg} ${cfg.iconColor}`}
                     >
                         {cfg.label}
                     </span>
@@ -69,7 +53,7 @@ function UpdateCard({ update }: { update: DashboardUpdateItem }) {
                 <h4 className="text-sm font-bold text-slate-900 leading-snug mb-0.5">
                     {update.title}
                 </h4>
-                <p className="text-xs text-slate-500 line-clamp-2">
+                <p className="text-xs text-slate-500 line-clamp-2 pt-2">
                     {update.description}
                 </p>
 
@@ -79,7 +63,7 @@ function UpdateCard({ update }: { update: DashboardUpdateItem }) {
                         <div className="flex items-center gap-1 text-slate-500">
                             <Calendar size={11} />
                             <span className="text-[11px] font-medium">
-                                {/* {formatEventDate(update.eventAt)} */}
+                                {formatRelativeDate(update.eventAt, { showYear: false })}
                             </span>
                         </div>
                     )}
@@ -93,11 +77,11 @@ function UpdateCard({ update }: { update: DashboardUpdateItem }) {
                         </div>
                     )}
                     <span className="ml-auto text-[11px] text-slate-400 font-medium">
-                        {/* {timeAgo(update.createdAt)} */}
+                        {formatRelativeDate(update.createdAt, { showYear: false })}
                     </span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 
@@ -106,23 +90,44 @@ interface RecentUpdatesProps {
 }
 
 export default function RecentUpdates({ updates }: RecentUpdatesProps) {
+    const uniqueClassCount = new Set(updates.map((f) => f.classId)).size;
+    const isEmpty = updates.length === 0;
+
+    // Don't render the section at all if there are no updates and no classes (to avoid showing an empty "Recent Updates" section when the user has no classes at all)
+    if (uniqueClassCount === 0) {
+        return null;
+    }
     return (
         <section>
             <div className="px-6 mb-3 flex items-center justify-between">
-                <h3 className="text-lg font-bold text-slate-900">Recent Updates</h3>
-                <Link
-                    href="#"
-                    className="flex items-center gap-1 text-sm font-medium text-primary"
-                >
-                    View all <ChevronRight size={15} />
-                </Link>
+                <div className="flex items-center gap-2">
+                    <h3 className="text-md font-bold text-slate-900">Recent Updates</h3>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-600">
+                        {updates.length}
+                    </span>
+                </div>
+                {/* How may class */}
+                {isEmpty ? null : (
+                    <span className="text-xs text-slate-400">
+                        Across {uniqueClassCount}{" "}
+                        {uniqueClassCount === 1 ? "class" : "classes"}
+                    </span>
+                )}
             </div>
 
-            <div className="flex flex-col gap-3 px-6 pb-6">
-                {updates.map((update) => (
-                    <UpdateCard key={update._id} update={update} />
-                ))}
-            </div>
+            {isEmpty ? (
+                <EmptyState
+                    icon={Megaphone}
+                    title="No recent updates"
+                    description="When your instructors post updates, they'll show up here."
+                />
+            ) : (
+                <div className="flex flex-col gap-3 px-6 pb-6">
+                    {updates.map((update) => (
+                        <UpdateCard key={update._id} update={update} />
+                    ))}
+                </div>
+            )}
         </section>
     );
 }
