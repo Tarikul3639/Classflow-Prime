@@ -86,7 +86,7 @@ export default function DashboardHeader() {
   const [showDialog, setShowDialog] = useState(false);
   return (
     <>
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-4">
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4">
         {/* Search */}
         <div className="flex-1 max-w-sm">
           <div className="relative">
@@ -96,6 +96,7 @@ export default function DashboardHeader() {
             />
             <input
               onClick={() => setShowDialog(true)}
+              onFocus={(e) => e.target.blur()}
               type="text"
               placeholder="Search classes, updates..."
               className="w-full pl-9 pr-4 py-2 bg-slate-100 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white border border-transparent focus:border-primary/30 transition-all"
