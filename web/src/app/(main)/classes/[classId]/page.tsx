@@ -1,9 +1,10 @@
 import { redirect } from "next/navigation";
 
-export default function ClassPage({
+export default async function ClassPage({
   params,
 }: {
-  params: { classId: string };
+  params: Promise<{ classId: string }>;
 }) {
-  redirect(`/classes/${params.classId}/updates`);
+  const { classId } = await params;
+  redirect(`/classes/${classId}/updates`);
 }

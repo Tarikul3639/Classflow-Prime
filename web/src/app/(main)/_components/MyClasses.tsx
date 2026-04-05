@@ -19,7 +19,8 @@ function ClassCard({ cls }: { cls: DashboardClassItem }) {
     const isEnded = cls.status === "ended";
 
     return (
-        <div
+        <Link
+            href={`/classes/${cls._id}/updates`}
             className={`relative rounded-2xl overflow-hidden bg-white border border-slate-100 cursor-pointer transition-all hover:border-slate-200 hover:shadow-sm ${isEnded ? "opacity-70" : ""
                 }`}
 
@@ -76,7 +77,7 @@ function ClassCard({ cls }: { cls: DashboardClassItem }) {
                     <span className="text-[11px]">{cls.studentCount}</span>
                 </div>
             </div>
-        </div>
+        </Link>
     );
 }
 
