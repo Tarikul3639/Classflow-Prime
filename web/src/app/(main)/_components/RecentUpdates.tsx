@@ -5,20 +5,14 @@ import {
     Calendar,
     Layers,
     Megaphone,
-    AlertCircle,
-    CheckCircle2,
-    BookMarked,
-    FileText,
-    ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
-import React from "react";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 import { DashboardUpdateItem } from "@/store/features/dashboard/dashboard.types";
 import { UPDATE_TYPE_CONFIG, UpdateCategory } from "@/types/update.types";
 import { formatRelativeDate } from "@/utils/date.utils";
-import { is } from "date-fns/locale";
+import { RichTextContent } from "@/components/ui/RichTextContent";
 
 function UpdateCard({ update }: { update: DashboardUpdateItem }) {
     const cfg =
@@ -53,14 +47,17 @@ function UpdateCard({ update }: { update: DashboardUpdateItem }) {
                 <h4 className="text-sm font-bold text-slate-900 leading-snug mb-0.5">
                     {update.title}
                 </h4>
-                <p className="text-xs text-slate-500 line-clamp-2 pt-2">
-                    {update.description}
-                </p>
+
+                {update.description && (
+                    <div className="py-1 line-clamp-2">
+                        <RichTextContent html={update.description} className="px-2" />
+                    </div>
+                )}
 
                 {/* Footer meta */}
                 <div className="flex items-center gap-3 mt-2">
                     {update.eventAt && (
-                        <div className="flex items-center gap-1 text-slate-500">
+                        <div className="flex items-center gap-1 text-slate-500 capitalize">
                             <Calendar size={11} />
                             <span className="text-[11px] font-medium">
                                 {formatRelativeDate(update.eventAt, { showYear: false })}
