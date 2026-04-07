@@ -1,8 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiClient } from "@/lib/api/axios";
-import { AxiosError } from "axios";
 import { CreateUpdateFormData, ClassUpdateItem } from "@/types/update.types";
-import type { ApiError, UpdateErrorField } from "../class.types";
+import { mapToApiError } from "@/lib/errors/api-error.mapper";
+import type { ApiError } from "@/lib/errors/api-error.mapper";
+import type { UpdateErrorFieldType } from "../class.types";
 
 interface CreateClassUpdatePayload {
     classId: string;
@@ -18,47 +19,40 @@ interface CreateClassUpdateResponse {
 }
 
 export const createClassUpdate = createAsyncThunk<
-    CreateClassUpdateResponse,
+    ClassUpdateItem,
     CreateClassUpdatePayload,
-    { rejectValue: ApiError }
+    { rejectValue: ApiError<UpdateErrorFieldType> }
 >("classes/createUpdate", async ({ classId, updateData }, { rejectWithValue }) => {
     try {
-        console.log("Creating update for classId: ", updateData.description.length);
-        // Basic validation before making the API call
-        if (!updateData.title || !updateData.category) {
+        if (!updateData.title) {
             return rejectWithValue({
-                field: !updateData.title ? "title" : "type",
-                message: !updateData.title
-                    ? "Title is required for the update"
-                    : "Update type is required",
+                field: "title",
+                message: "Title is required for the update",
             });
         }
 
-        console.log("Update form data: ", updateData);
+        if (!updateData.category) {
+            return rejectWithValue({
+                field: "type", // or change to "category"
+                message: "Update type is required",
+            });
+        }
 
-        // NOTE: Actually, If your observe closely, the API endpoint are plural `/classes/${classId}/updates` not singular, Because it indicates the collection of updates for a class, and we are adding a new update to that collection. So the correct endpoint should be `/classes/${classId}/updates` instead of `/classes/${classId}/update`. This follows RESTful API design principles where the endpoint represents a resource (in this case, updates) and we are performing a POST request to add a new item to that resource.
-        // Make the API call to create the class update
-        const response = await apiClient.post<CreateClassUpdateResponse>(
+        const { data } = await apiClient.post<CreateClassUpdateResponse>(
             `/classes/${classId}/updates`,
             updateData,
         );
-
-        if (!response.data.success) {
+        console.log("API RESPONSE:", data);
+        if (!data.success) {
             return rejectWithValue({
-                field: null,
-                message: response.data.message || "Failed to create class update",
+                message: data.message || "Failed to create class update",
             });
         }
-
-        // console.log("Create response: ", response);
-
-        return response.data;
+        console.log("API RESPONSE:", data.data.update);
+        return data.data.update; // ← return just the item
     } catch (error: unknown) {
-        const err = error as AxiosError<{ field?: UpdateErrorField; message?: string }>;
-
-        return rejectWithValue({
-            field: err.response?.data?.field || null,
-            message: err.response?.data?.message || "Something went wrong while posting the update",
-        });
+        return rejectWithValue(
+            mapToApiError<UpdateErrorFieldType>(error)
+        );
     }
 });

@@ -26,11 +26,11 @@ export default function MainLayout({
     dispatch(meThunk())
       .unwrap()
       .then((res) => {
-        if (res?.name) {
-          toast.success(`Welcome back, ${res.name}!`, {
-            position: "top-center",
-          });
-        }
+        // if (res?.name) {
+        //   toast.success(`Welcome back, ${res.name}!`, {
+        //     position: "top-center",
+        //   });
+        // }
       })
       .catch((err) => {
         toast.error("Failed to fetch user data", {

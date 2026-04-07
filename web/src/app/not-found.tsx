@@ -43,7 +43,7 @@ export default function NotFoundPage() {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 border border-slate-200 rounded-lg font-semibold hover:bg-slate-50 transition-colors"
           >
             <ArrowLeft size={18} />

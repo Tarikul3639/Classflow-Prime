@@ -1,12 +1,10 @@
-export type UpdateErrorField =
-    | "title"
-    | "type"
-    | "description"
-    | "date"
-    | "time"
-    | null;
+export const UpdateErrorField = {
+    title: "title",
+    type: "type",
+    description: "description",
+    date: "date",
+    time: "time",
+} as const;
 
-export interface ApiError {
-    field: UpdateErrorField;
-    message: string | null;
-}
+export type UpdateErrorFieldType =
+    typeof UpdateErrorField[keyof typeof UpdateErrorField];

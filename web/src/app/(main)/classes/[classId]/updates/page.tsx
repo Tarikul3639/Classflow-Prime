@@ -20,10 +20,11 @@ import { fetchClassUpdate } from "@/store/features/classes/thunks/fetch-class-up
 import { togglePinClassUpdate } from "@/store/features/classes/thunks/toggle-pin-class-update.thunk";
 import { deleteSingleClassUpdate } from "@/store/features/classes/thunks/delete-single-class-update.thunk";
 
-// Memoized Selectors (Abstracted Logic)
+// Memoized Selectors
 import {
   selectGroupedUpdates,
-  selectClassUpdatesLoading
+  selectClassUpdatesLoading,
+  selectClassUpdateItems,
 } from "@/store/features/classes/selectors/class-updates.selectors";
 
 // Types & Configurations
@@ -39,46 +40,41 @@ export default function UpdatesPage() {
   const router = useRouter();
   const params = useParams();
 
-  // Extract classId from URL params
   const classId = params.classId as string;
 
-  // Local state for UI controls (Filtering and Searching)
   const [activeFilter, setActiveFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  /**
-   * 1. DATA SELECTION
-   * We use selectGroupedUpdates to get data that is already filtered, 
-   * sorted (Pinned -> EventAt -> CreatedAt), and grouped by Relative Dates.
-   */
-  const { grouped, sortedDateKeys } = useAppSelector((state) =>
-    selectGroupedUpdates(state, searchQuery, activeFilter)
+  // ── Selectors ──────────────────────────────────────────────────────────────
+
+  // Raw items — used only for the "already fetched?" guard
+  const updates = useAppSelector((state) =>
+    selectClassUpdateItems(state, classId)
   );
 
-  // Selector for the raw updates array (used to prevent redundant fetching)
-  const { updates } = useAppSelector((state) => state.classes.fetchClassUpdates);
+  // Filtered, sorted, and grouped output for rendering
+  const { grouped, sortedDateKeys } = useAppSelector((state) =>
+    selectGroupedUpdates(state, classId, searchQuery, activeFilter)
+  );
 
-  // Selector for class details (to check permissions like isAdmin)
-  const { classDetails } = useAppSelector((state) => state.classes.fetchSingleClass);
+  // Per-operation loading flags
+  const loading = useAppSelector((state) =>
+    selectClassUpdatesLoading(state, classId)
+  );
 
-  // Select loading state for various operations (fetch, delete, pin)
-  const loading = useAppSelector(selectClassUpdatesLoading);
+  // Class-level permissions
+  const { classDetails } = useAppSelector(
+    (state) => state.classes.fetchSingleClass
+  );
 
-  /**
-   * 2. INITIALIZATION
-   * Fetch updates from the server if they haven't been loaded yet.
-   */
+  // ── Initialization ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (!classId || !classDetails?.classId) return;
-    if (updates.length > 0) return; // Skip if data already exists in store
-
+    if (updates.length > 0) return; // Skip if already loaded
     dispatch(fetchClassUpdate(classId));
   }, [dispatch, classId, classDetails?.classId, updates.length]);
 
-  /**
-   * 3. UI HELPERS
-   * Map the configuration object to a list of filters for the FilterChips component.
-   */
+  // ── Filter Config ──────────────────────────────────────────────────────────
   const filters: Filter[] = [
     { id: "all", label: "All Updates" },
     ...Object.entries(UPDATE_TYPE_CONFIG).map(([key, config]) => ({
@@ -87,12 +83,8 @@ export default function UpdatesPage() {
     })),
   ];
 
-  /**
-   * 4. EVENT HANDLERS
-   */
-
-  // Handles Pining or Unpinning an update
-  const handleTogglePin = async (updateId: string, isPinned: boolean) => {
+  // ── Event Handlers ─────────────────────────────────────────────────────────
+  const handleTogglePin = (updateId: string, isPinned: boolean) => {
     const promise = dispatch(
       togglePinClassUpdate({ classId, updateId, isPinned })
     ).unwrap();
@@ -104,9 +96,10 @@ export default function UpdatesPage() {
     });
   };
 
-  // Handles permanent deletion of an update
-  const handleDelete = async (updateId: string) => {
-    const promise = dispatch(deleteSingleClassUpdate({ classId, updateId })).unwrap();
+  const handleDelete = (updateId: string) => {
+    const promise = dispatch(
+      deleteSingleClassUpdate({ classId, updateId })
+    ).unwrap();
 
     toast.promise(promise, {
       loading: "Deleting update...",
@@ -115,37 +108,46 @@ export default function UpdatesPage() {
     });
   };
 
-  // Determine user permissions
+  // ── Derived UI State ───────────────────────────────────────────────────────
   const isAdmin = classDetails?.isInstructor || classDetails?.isAssistant;
-
-  // Check if current list is empty after filtering/searching
   const isEmpty = sortedDateKeys.length === 0 && !loading.fetch;
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <main className="relative bg-slate-50 flex flex-col min-h-screen">
-      {/* Sticky Top Header: Search and Filter Actions */}
+      {/* Sticky Header */}
       <div className="sticky top-0 z-10 p-4 flex flex-col gap-3 bg-white border-b border-slate-200">
         <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        <FilterChips filters={filters} active={activeFilter} onChange={setActiveFilter} />
+        <FilterChips
+          filters={filters}
+          active={activeFilter}
+          onChange={setActiveFilter}
+        />
       </div>
 
       <div className="flex-1 px-4 py-4 space-y-6 pb-24 lg:pb-8">
-        {/* Visual loader for any ongoing network activity */}
-        <TopLoader isLoading={loading.fetch || loading.delete || loading.togglePin} />
+        {/* Network Activity Indicator */}
+        <TopLoader
+          isLoading={
+            loading.fetch || loading.delete || loading.togglePin
+          }
+        />
 
-        {/* Post Creation area: Only visible to authorized users */}
+        {/* Create Card — Admin Only */}
         {isAdmin && (
           <div className="shrink-0">
             <CreateUpdateCard classId={classId} />
           </div>
         )}
 
-        {/* Conditional Rendering: Empty State vs Update List */}
+        {/* Empty State vs Update List */}
         {isEmpty ? (
           <div className="flex-1 flex items-center justify-center py-10">
             <EmptyState
               icon={GraduationCap}
-              title={searchQuery ? "No matches found" : "No updates yet"}
+              title={
+                searchQuery ? "No matches found" : "No updates yet"
+              }
               description={
                 searchQuery
                   ? `Couldn't find anything for "${searchQuery}"`
@@ -155,15 +157,16 @@ export default function UpdatesPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Iterate through Group Keys (e.g., "Pinned", "Today", "Tomorrow") */}
             {sortedDateKeys.map((dateKey) => (
               <section key={dateKey} className="space-y-3">
                 <DateHeader label={dateKey} />
 
                 <div className="space-y-3">
-                  {/* Iterate through updates within this specific date group */}
                   {grouped[dateKey].map((update) => {
-                    const config = UPDATE_TYPE_CONFIG[update.category as UpdateCategory];
+                    const config =
+                      UPDATE_TYPE_CONFIG[
+                      update.category as UpdateCategory
+                      ];
                     return (
                       <UpdateCard
                         key={update._id}
@@ -178,9 +181,20 @@ export default function UpdatesPage() {
                         materials={update.materials}
                         postedBy={update.postedBy}
                         isPinned={update.isPinned}
-                        onTogglePin={() => handleTogglePin(update._id, update.isPinned)}
-                        onEdit={() => router.push(`/classes/${classId}/updates/${update._id}`)}
-                        onDelete={() => handleDelete(update._id)}
+                        onTogglePin={() =>
+                          handleTogglePin(
+                            update._id,
+                            update.isPinned
+                          )
+                        }
+                        onEdit={() =>
+                          router.push(
+                            `/classes/${classId}/updates/${update._id}`
+                          )
+                        }
+                        onDelete={() =>
+                          handleDelete(update._id)
+                        }
                         showActions={isAdmin}
                       />
                     );

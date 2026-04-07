@@ -3,28 +3,52 @@ import { RootState } from "@/store/store";
 import { formatRelativeDate } from "@/utils/date.utils";
 import { ClassUpdateItem } from "@/types/update.types";
 
-/**
- * 1. Base Selector
- * Extracts the raw fetchClassUpdates state from the store.
- */
-const selectClassUpdatesState = (state: RootState) => state.classes.fetchClassUpdates;
+// ─── 1. Base Selector ────────────────────────────────────────────────────────
+// Reads the bucket for a specific classId from the normalized state
+const selectClassBucket = (state: RootState, classId: string) =>
+    state.classes.classUpdates.updatesByClass[classId] ?? null;
 
-/**
- * 2. Filtered and Sorted Selector
- * Handles search queries, category filters, and complex sorting rules.
- * Memoized to prevent unnecessary re-calculations.
- */
+// ─── 2. Raw Items Selector ───────────────────────────────────────────────────
+export const selectClassUpdateItems = createSelector(
+    [selectClassBucket],
+    (bucket) => bucket?.items ?? []
+);
+
+// ─── 3. Loading Selector ─────────────────────────────────────────────────────
+export const selectClassUpdatesLoading = createSelector(
+    [selectClassBucket],
+    (bucket) =>
+        bucket?.loading ?? {
+            fetch: false,
+            create: false,
+            update: false,
+            togglePin: false,
+            delete: false,
+        }
+);
+
+// ─── 4. Error Selector ───────────────────────────────────────────────────────
+export const selectClassUpdatesError = createSelector(
+    [selectClassBucket],
+    (bucket) =>
+        bucket?.error ?? {
+            fetch: null,
+            create: null,
+            update: null,
+            togglePin: null,
+            delete: null,
+        }
+);
+
+// ─── 5. Filtered + Sorted Selector ───────────────────────────────────────────
 export const selectFilteredAndSortedUpdates = createSelector(
     [
-        selectClassUpdatesState,
-        (_: RootState, searchQuery: string) => searchQuery,
-        (_: RootState, __: string, activeFilter: string) => activeFilter,
+        selectClassUpdateItems,
+        (_: RootState, __: string, searchQuery: string) => searchQuery,
+        (_: RootState, __: string, ___: string, activeFilter: string) => activeFilter,
     ],
-    (classUpdatesState, searchQuery, activeFilter) => {
-        const { updates } = classUpdatesState;
-
-        // Filter by Search Query (Title/Description) and Category
-        const filtered = updates.filter((u: ClassUpdateItem) => {
+    (items, searchQuery, activeFilter) => {
+        const filtered = items.filter((u: ClassUpdateItem) => {
             const matchesSearch =
                 u.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 u.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -32,39 +56,30 @@ export const selectFilteredAndSortedUpdates = createSelector(
             return matchesSearch && matchesFilter;
         });
 
-        // Sorting Logic:
-        // 1. Pinned items always at the top.
-        // 2. Upcoming events (eventAt) closest to today first.
-        // 3. Regular updates by creation date (Newest first).
         return [...filtered].sort((a, b) => {
+            // 1. Pinned items always at the top
             if (a.isPinned && !b.isPinned) return -1;
             if (!a.isPinned && b.isPinned) return 1;
 
-            // If both have event dates, sort ascending (closest future event first)
+            // 2. Upcoming events closest to today first
             if (a.eventAt && b.eventAt) {
                 return new Date(a.eventAt).getTime() - new Date(b.eventAt).getTime();
             }
-
-            // Items with event dates take precedence over items without
             if (a.eventAt && !b.eventAt) return -1;
             if (!a.eventAt && b.eventAt) return 1;
 
-            // Fallback: Newest created first
+            // 3. Fallback: Newest created first
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
     }
 );
 
-/**
- * 3. Grouped Selector (Final output for Component)
- * Transforms the sorted array into an object grouped by relative date keys.
- */
+// ─── 6. Grouped Selector (Final output for Component) ────────────────────────
 export const selectGroupedUpdates = createSelector(
     [selectFilteredAndSortedUpdates],
     (sortedUpdates) => {
         const groups: Record<string, ClassUpdateItem[]> = {};
 
-        // Grouping updates into date buckets
         sortedUpdates.forEach((u) => {
             const dateKey = u.isPinned
                 ? "Pinned Updates"
@@ -78,9 +93,7 @@ export const selectGroupedUpdates = createSelector(
             groups[dateKey].push(u);
         });
 
-        // Sort the Group Headers (Keys)
         const sortedKeys = Object.keys(groups).sort((a, b) => {
-            // Always put 'Pinned Updates' section first
             if (a === "Pinned Updates") return -1;
             if (b === "Pinned Updates") return 1;
 
@@ -88,19 +101,15 @@ export const selectGroupedUpdates = createSelector(
             const aP = priority.indexOf(a);
             const bP = priority.indexOf(b);
 
-            // Handle Priority list (Today > Tomorrow > Yesterday)
             if (aP !== -1 || bP !== -1) {
                 return (aP === -1 ? Infinity : aP) - (bP === -1 ? Infinity : bP);
             }
 
             const dateA = new Date(a).getTime();
             const dateB = new Date(b).getTime();
-            const now = new Date().getTime();
+            const now = Date.now();
 
-            // If both are future dates, show closest first
             if (dateA > now && dateB > now) return dateA - dateB;
-
-            // Default: Latest historical date first
             return dateB - dateA;
         });
 
@@ -108,16 +117,40 @@ export const selectGroupedUpdates = createSelector(
     }
 );
 
+
+
 /**
- * 4. Helper Selectors
- * Simple selectors for UI loading and error states.
+ * Some selectors are designed for specific UI states (e.g. loading, error) and are accessed via the same bucket to ensure consistency and avoid mismatches between different parts of the state.
  */
-export const selectClassUpdatesLoading = createSelector(
-    [selectClassUpdatesState],
-    (state) => state.loading
+
+// Example: Create Update Form State Selector
+export const selectCreateUpdateState = createSelector(
+    [
+        (state: RootState, classId: string) =>
+            state.classes.classUpdates.updatesByClass[classId],
+    ],
+    (bucket) => ({
+        loading: bucket?.loading.create ?? false,
+        error: bucket?.error.create ?? null,
+    })
 );
 
-export const selectClassUpdatesError = createSelector(
-    [selectClassUpdatesState],
-    (state) => state.error
+// Example: Single Update Fetch State Selector
+export const selectSingleUpdateState = createSelector(
+    [
+        (state: RootState, classId: string) =>
+            state.classes.classUpdates.updatesByClass[classId],
+        (_: RootState, __: string, updateId: string) => updateId,
+    ],
+    (bucket, updateId) => {
+        const update =
+            bucket?.items.find((u) => u._id === updateId) ?? null;
+
+        return {
+            data: update,
+            loading: bucket?.loading.fetch ?? false,
+            updating: bucket?.loading.update ?? false,
+            error: bucket?.error.update ?? null,
+        };
+    }
 );

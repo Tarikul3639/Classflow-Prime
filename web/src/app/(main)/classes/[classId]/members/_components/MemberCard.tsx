@@ -8,10 +8,12 @@ import {
   ClassMember,
   EnrollmentRole,
 } from "@/store/features/classes/thunks/members/class-member.thunk";
+import { m } from "motion/react";
 
 interface MemberCardProps {
   member: ClassMember;
   isMe: boolean;
+  currentUserRole: string;
   onAssignAssistant: (userId: string) => void;
   onRevokeAssistant: (userId: string) => void;
   onRevokeMember: (userId: string) => void;
@@ -20,6 +22,7 @@ interface MemberCardProps {
 export default function MemberCard({
   member,
   isMe,
+  currentUserRole,
   onAssignAssistant,
   onRevokeAssistant,
   onRevokeMember,
@@ -42,6 +45,15 @@ export default function MemberCard({
         return null;
     }
   };
+
+
+  const canManage =
+    !isMe &&
+    (
+      currentUserRole === EnrollmentRole.INSTRUCTOR ||
+      (currentUserRole === EnrollmentRole.ASSISTANT &&
+        member.role === EnrollmentRole.LEARNER)
+    );
 
   return (
     <div className="group flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 hover:border-primary/30 transition-all shadow-xs max-w-sm">
@@ -78,15 +90,14 @@ export default function MemberCard({
         </p>
       </div>
 
-      {!isMe &&
-        member.role !== EnrollmentRole.INSTRUCTOR && (
-          <MemberActionMenu
-            member={member}
-            onAssignAssistant={() => onAssignAssistant(member.userId)}
-            onRevokeAssistant={() => onRevokeAssistant(member.userId)}
-            onRevokeMember={() => onRevokeMember(member.userId)}
-          />
-        )}
+      {canManage && (
+        <MemberActionMenu
+          member={member}
+          onAssignAssistant={() => onAssignAssistant(member.userId)}
+          onRevokeAssistant={() => onRevokeAssistant(member.userId)}
+          onRevokeMember={() => onRevokeMember(member.userId)}
+        />
+      )}
     </div>
   );
 }

@@ -23,6 +23,7 @@ import Faculty from "./_components/Faculty";
 import StudyGroups from "./_components/StudyGroups";
 import DashboardSkeleton from "./_components/DashboardSkeleton";
 import Welcome from "./_components/Welcome";
+import ErrorState from "./_components/ErrorState";
 
 export default function DashboardPage() {
   const dispatch = useAppDispatch();
@@ -53,15 +54,10 @@ export default function DashboardPage() {
         {isLoading ? (
           <DashboardSkeleton />
         ) : error ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3">
-            <p className="text-sm text-slate-500">{error}</p>
-            <button
-              onClick={() => dispatch(fetchDashboardData())}
-              className="text-sm font-medium text-primary underline"
-            >
-              Retry
-            </button>
-          </div>
+          <ErrorState
+            message={error || "Failed to load dashboard data"}
+            onRetry={() => dispatch(fetchDashboardData())}
+          />
         ) : (
           <>
             {/* Welcome banner */}

@@ -11,7 +11,8 @@ import {
   CreateUpdateFormData,
   UpdateCategory,
 } from "@/types/update.types";
-import type { ApiError } from "@/store/features/classes/class.types";
+import type { ApiError } from "@/lib/errors/api-error.mapper";
+import { UpdateErrorField } from "@/store/features/classes/class.types";
 
 interface UpdateFormProps {
   form: CreateUpdateFormData;
@@ -33,7 +34,7 @@ export function UpdateForm({ form, setForm, error }: UpdateFormProps) {
           description="Keep it concise and informative to grab students' attention."
           value={form.title}
           error={
-            error?.field === "title" ? error.message ?? undefined : undefined
+            error?.field === UpdateErrorField.title ? error.message ?? undefined : undefined
           }
           onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
         />
@@ -44,7 +45,7 @@ export function UpdateForm({ form, setForm, error }: UpdateFormProps) {
           value={form.category}
           description="Choose the type of update you're creating."
           error={
-            error?.field === "type" ? error.message ?? undefined : undefined
+            error?.field === UpdateErrorField.type ? error.message ?? undefined : undefined
           }
           options={Object.entries(UPDATE_TYPE_CONFIG).map(([value, config]) => ({
             value,

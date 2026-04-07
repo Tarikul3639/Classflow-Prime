@@ -15,7 +15,10 @@ import {
   Material,
   MaterialDocument,
 } from '../../../database/entities/material.entity';
-import { CreateClassUpdateRequestDto } from '../dto/create-class-update.dto';
+import {
+  CreateClassUpdateRequestDto,
+  CreateClassUpdateResponseDto,
+} from '../dto/create-class-update.dto';
 import { NotificationService } from '../../notification/services/notification.service';
 import { NotificationType } from '../../../database/entities/notification.entity';
 import {
@@ -24,6 +27,7 @@ import {
 } from '../../../database/entities/enrollment.entity';
 import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
 import { ClassStatus } from '../../../database/interface/class.interface';
+import { MaterialType } from '../../../database/interface/material.interface';
 
 @Injectable()
 export class CreateClassUpdateService {
@@ -41,8 +45,11 @@ export class CreateClassUpdateService {
     classId: string,
     userId: string,
     dto: CreateClassUpdateRequestDto,
-  ) {
-    console.log('--- EXECUTING CREATE UPDATE SERVICE ---', { userId, title: dto.title });
+  ): Promise<CreateClassUpdateResponseDto> {
+    console.log('--- EXECUTING CREATE UPDATE SERVICE ---', {
+      userId,
+      title: dto.title,
+    });
 
     const userObjId = new Types.ObjectId(userId);
     const classObjId = new Types.ObjectId(classId);
@@ -81,8 +88,6 @@ export class CreateClassUpdateService {
     }
 
     // ── Start a MongoDB session and transaction ────────────────────────────
-    // This ensures the class update and its materials are created atomically.
-    // If anything fails, the entire operation is rolled back.
     const session = await this.classModel.db.startSession();
     session.startTransaction();
 
@@ -116,16 +121,13 @@ export class CreateClassUpdateService {
           uploadedBy: userObjId,
         }));
 
-        // Insert all materials in a single bulk operation
         const createdMaterials = await this.materialModel.insertMany(
           materialsToCreate,
           { session },
         );
 
-        // Extract the IDs of the newly created materials
         const materialIds = createdMaterials.map((m) => m._id);
 
-        // Update the class update document to reference the material IDs
         await this.classUpdateModel.updateOne(
           { _id: newUpdate._id },
           { $set: { materials: materialIds } },
@@ -133,33 +135,43 @@ export class CreateClassUpdateService {
         );
       }
 
-      // ── Save the new update ID before committing ───────────────────────
-      // We store this outside the try block scope so we can use it after commit.
       newUpdateId = newUpdate._id as Types.ObjectId;
 
-      // ── Commit the transaction — all DB writes are now permanent ──────
       await session.commitTransaction();
     } catch (error) {
-      // ── If anything failed, roll back all changes ──────────────────────
       await session.abortTransaction();
       console.error('Transaction Error:', error);
       throw new InternalServerErrorException('Failed to create class update');
     } finally {
-      // ── Always close the session regardless of success or failure ──────
       session.endSession();
     }
 
     // ── Fetch the fully populated update AFTER the transaction closes ──────
-    // This is intentionally outside the try/catch to avoid calling
-    // abortTransaction() on an already-committed session if populate fails.
     const data = await this.classUpdateModel
       .findById(newUpdateId)
-      .populate('postedBy', 'name avatarUrl')
-      .populate('materials')
+      .populate<{ postedBy: { _id: Types.ObjectId; name: string; avatarUrl: string | null } }>(
+        'postedBy',
+        'name avatarUrl',
+      )
+      .populate<{
+        materials: Array<{
+          _id: Types.ObjectId;
+          url: string;
+          name?: string;
+          type: MaterialType;
+          size?: number;
+        }>;
+      }>('materials')
+      .lean()
       .exec();
 
+    if (!data) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve created update',
+      );
+    }
+
     // ── Fetch all enrolled learners AND assistants in a single DB query ────
-    // Using $in on the role field avoids making two separate round-trips.
     const allEnrollments = await this.enrollmentModel
       .find({
         classId: classObjId,
@@ -168,7 +180,6 @@ export class CreateClassUpdateService {
       .select('userId role')
       .lean();
 
-    // ── Separate learner and assistant IDs from the combined result ────────
     const learnerIds = allEnrollments
       .filter((e) => e.role === EnrollmentRole.LEARNER)
       .map((e) => e.userId.toString());
@@ -177,15 +188,12 @@ export class CreateClassUpdateService {
       .filter((e) => e.role === EnrollmentRole.ASSISTANT)
       .map((e) => e.userId.toString());
 
-    // ── Include the class instructor ──────────────────────────────────────
     const instructorId = targetClass.instructorId.toString();
 
-    // ── Merge all recipients and remove the poster to avoid self-notification
     const allRecipients = [
       ...new Set([...learnerIds, ...assistantIds, instructorId]),
     ].filter((id) => id !== userId);
 
-    // ── Send bulk notifications to all recipients (if any) ────────────────
     if (allRecipients.length > 0) {
       await this.notificationService.createBulk({
         recipientIds: allRecipients,
@@ -195,15 +203,39 @@ export class CreateClassUpdateService {
         type: NotificationType.UPDATE,
         metadata: {
           classId,
-          updateId: data?._id.toString(),
+          updateId: data._id.toString(),
         },
       });
     }
 
+    // ── Serialize all ObjectId fields to strings to match the DTO ─────────
     return {
       success: true,
       message: 'Class update created successfully',
-      update: data,
+      data: {
+        update: {
+          _id: data._id.toString(),
+          classId: data.classId.toString(),
+          category: data.category,
+          title: data.title,
+          description: data.description,
+          isPinned: data.isPinned,
+          eventAt: data.eventAt ? data.eventAt.toISOString() : null,
+          createdAt: data.createdAt ? data.createdAt.toISOString() : new Date().toISOString(),
+          postedBy: {
+            _id: data.postedBy._id.toString(),
+            name: data.postedBy.name,
+            avatarUrl: data.postedBy.avatarUrl ?? null,
+          },
+          materials: (data.materials ?? []).map((m) => ({
+            _id: m._id.toString(),
+            url: m.url,
+            name: m.name,
+            type: m.type,
+            size: m.size,
+          })),
+        },
+      },
     };
   }
 }

@@ -5,9 +5,7 @@ import type { ClassUpdateItem } from "@/types/update.types";
 interface FetchClassUpdateResponse {
     success: boolean;
     message: string;
-    data: {
-        update: ClassUpdateItem[];
-    };
+    data: { update: ClassUpdateItem[] };
 }
 
 export const fetchClassUpdate = createAsyncThunk<
@@ -16,22 +14,18 @@ export const fetchClassUpdate = createAsyncThunk<
     { rejectValue: { message: string } }
 >(
     "classes/fetchClassUpdate",
-    async (classId: string, { rejectWithValue }) => {
+    async (classId, { rejectWithValue }) => {
         try {
             const { data } = await apiClient.get<FetchClassUpdateResponse>(
                 `/classes/${classId}/update`
             );
-
             if (!data.success) {
-                return rejectWithValue({ message: data.message || "Failed to fetch update." });
+                return rejectWithValue({ message: data.message || "Failed to fetch updates." });
             }
-
-            console.log("ALL Updates: ",data.data.update);
-
             return data.data.update;
         } catch (error: unknown) {
-            const err = error as Error;
-            return rejectWithValue({ message: err.message || "An error occurred." });
+            const message = error instanceof Error ? error.message : "An unexpected error occurred.";
+            return rejectWithValue({ message });
         }
     }
 );

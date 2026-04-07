@@ -17,12 +17,8 @@ const authReducer = combineReducers({
 // Classes slices
 import createClassReducer from "./features/classes/slices/create-class.slice";
 import enrollClass from "./features/classes/slices/enroll-class.slice";
-import fetchClassUpdatesReducer from "./features/classes/slices/fetch-class-updates.slice";
-import createClassUpdateReducer from "./features/classes/slices/create-class-update.slice";
 import fetchSingleClassReducer from "./features/classes/slices/fetch-single-class.slice";
 import fetchEnrolledClassesReducer from "./features/classes/slices/fetch-enrolled-classes.slice";
-import fetchSingleClassUpdateReducer from "./features/classes/slices/fetch-single-class-update.slice";
-import updateClassUpdateReducer from "./features/classes/slices/update-class-update.slice";
 
 // Class Faculty slices
 import classFacultyReducer from "./features/classes/slices/class-faculty.slice";
@@ -37,16 +33,17 @@ import classGroupReducer from "./features/classes/slices/groups/class-group.slic
 // Class Settings slices
 import classSettingsReducer from "./features/classes/slices/settings/class-setting.slice";
 
+// Class Updates slices
+import classUpdatesReducer from "./features/classes/slices/class-updates.slice";
+
 const classesReducer = combineReducers({
   createClass: createClassReducer,
   enrollClass: enrollClass,
-  fetchClassUpdates: fetchClassUpdatesReducer,
-  createClassUpdate: createClassUpdateReducer,
+  // Class updates are now normalized by classId to prevent data overlap and improve performance.
+  classUpdates: classUpdatesReducer,
+
   fetchSingleClass: fetchSingleClassReducer,
   fetchEnrolledClasses: fetchEnrolledClassesReducer,
-  fetchSingleClassUpdate: fetchSingleClassUpdateReducer,
-  updateClassUpdate: updateClassUpdateReducer,
-
   classFaculty: classFacultyReducer,
   fetchSingleClassFaculty: fetchSingleClassFaculty,
   classMembers: classMemberReducer,

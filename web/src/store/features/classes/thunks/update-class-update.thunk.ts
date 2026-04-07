@@ -1,8 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiClient } from "@/lib/api/axios";
 import type { ClassUpdateItem, CreateUpdateFormData } from "@/types/update.types";
-import { isAxiosError } from "axios";
-import type { ApiError, UpdateErrorField } from "../class.types";
+import { mapToApiError } from "@/lib/errors/api-error.mapper";
+import type { ApiError } from "@/lib/errors/api-error.mapper";
+import { UpdateErrorField, type UpdateErrorFieldType } from "../class.types";
 
 /**
  * API Response Structure for Update
@@ -10,7 +11,7 @@ import type { ApiError, UpdateErrorField } from "../class.types";
 interface UpdateClassUpdateResponse {
     success: boolean;
     message: string;
-    error: ApiError;
+    error?: ApiError<UpdateErrorFieldType>;
     data: {
         update: ClassUpdateItem;
     };
@@ -28,12 +29,50 @@ interface UpdateThunkArgs {
 export const updateClassUpdate = createAsyncThunk<
     ClassUpdateItem, // Return type
     UpdateThunkArgs, // Argument type
-    { rejectValue: ApiError } // Error type
+    { rejectValue: ApiError<UpdateErrorFieldType> } // Error type
 >(
     "classes/updateClassUpdate",
     async ({ classId, updateId, updateData }, { rejectWithValue }) => {
-        
-        console.log("Update Payload: ", updateData);
+
+        if ("title" in updateData) {
+            const title = updateData.title?.trim();
+
+            if (!title) {
+                return rejectWithValue({
+                    message: "Title is required.",
+                    field: UpdateErrorField.title,
+                    code: "VALIDATION_ERROR",
+                });
+            }
+
+            if (title.length < 3) {
+                return rejectWithValue({
+                    message: "Title must be at least 3 characters.",
+                    field: UpdateErrorField.title,
+                    code: "VALIDATION_ERROR",
+                });
+            }
+        }
+
+        if ("description" in updateData) {
+            const description = updateData.description?.trim();
+
+            if (!description) {
+                return rejectWithValue({
+                    message: "Description is required.",
+                    field: UpdateErrorField.description,
+                    code: "VALIDATION_ERROR",
+                });
+            }
+
+            if (description.length < 10) {
+                return rejectWithValue({
+                    message: "Description must be at least 10 characters.",
+                    field: UpdateErrorField.description,
+                    code: "VALIDATION_ERROR",
+                });
+            }
+        }
 
         try {
             // API call to update the class announcement/event
@@ -43,25 +82,18 @@ export const updateClassUpdate = createAsyncThunk<
             );
 
             if (!data.success) {
-                return rejectWithValue({
-                    field: data.error?.field || null,
-                    message: data.message || "Failed to update the class info."
-                });
+                return rejectWithValue(
+                    data.error ?? {
+                        message: data.message || "Failed to update class update.",
+                    }
+                );
             }
 
             return data.data.update;
-        } catch (error: unknown) {
-            let errorMessage = "Failed to update class update.";
-            let errorField: UpdateErrorField | null = null;
-
-            if (isAxiosError(error)) {
-                errorField = error.response?.data?.field || null;
-                errorMessage = error.response?.data?.message || error.message;
-            } else if (error instanceof Error) {
-                errorMessage = error.message;
-            }
-
-            return rejectWithValue({ field: errorField, message: errorMessage });
+        } catch (error) {
+            return rejectWithValue(
+                mapToApiError<UpdateErrorFieldType>(error)
+            );
         }
     }
 );
