@@ -34,22 +34,30 @@ interface FetchClassMembersResponse {
  * Fetch Class Members
  */
 export const fetchClassMembers = createAsyncThunk<
-    ClassMember[],                 // array of members
-    string,                        // classId
+    { classId: string; members: ClassMember[] },
+    string,
     { rejectValue: { message: string } }
 >("classes/fetchMembers", async (classId, { rejectWithValue }) => {
     try {
-        const { data } = await apiClient.get<FetchClassMembersResponse>(`/classes/${classId}/members`);
+        const { data } = await apiClient.get<FetchClassMembersResponse>(
+            `/classes/${classId}/members`
+        );
+
         if (!data.success) {
             return rejectWithValue({
                 message: data.message || "Failed to fetch class members",
             });
         }
-        console.log("All member: ", data.data.members);
-        return data.data.members;
+
+        return {
+            classId: data.data.classId,
+            members: data.data.members,
+        };
     } catch (error: unknown) {
         return rejectWithValue({
-            message: extractAxiosError(error) || "An error occurred while fetching class members",
+            message:
+                extractAxiosError(error) ||
+                "An error occurred while fetching class members",
         });
     }
 });
@@ -58,7 +66,7 @@ export const fetchClassMembers = createAsyncThunk<
  * Assign Assistant
  */
 export const assignAssistant = createAsyncThunk<
-    { userId: string },
+    { classId: string, userId: string },
     { classId: string; userId: string },
     { rejectValue: { message: string } }
 >("classes/assignAssistant", async ({ classId, userId }, { rejectWithValue }) => {
@@ -67,7 +75,7 @@ export const assignAssistant = createAsyncThunk<
         if (!data.success) {
             return rejectWithValue({ message: data.message || "Failed to assign assistant" });
         }
-        return { userId };
+        return { userId, classId };
     } catch (error: unknown) {
         return rejectWithValue({ message: extractAxiosError(error) || "Error assigning assistant" });
     }
@@ -77,7 +85,7 @@ export const assignAssistant = createAsyncThunk<
  * Revoke Assistant
  */
 export const revokeAssistant = createAsyncThunk<
-    { userId: string },
+    { classId: string, userId: string },
     { classId: string; userId: string },
     { rejectValue: { message: string } }
 >("classes/revokeAssistant", async ({ classId, userId }, { rejectWithValue }) => {
@@ -87,7 +95,7 @@ export const revokeAssistant = createAsyncThunk<
             console.log(data.message);
             return rejectWithValue({ message: data.message || "Failed to revoke assistant" });
         }
-        return { userId };
+        return { classId, userId };
     } catch (error: unknown) {
         return rejectWithValue({ message: extractAxiosError(error) || "Error removing assistant" });
     }
@@ -97,16 +105,16 @@ export const revokeAssistant = createAsyncThunk<
  * Revoke Member
  */
 export const revokeMember = createAsyncThunk<
-    { userId: string },
+    { classId: string, userId: string },
     { classId: string; userId: string },
     { rejectValue: { message: string } }
 >("classes/revokeMember", async ({ classId, userId }, { rejectWithValue }) => {
     try {
-        const { data } = await apiClient.delete(`/classes/${classId}/members/${userId}` );
+        const { data } = await apiClient.delete(`/classes/${classId}/members/${userId}`);
         if (!data.success) {
             return rejectWithValue({ message: data.message || "Failed to revoke member" });
         }
-        return { userId };
+        return {classId, userId };
     } catch (error: unknown) {
         return rejectWithValue({ message: extractAxiosError(error) || "Error removing member" });
     }

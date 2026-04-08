@@ -13,8 +13,8 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { fetchEnrolledClasses } from "@/store/features/classes/thunks/fetch-enrolled-classes.thunk";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { ClassesSkeleton } from "./ClassesSkeleton";
 import { toast } from "sonner";
-import { TopLoader } from "@/components/ui/TopLoader";
 
 const Classes: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState("all");
@@ -32,7 +32,6 @@ const Classes: React.FC = () => {
 
   useEffect(() => {
     if (classes.length > 0) return; // Don't fetch again if we already have classes in state
-    setTimeout(() => { }, 5000);
     dispatch(fetchEnrolledClasses())
       .unwrap()
       .then(() => {
@@ -142,8 +141,8 @@ const Classes: React.FC = () => {
                 key={filter.id}
                 onClick={() => setActiveFilter(filter.id)}
                 className={`shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${activeFilter === filter.id
-                    ? "bg-primary text-white shadow-sm shadow-primary/20"
-                    : "bg-slate-200 text-slate-600 border border-transparent hover:border-slate-200"
+                  ? "bg-primary text-white shadow-sm shadow-primary/20"
+                  : "bg-slate-200 text-slate-600 border border-transparent hover:border-slate-200"
                   }`}
               >
                 {filter.label}
@@ -154,205 +153,207 @@ const Classes: React.FC = () => {
       </header>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="mx-auto px-4 lg:px-8 py-6 relative">
-          <main className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] md:grid-cols-[repeat(auto-fit,minmax(300px,300px))] justify-start">
-            {filteredClasses.map((cls) => (
-              <Link
-                href={`/classes/${cls.classId}/updates`}
-                key={cls.classId}
-                className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col w-full h-full sm:max-w-75 sm:min-w-70"
-                style={{
-                  border: `1px solid ${cls.themeColor}40`,
-                  boxShadow: `0 2px 10px ${cls.themeColor}20`,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = `${cls.themeColor}60`;
-                  e.currentTarget.style.boxShadow = `0 4px 50px ${cls.themeColor}25`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = `${cls.themeColor}40`;
-                  e.currentTarget.style.boxShadow = "none";
-                }}
-              >
-                {/* Banner */}
-                <div className="relative h-28 sm:h-36 overflow-hidden bg-slate-100">
-                  <Avatar className="absolute inset-0 w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-300">
-                    <AvatarImage
-                      className="object-cover"
-                      src={cls.coverImage || undefined}
-                      alt={cls.title}
-                    />
-                    <AvatarFallback
-                      className="rounded-none w-full h-full text-4xl font-bold tracking-widest flex items-center justify-center uppercase"
-                      style={{
-                        backgroundColor: `${cls.themeColor}50`,
-                        color: cls.themeColor,
-                      }}
-                    >
-                      {cls.title
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  {/* Concentric rings effect */}
-                  <svg
-                    className="absolute inset-0 w-full h-full pointer-events-none"
-                    viewBox="0 0 200 144"
-                    preserveAspectRatio="none"
-                  >
-                    <circle
-                      cx="170"
-                      cy="-10"
-                      r="100"
-                      fill="rgba(255,255,255,0.07)"
-                    />
-                    <circle
-                      cx="170"
-                      cy="-10"
-                      r="70"
-                      fill="rgba(255,255,255,0.06)"
-                    />
-                    <circle
-                      cx="170"
-                      cy="-10"
-                      r="40"
-                      fill="rgba(255,255,255,0.06)"
-                    />
-                  </svg>
-
-                  {/* Status Badge */}
-                  <div
-                    className="absolute top-3 right-3 text-[11px] font-semibold tracking-widest px-2 py-0.5 pb-1 rounded-full text-white"
-                    style={{ backgroundColor: `${cls.themeColor}` }}
-                  >
-                    {cls.status.charAt(0).toUpperCase() +
-                      cls.status.slice(1).toLowerCase()}
-                  </div>
-
-                  {/* Department Label */}
-                  <div className="absolute bottom-3 left-3">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider">
-                      <span
-                        className="size-1.5 rounded-full"
-                        style={{ backgroundColor: cls.themeColor }} // colored dot
-                      />
-                      {cls.department}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div
-                  className="relative p-4 flex flex-col flex-1 bg-white overflow-hidden gap-2 sm:gap-3"
+      {loading ? (
+        <ClassesSkeleton />
+      ) : (
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto px-4 lg:px-8 py-6 relative">
+            <main className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(min(300px,100%),1fr))] md:grid-cols-[repeat(auto-fit,minmax(300px,300px))] justify-start">
+              {filteredClasses.map((cls) => (
+                <Link
+                  href={`/classes/${cls.classId}/updates`}
+                  key={cls.classId}
+                  className="group relative rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col w-full h-full sm:max-w-75 sm:min-w-70"
                   style={{
-                    borderTop: `2px solid ${cls.themeColor}`,
-                    background: `linear-gradient(160deg, ${cls.themeColor}08 0%, #ffffff 40%)`,
+                    border: `1px solid ${cls.themeColor}40`,
+                    boxShadow: `0 2px 10px ${cls.themeColor}20`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${cls.themeColor}60`;
+                    e.currentTarget.style.boxShadow = `0 4px 50px ${cls.themeColor}25`;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${cls.themeColor}40`;
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                 >
-                  {/* Soft color wash from top */}
-                  <div
-                    className="absolute inset-x-0 top-0 h-24 pointer-events-none"
-                    style={{
-                      background: `radial-gradient(ellipse 140% 100% at 85% -20%, ${cls.themeColor}18, transparent 65%)`,
-                    }}
-                  />
-
-                  {/* Title */}
-                  <h3 className="text-md font-bold text-[#203044] leading-tight line-clamp-2">
-                    {cls.title}
-                  </h3>
-
-                  {/* Instructor */}
-                  <div className="flex items-center gap-2 ml-1">
-                    <Avatar className="w-8 h-8 border border-slate-200">
+                  {/* Banner */}
+                  <div className="relative h-28 sm:h-36 overflow-hidden bg-slate-100">
+                    <Avatar className="absolute inset-0 w-full h-full object-cover rounded-none group-hover:scale-105 transition-transform duration-300">
                       <AvatarImage
-                        src={cls.avatarUrl || undefined}
-                        alt={cls.instructor}
+                        className="object-cover"
+                        src={cls.coverImage || undefined}
+                        alt={cls.title}
                       />
                       <AvatarFallback
-                        className="w-full h-full text-sm font-semibold text-center p-1"
+                        className="rounded-none w-full h-full text-4xl font-bold tracking-widest flex items-center justify-center uppercase"
                         style={{
-                          backgroundColor: cls.themeColor,
-                          color: "#fff",
+                          backgroundColor: `${cls.themeColor}50`,
+                          color: cls.themeColor,
                         }}
                       >
-                        {cls.instructor
+                        {cls.title
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      <p className="text-[9px] uppercase font-bold leading-none text-black opacity-60">
-                        Instructor
-                      </p>
-                      <span className="text-[13px] font-semibold">
-                        {cls.instructor}
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Footer */}
-                  <div
-                    className="pt-2 mt-auto flex items-center justify-between"
-                    style={{ borderTop: `1px solid ${cls.themeColor}30` }}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <Users size={16} className="text-slate-400" />
-                      <span className="text-xs font-semibold text-[#4d5d73]">
-                        {cls.students} Students
-                      </span>
-                    </div>
-                    <div
-                      className="text-xs font-semibold px-2 py-1 rounded"
-                      style={{
-                        backgroundColor: `${cls.themeColor}15`,
-                        color: cls.themeColor,
-                      }}
+                    {/* Concentric rings effect */}
+                    <svg
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      viewBox="0 0 200 144"
+                      preserveAspectRatio="none"
                     >
-                      {cls.semester}
+                      <circle
+                        cx="170"
+                        cy="-10"
+                        r="100"
+                        fill="rgba(255,255,255,0.07)"
+                      />
+                      <circle
+                        cx="170"
+                        cy="-10"
+                        r="70"
+                        fill="rgba(255,255,255,0.06)"
+                      />
+                      <circle
+                        cx="170"
+                        cy="-10"
+                        r="40"
+                        fill="rgba(255,255,255,0.06)"
+                      />
+                    </svg>
+
+                    {/* Status Badge */}
+                    <div
+                      className="absolute top-3 right-3 text-[11px] font-semibold tracking-widest px-2 py-0.5 pb-1 rounded-full text-white"
+                      style={{ backgroundColor: `${cls.themeColor}` }}
+                    >
+                      {cls.status.charAt(0).toUpperCase() +
+                        cls.status.slice(1).toLowerCase()}
+                    </div>
+
+                    {/* Department Label */}
+                    <div className="absolute bottom-3 left-3">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-[10px] font-semibold uppercase tracking-wider">
+                        <span
+                          className="size-1.5 rounded-full"
+                          style={{ backgroundColor: cls.themeColor }} // colored dot
+                        />
+                        {cls.department}
+                      </span>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </main>
 
-          {!loading && filteredClasses.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-24 gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                <BookOpen className="text-slate-300" size={28} />
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-slate-700">
-                  No classes found
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  {searchQuery
-                    ? `No results for "${searchQuery}"`
-                    : activeFilter !== "all"
-                      ? `You have no ${activeFilter} classes`
-                      : "Create or enroll in a class to get started"}
-                </p>
-              </div>
-              {!searchQuery && activeFilter === "all" && (
-                <Link
-                  href="/classes/create"
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
-                >
-                  <Plus size={16} />
-                  Create a class
+                  {/* Content */}
+                  <div
+                    className="relative p-4 flex flex-col flex-1 bg-white overflow-hidden gap-2 sm:gap-3"
+                    style={{
+                      borderTop: `2px solid ${cls.themeColor}`,
+                      background: `linear-gradient(160deg, ${cls.themeColor}08 0%, #ffffff 40%)`,
+                    }}
+                  >
+                    {/* Soft color wash from top */}
+                    <div
+                      className="absolute inset-x-0 top-0 h-24 pointer-events-none"
+                      style={{
+                        background: `radial-gradient(ellipse 140% 100% at 85% -20%, ${cls.themeColor}18, transparent 65%)`,
+                      }}
+                    />
+
+                    {/* Title */}
+                    <h3 className="text-md font-bold text-[#203044] leading-tight line-clamp-2">
+                      {cls.title}
+                    </h3>
+
+                    {/* Instructor */}
+                    <div className="flex items-center gap-2 ml-1">
+                      <Avatar className="w-8 h-8 border border-slate-200">
+                        <AvatarImage
+                          src={cls.avatarUrl || undefined}
+                          alt={cls.instructor}
+                        />
+                        <AvatarFallback
+                          className="w-full h-full text-sm font-semibold text-center p-1"
+                          style={{
+                            backgroundColor: cls.themeColor,
+                            color: "#fff",
+                          }}
+                        >
+                          {cls.instructor
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <p className="text-[9px] uppercase font-bold leading-none text-black opacity-60">
+                          Instructor
+                        </p>
+                        <span className="text-[13px] font-semibold">
+                          {cls.instructor}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div
+                      className="pt-2 mt-auto flex items-center justify-between"
+                      style={{ borderTop: `1px solid ${cls.themeColor}30` }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <Users size={16} className="text-slate-400" />
+                        <span className="text-xs font-semibold text-[#4d5d73]">
+                          {cls.students} Students
+                        </span>
+                      </div>
+                      <div
+                        className="text-xs font-semibold px-2 py-1 rounded"
+                        style={{
+                          backgroundColor: `${cls.themeColor}15`,
+                          color: cls.themeColor,
+                        }}
+                      >
+                        {cls.semester}
+                      </div>
+                    </div>
+                  </div>
                 </Link>
-              )}
-            </div>
-          )}
+              ))}
+            </main>
 
-          <TopLoader isLoading={loading} />
+            {!loading && filteredClasses.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-24 gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                  <BookOpen className="text-slate-300" size={28} />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-slate-700">
+                    No classes found
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    {searchQuery
+                      ? `No results for "${searchQuery}"`
+                      : activeFilter !== "all"
+                        ? `You have no ${activeFilter} classes`
+                        : "Create or enroll in a class to get started"}
+                  </p>
+                </div>
+                {!searchQuery && activeFilter === "all" && (
+                  <Link
+                    href="/classes/create"
+                    className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors"
+                  >
+                    <Plus size={16} />
+                    Create a class
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
