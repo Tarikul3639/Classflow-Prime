@@ -15,7 +15,7 @@ export class FetchClassMembersService {
         @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
         @InjectModel(Enrollment.name) private readonly enrollmentModel: Model<EnrollmentDocument>,
         @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-    ) {}
+    ) { }
 
     async execute(userId: string, classId: string): Promise<GetClassMembersResponseWrapperDto> {
         const userObjId = new Types.ObjectId(userId);
@@ -69,7 +69,7 @@ export class FetchClassMembersService {
             return {
                 userId: enrollment.userId.toString(),
                 name: user?.name || 'Unknown User',
-                email: user?.email || 'Unknown Email',
+                email: maskEmail(user?.email),
                 verified: user?.emailVerified || false,
                 avatarUrl: user?.avatarUrl || '',
                 role: enrollment.role,
@@ -100,4 +100,41 @@ export class FetchClassMembersService {
             },
         };
     }
+}
+
+
+function maskEmail(email?: string): string {
+    if (!email) return "Unknown Email";
+
+    const [name, domain] = email.split("@");
+    if (!name || !domain) return email;
+
+    let visibleLength = name.length
+    let end = name.slice(-2); // Show last 2 characters of the name
+
+    if (name.length <= 2) {
+        visibleLength = 1; // Show only the first character for very short names  
+    }
+
+    if (name.length > 2 && name.length <= 4) {
+        visibleLength = 2; // Show the first 2 characters for names longer than 2 characters
+    }
+
+    if (name.length > 4 && name.length <= 6) {
+        visibleLength = 3; // Show the first 3 characters for longer names
+    }
+
+    if (name.length > 6 && name.length <= 10) {
+        visibleLength = 4; // Show the first 4 characters for very long names
+    }
+
+    if (name.length > 10) {
+        visibleLength = 5; // Show the first 5 characters for very long names
+    }
+
+    const visiblePart = name.slice(0, visibleLength);
+    const stars = "*".repeat(name.length - visibleLength).slice(0, -2) + end; // Limit to 5 stars for very long names
+    
+
+    return `${visiblePart}${stars}@${domain}`;
 }
