@@ -56,20 +56,36 @@ export const selectFilteredAndSortedUpdates = createSelector(
             return matchesSearch && matchesFilter;
         });
 
+        const now = Date.now();
+
         return [...filtered].sort((a, b) => {
-            // 1. Pinned items always at the top
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
+            // 1. Priority Function
+            const getPriority = (item: ClassUpdateItem) => {
+                if (item.isPinned) return 0;
+                
+                const itemTime = item.eventAt ? new Date(item.eventAt).getTime() : null;
+                if (itemTime) {
+                    return itemTime >= now ? 1 : 3; // 1 for Upcoming, 3 for Past
+                }
+                return 2; // Regular Updates (No eventAt)
+            };
 
-            // 2. Upcoming events closest to today first
-            if (a.eventAt && b.eventAt) {
-                return new Date(a.eventAt).getTime() - new Date(b.eventAt).getTime();
+            const priorityA = getPriority(a);
+            const priorityB = getPriority(b);
+
+            if (priorityA !== priorityB) {
+                return priorityA - priorityB;
             }
-            if (a.eventAt && !b.eventAt) return -1;
-            if (!a.eventAt && b.eventAt) return 1;
 
-            // 3. Fallback: Newest created first
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            // 2. Same Priority thakle internal sorting
+            const aTime = a.eventAt ? new Date(a.eventAt).getTime() : new Date(a.createdAt).getTime();
+            const bTime = b.eventAt ? new Date(b.eventAt).getTime() : new Date(b.createdAt).getTime();
+
+            if (priorityA === 1) {
+                return aTime - bTime; // Upcoming: Shobcheye kacher ta age
+            }
+            // Regular updates ebong Past events er jonno: Newest first
+            return bTime - aTime; 
         });
     }
 );
@@ -79,45 +95,37 @@ export const selectGroupedUpdates = createSelector(
     [selectFilteredAndSortedUpdates],
     (sortedUpdates) => {
         const groups: Record<string, ClassUpdateItem[]> = {};
+        const keyOrder: string[] = [];
+        const now = Date.now();
 
         sortedUpdates.forEach((u) => {
-            const dateKey = u.isPinned
-                ? "Pinned Updates"
-                : formatRelativeDate(u.eventAt ?? u.createdAt, {
+            let dateKey: string;
+
+            const isPast = u.eventAt && new Date(u.eventAt).getTime() < now;
+
+            if (u.isPinned) {
+                dateKey = "Pinned Updates";
+            } else if (isPast) {
+                dateKey = "Past Events"; // Shob past event ekhane jabe
+            } else {
+                // Today, Tomorrow, ba Specific Date
+                dateKey = formatRelativeDate(u.eventAt ?? u.createdAt, {
                     showTime: false,
                     showYear: true,
                     relativeDaysLimit: 3,
                 });
+            }
 
-            if (!groups[dateKey]) groups[dateKey] = [];
+            if (!groups[dateKey]) {
+                groups[dateKey] = [];
+                keyOrder.push(dateKey);
+            }
             groups[dateKey].push(u);
         });
 
-        const sortedKeys = Object.keys(groups).sort((a, b) => {
-            if (a === "Pinned Updates") return -1;
-            if (b === "Pinned Updates") return 1;
-
-            const priority = ["Today", "Tomorrow", "Yesterday"];
-            const aP = priority.indexOf(a);
-            const bP = priority.indexOf(b);
-
-            if (aP !== -1 || bP !== -1) {
-                return (aP === -1 ? Infinity : aP) - (bP === -1 ? Infinity : bP);
-            }
-
-            const dateA = new Date(a).getTime();
-            const dateB = new Date(b).getTime();
-            const now = Date.now();
-
-            if (dateA > now && dateB > now) return dateA - dateB;
-            return dateB - dateA;
-        });
-
-        return { grouped: groups, sortedDateKeys: sortedKeys };
+        return { grouped: groups, sortedDateKeys: keyOrder };
     }
 );
-
-
 
 /**
  * Some selectors are designed for specific UI states (e.g. loading, error) and are accessed via the same bucket to ensure consistency and avoid mismatches between different parts of the state.

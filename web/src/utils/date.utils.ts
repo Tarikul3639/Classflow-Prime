@@ -59,7 +59,7 @@ export function formatRelativeDate(
   const today = normalize(new Date());
   const target = normalize(date);
 
-  const diffDays = Math.round(
+  const diffDays = Math.floor(
     (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   );
 

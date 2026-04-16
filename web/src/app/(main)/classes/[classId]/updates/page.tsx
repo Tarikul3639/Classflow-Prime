@@ -167,9 +167,13 @@ export default function UpdatesPage() {
                       UPDATE_TYPE_CONFIG[
                       update.category as UpdateCategory
                       ];
+                    const isPast =
+                      update.eventAt &&
+                      new Date(update.eventAt).getTime() < Date.now();
                     return (
                       <UpdateCard
                         key={update._id}
+                        isPast={!!isPast}
                         icon={config.icon}
                         iconBg={config.iconBg}
                         iconColor={config.iconColor}
