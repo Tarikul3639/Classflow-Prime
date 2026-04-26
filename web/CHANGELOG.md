@@ -1,3 +1,10 @@
+# [web-v2.4.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.3.0...web-v2.4.0) (2026-04-26)
+
+
+### Features
+
+* **web:** Update app icons, manifest, metadata and OG image ([100a041](https://github.com/Tarikul3639/classflow-prime/commit/100a0419634e878ba34e76962e897e40a1136ff4))
+
 # [web-v2.3.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.2.0...web-v2.3.0) (2026-04-26)
 
 
