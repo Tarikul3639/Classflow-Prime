@@ -1,3 +1,10 @@
+# [web-v2.3.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.2.0...web-v2.3.0) (2026-04-26)
+
+
+### Features
+
+* **web:** Add SEO, OG image, sitemap/robots and UI tweaks ([6d29b7e](https://github.com/Tarikul3639/classflow-prime/commit/6d29b7e44c30d7b6042732cc89fe3443fa04f112))
+
 # [web-v2.2.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.1.1...web-v2.2.0) (2026-04-16)
 
 
