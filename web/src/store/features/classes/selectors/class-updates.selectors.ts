@@ -106,7 +106,7 @@ export const selectGroupedUpdates = createSelector(
             if (u.isPinned) {
                 dateKey = "Pinned Updates";
             } else if (isPast) {
-                dateKey = "Past Events"; // Shob past event ekhane jabe
+                dateKey = "Past Events"; 
             } else {
                 // Today, Tomorrow, ba Specific Date
                 dateKey = formatRelativeDate(u.eventAt ?? u.createdAt, {

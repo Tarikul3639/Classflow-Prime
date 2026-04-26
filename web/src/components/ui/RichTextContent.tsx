@@ -71,12 +71,14 @@ export function RichTextContent({
 
             {/* Button only if needed */}
             {shouldShowButton && (
-                <button
-                    onClick={() => setExpanded((prev) => !prev)}
-                    className="text-blue-600 text-xs mt-1 hover:underline cursor-pointer"
-                >
-                    {expanded ? "Show less" : "Show more"}
-                </button>
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setExpanded((prev) => !prev)}
+                        className="text-blue-600 text-xs mt-1 hover:underline cursor-pointer"
+                    >
+                        {expanded ? "Show less" : "Show more"}
+                    </button>
+                </div>
             )}
         </div>
     );
