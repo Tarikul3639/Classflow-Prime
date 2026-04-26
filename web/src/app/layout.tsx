@@ -13,12 +13,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
+
   title: {
     default: "ClassFlow Prime | Scalable Education Management Platform",
     template: "%s | ClassFlow Prime",
   },
   description:
     "ClassFlow Prime is a scalable education management platform designed to centralize class operations, communication, exams, and member management into a digital workspace.",
+  verification: {
+    google: "wX9p5QSBg-V35tiEQef35nhxekmLe0tuCjPcXo04Yxo",
+  },
   keywords: [
     "ClassFlow Prime",
     "Education Management System",
