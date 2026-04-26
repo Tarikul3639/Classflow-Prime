@@ -30,31 +30,30 @@ export const metadata: Metadata = {
   creator: "Tarikul Islam",
   publisher: "Tarikul Islam",
 
-  // ── Open Graph ──
   openGraph: {
     type: "website",
     locale: "en_US",
     url: BASE_URL,
     siteName: "ClassFlow Prime",
-    title: "ClassFlow Prime | Centralized Academic Workspace",
-    description: "Streamline communication, exams, and class updates with ClassFlow Prime.",
+    title: "Smart Education Management Platform",
+    description:
+      "Centralize classes, exams, communication & collaboration in one powerful academic workspace.",
     images: [
       {
         url: "/og",
         width: 1200,
         height: 630,
-        alt: "ClassFlow Prime Dashboard Preview",
+        alt: "ClassFlow Prime Modern Dashboard Preview",
       },
     ],
   },
 
-  // ── Twitter ──
   twitter: {
     card: "summary_large_image",
     title: "ClassFlow Prime",
-    description: "Manage your classes and academic operations with ease.",
+    description:
+      "A modern education management system for students & institutions.",
     images: ["/og"],
-    creator: "@tarikul3639", // Optional
   },
 
   // ── PWA & Icons ──
@@ -64,14 +63,16 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "ClassFlow Prime",
   },
+  // ── Icons (matched to actual /public files) ──
   icons: {
     icon: [
-      { url: "/favicon.svg" },
-      { url: "/icon.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon0.svg", type: "image/svg+xml" },   // scalable
+      { url: "/icon1.png", type: "image/png", sizes: "48x48" },
     ],
-    apple: [
-      { url: "/icon.png", sizes: "180x180", type: "image/png" },
+    apple: "/apple-icon.png",                          // exists in public ✓
+    other: [
+      { rel: "mask-icon", url: "/icon0.svg", color: "#0a0a0a" },
     ],
   },
 };
