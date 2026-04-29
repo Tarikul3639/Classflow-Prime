@@ -74,13 +74,13 @@ export function WhatsNewDialog({ open: externalOpen, onClose }: WhatsNewDialogPr
 
     return (
         <div className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40 p-4 md:px-10 md:py-6 lg:px-20 lg:py-10">
-            <div className="bg-slate-50 rounded-2xl border border-slate-300 w-full max-width-[440px] overflow-hidden">
+            <div className="bg-slate-50 rounded-2xl border border-slate-300 w-full max-width-[440px] overflow-hidden py-2 px-0.5">
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                            <Star size={15} className="text-white" />
+                        <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+                            <Star size={16} className="text-white" />
                         </div>
                         <div>
                             <p className="text-sm font-medium text-slate-950">What's new</p>
