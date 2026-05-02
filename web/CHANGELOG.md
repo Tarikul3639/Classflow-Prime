@@ -1,3 +1,10 @@
+# [web-v2.6.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.5.0...web-v2.6.0) (2026-05-02)
+
+
+### Features
+
+* **web:** Show Brave setup modal on FCM failure ([99ed71d](https://github.com/Tarikul3639/classflow-prime/commit/99ed71d5c2ea4efe644937775250d786e05da791))
+
 # [web-v2.5.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.4.0...web-v2.5.0) (2026-04-29)
 
 
