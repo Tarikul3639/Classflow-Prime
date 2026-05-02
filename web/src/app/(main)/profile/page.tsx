@@ -10,6 +10,8 @@ import EnrolledClasses from "./_components/EnrolledClasses";
 import Preferences from "./_components/Preferences";
 import VersionInfo from "./_components/VersionInfo";
 import { EmptyState } from "@/components/ui/EmptyState";
+import BravePushGuideModal from "@/components/ui/BravePushGuideModal";
+import { isBraveBrowser } from '@/lib/brave-push-helper'; 
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { signoutCurrentThunk } from "@/store/features/auth/thunks/signout.thunk";
@@ -43,6 +45,7 @@ const ProfileSettings: React.FC = () => {
     avatarUrl: "",
   });
 
+  const [showBraveModal, setShowBraveModal] = useState(false);
   const [initialUserForm, setInitialUserForm] = useState(userForm);
   const [notificationError, setNotificationError] = useState<string | null>(
     null,
@@ -100,27 +103,33 @@ const ProfileSettings: React.FC = () => {
   const handleNotificationToggle = async () => {
     setNotificationError(null);
 
-    const promise = toggleNotification();
+    const isBrave = await isBraveBrowser();
+
+    const promise = toggleNotification().catch((err) => {
+      // Show Brave setup modal instead of toast error for FCM-related failures
+      if (err?.name === 'AbortError' && isBrave) {
+        setShowBraveModal(true);
+        return;
+      }
+      throw err;
+    });
 
     toast.promise(promise, {
-      loading: "Updating notification settings...",
-      success: () => {
-        return isSubscribed
-          ? "Notifications disabled successfully"
-          : "Notifications enabled successfully";
-      },
+      loading: 'Updating notification settings...',
+      success: () =>
+        isSubscribed
+          ? 'Notifications disabled successfully'
+          : 'Notifications enabled successfully',
       error: (err) => {
         const errorMessage =
           err instanceof Error
             ? err.message
-            : "Failed to update notification settings";
+            : 'Failed to update notification settings';
         setNotificationError(errorMessage);
-        console.error("Notification error:", err);
         return errorMessage;
       },
     });
   };
-
   const handleToggle = (field: keyof typeof preferences) => {
     if (field === "notifications") {
       handleNotificationToggle();
@@ -161,86 +170,94 @@ const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <main className="relative flex flex-col min-h-screen bg-slate-50">
-      {/* Fixed Header */}
-      <ProfileHeader onSave={handleSave} isChanged={isChanged} />
+    <>
+      <main className="relative flex flex-col min-h-screen bg-slate-50">
+        {/* Fixed Header */}
+        <ProfileHeader onSave={handleSave} isChanged={isChanged} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
-        {/* ── State 1: Loading ── */}
-        {status.loading && (
-          <div className="flex-1 flex items-center justify-center">
-            <TopLoader isLoading={status.loading} />
-          </div>
-        )}
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col">
+          {/* ── State 1: Loading ── */}
+          {status.loading && (
+            <div className="flex-1 flex items-center justify-center">
+              <TopLoader isLoading={status.loading} />
+            </div>
+          )}
 
-        {/* ── State 2: User found ── */}
-        {!status.loading && user && (
-          <div className="flex-1 overflow-y-auto pb-24 lg:pb-8">
-            <div className="mx-auto px-4 lg:px-8 py-6">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column */}
-                <div className="lg:col-span-5 space-y-5">
-                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                    <ProfilePicture
-                      imageUrl={userForm.avatarUrl}
-                      name={userForm.name}
-                      username={userForm.email.split("@")[0]}
-                      email={userForm.email}
-                      onImageUpload={handleAvatarUpload}
-                      isUploading={uploadLoading}
-                    />
-                    <PersonalInformation
-                      name={userForm.name}
-                      email={userForm.email}
-                      bio={userForm.bio || "No bio added yet"}
-                      onNameChange={(value) => handleChange("name", value)}
-                      onBioChange={(value) => handleChange("bio", value)}
-                    />
-                    <div className="pt-4 mt-4 border-t border-slate-100">
-                      <LogoutButton
-                        isLoading={logoutLoading}
-                        onLogout={handleLogout}
+          {/* ── State 2: User found ── */}
+          {!status.loading && user && (
+            <div className="flex-1 overflow-y-auto pb-24 lg:pb-8">
+              <div className="mx-auto px-4 lg:px-8 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Column */}
+                  <div className="lg:col-span-5 space-y-5">
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                      <ProfilePicture
+                        imageUrl={userForm.avatarUrl}
+                        name={userForm.name}
+                        username={userForm.email.split("@")[0]}
+                        email={userForm.email}
+                        onImageUpload={handleAvatarUpload}
+                        isUploading={uploadLoading}
                       />
+                      <PersonalInformation
+                        name={userForm.name}
+                        email={userForm.email}
+                        bio={userForm.bio || "No bio added yet"}
+                        onNameChange={(value) => handleChange("name", value)}
+                        onBioChange={(value) => handleChange("bio", value)}
+                      />
+                      <div className="pt-4 mt-4 border-t border-slate-100">
+                        <LogoutButton
+                          isLoading={logoutLoading}
+                          onLogout={handleLogout}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Right Column */}
-                <div className="lg:col-span-7 space-y-5">
-                  {user.enrolledClasses?.length > 0 && (
-                    <EnrolledClasses classes={user.enrolledClasses} />
-                  )}
-                  <Preferences
-                    notifications={preferences.notifications}
-                    darkMode={preferences.darkMode}
-                    onNotificationsToggle={() => handleToggle("notifications")}
-                    onDarkModeToggle={() => handleToggle("darkMode")}
-                    onLanguageClick={() => console.log("Language settings")}
-                    notificationLoading={notificationLoading}
-                    notificationError={notificationError}
-                  />
-                  <VersionInfo />
+                  {/* Right Column */}
+                  <div className="lg:col-span-7 space-y-5">
+                    {user.enrolledClasses?.length > 0 && (
+                      <EnrolledClasses classes={user.enrolledClasses} />
+                    )}
+                    <Preferences
+                      notifications={preferences.notifications}
+                      darkMode={preferences.darkMode}
+                      onNotificationsToggle={() => handleToggle("notifications")}
+                      onDarkModeToggle={() => handleToggle("darkMode")}
+                      onLanguageClick={() => console.log("Language settings")}
+                      notificationLoading={notificationLoading}
+                      notificationError={notificationError}
+                    />
+                    <VersionInfo />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* ── State 3: No user + not loading ── */}
-        {!status.loading && !user && (
-          <div className="flex-1 flex items-center justify-center p-4">
-            <EmptyState
-              icon={UserX}
-              title="Profile Not Found"
-              description="We couldn't retrieve your profile data at this moment."
-              actionLabel="Try Reloading"
-              onAction={() => window.location.reload()}
-            />
-          </div>
-        )}
-      </div>
-    </main>
+          {/* ── State 3: No user + not loading ── */}
+          {!status.loading && !user && (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <EmptyState
+                icon={UserX}
+                title="Profile Not Found"
+                description="We couldn't retrieve your profile data at this moment."
+                actionLabel="Try Reloading"
+                onAction={() => window.location.reload()}
+              />
+            </div>
+          )}
+        </div>
+      </main>
+
+      <BravePushGuideModal
+        isOpen={showBraveModal}
+        onClose={() => setShowBraveModal(false)}
+      />
+
+    </>
   );
 };
 

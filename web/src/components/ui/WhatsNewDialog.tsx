@@ -33,6 +33,13 @@ const updates: UpdateItem[] = [
         badge: 'New',
     },
     {
+        icon: <Check size={15} strokeWidth={2.5} className="text-yellow-500" />,
+        iconBg: 'bg-yellow-50',
+        title: 'Brave browser support',
+        description: 'You can now receive notifications on Brave browser. Just follow the guide to enable it.',
+        badge: 'New',
+    },
+    {
         icon: <Check size={15} strokeWidth={2.5} className="text-blue-500" />,
         iconBg: 'bg-blue-50',
         title: 'Improved calendar sync',
