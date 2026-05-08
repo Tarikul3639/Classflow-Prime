@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { IClass, ClassStatus, } from '../interface/class.interface';
+import { IClass, ClassStatus } from '../interface/class.interface';
 
 export type ClassDocument = HydratedDocument<Class & IClass>;
 
@@ -13,7 +13,7 @@ export class Class implements IClass {
     required: true,
     trim: true,
   })
-  name: string;
+  name!: string;
 
   @Prop({
     required: true,
@@ -21,14 +21,14 @@ export class Class implements IClass {
     minlength: 6,
     maxlength: 6,
   })
-  enrollCode: string; // Teacher generated code
+  enrollCode!: string; // Teacher generated code
 
   @Prop({
     type: Types.ObjectId,
     ref: 'User',
     required: true,
   })
-  instructorId: Types.ObjectId;
+  instructorId!: Types.ObjectId;
 
   @Prop({
     trim: true,
@@ -44,7 +44,7 @@ export class Class implements IClass {
 
   // UI Identity Fields
   @Prop({ default: '#3B82F6' }) // Default blue
-  themeColor: string;
+  themeColor!: string;
 
   @Prop({ default: null })
   coverImage?: string;
@@ -54,10 +54,10 @@ export class Class implements IClass {
     default: ClassStatus.ACTIVE,
     index: true,
   })
-  status: ClassStatus;
+  status!: ClassStatus;
 
   @Prop({ default: true })
-  allowEnroll: boolean;
+  allowEnroll!: boolean;
 }
 
 export const ClassSchema = SchemaFactory.createForClass(Class);

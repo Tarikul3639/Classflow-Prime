@@ -18,12 +18,12 @@ export class Throttle implements IThrottle {
     required: true,
     enum: ThrottlePurpose,
   })
-  purpose: ThrottlePurpose;
+  purpose!: ThrottlePurpose;
 
   @Prop({
     required: true,
   })
-  ipAddress: string;
+  ipAddress!: string;
 
   @Prop({
     trim: true,
@@ -33,7 +33,7 @@ export class Throttle implements IThrottle {
   @Prop({
     default: 0,
   })
-  attempts: number;
+  attempts!: number;
 
   @Prop()
   expiresAt?: Date;

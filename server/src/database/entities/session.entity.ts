@@ -17,17 +17,17 @@ export class Session implements ISession {
     type: Types.ObjectId,
     ref: 'User',
   })
-  userId: Types.ObjectId; // Reference to the User who owns this session
+  userId!: Types.ObjectId; // Reference to the User who owns this session
 
   @Prop({
     required: true,
   })
-  token: string; // Unique session token (e.g., JWT or random hash string)
+  token!: string; // Unique session token (e.g., JWT or random hash string)
 
   @Prop({
     required: true,
   })
-  expiresAt: Date; // When the session expires
+  expiresAt!: Date; // When the session expires
 
   @Prop()
   ipAddress?: string; // IP address of the client e.g., "192.168.1.1"

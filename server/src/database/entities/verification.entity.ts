@@ -18,17 +18,17 @@ export class Verification implements IVerification {
     required: true,
     trim: true,
   })
-  identifier: string; // e.g., email or phone number
+  identifier!: string; // e.g., email or phone number
 
   @Prop({
     required: true,
   })
-  value: string; // e.g., OTP code or verification token
+  value!: string; // e.g., OTP code or verification token
 
   @Prop({
     required: true,
   })
-  expiresAt: Date;
+  expiresAt!: Date;
 }
 
 export const VerificationSchema = SchemaFactory.createForClass(Verification);

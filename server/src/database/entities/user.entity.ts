@@ -14,7 +14,7 @@ export class User implements IUser {
     required: true,
     trim: true,
   })
-  name: string;
+  name!: string;
 
   // User role (e.g., 'user', 'admin')
   @Prop({
@@ -22,7 +22,7 @@ export class User implements IUser {
     enum: UserRole,
     default: UserRole.USER,
   })
-  role: UserRole;
+  role!: UserRole;
 
   // Unique email (lowercase)
   @Prop({
@@ -31,14 +31,14 @@ export class User implements IUser {
     lowercase: true,
     trim: true,
   })
-  email: string;
+  email!: string;
 
   // Has the user verified email
   @Prop({
     required: true,
     default: false,
   })
-  emailVerified: boolean;
+  emailVerified!: boolean;
 
   // Optional avatar image URL
   @Prop({

@@ -24,7 +24,7 @@ export class Notification implements INotification {
         required: true,
         index: true,
     })
-    recipientId: Types.ObjectId;
+    recipientId!: Types.ObjectId;
 
     // ─── Sender (null = system generated) ────────────────────────
     @Prop({
@@ -32,7 +32,7 @@ export class Notification implements INotification {
         ref: 'User',
         default: null,
     })
-    senderId: Types.ObjectId | null;
+    senderId!: Types.ObjectId | null;
 
     // ─── Content ────────────────────────────────────────────────
     @Prop({
@@ -40,14 +40,14 @@ export class Notification implements INotification {
         trim: true,
         maxlength: 100,
     })
-    title: string;
+    title!: string;
 
     @Prop({
         required: true,
         trim: true,
         maxlength: 500,
     })
-    message: string;
+    message!: string;
 
     // ─── Type ───────────────────────────────────────────────────
     @Prop({
@@ -56,17 +56,17 @@ export class Notification implements INotification {
         default: NotificationType.UPDATE,
         index: true,
     })
-    type: NotificationType;
+    type!: NotificationType;
 
     // ─── Read State ─────────────────────────────────────────────
     @Prop({ default: false })
-    isRead: boolean;
+    isRead!: boolean;
 
     @Prop({
         type: Date,
         default: null,
     })
-    readAt: Date | null;
+    readAt!: Date | null;
 
     // ─── Navigation Metadata ────────────────────────────────────
     @Prop({
@@ -99,7 +99,7 @@ export class Notification implements INotification {
         default: {},
         _id: false,
     })
-    metadata: {
+    metadata!: {
         classId?: Types.ObjectId | null;
         updateId?: Types.ObjectId | null;
         refModel?: 'ClassUpdate' | 'Class' | 'Enrollment' | 'Material' | null;
