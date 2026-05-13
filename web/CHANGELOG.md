@@ -1,3 +1,10 @@
+# [web-v2.8.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.1...web-v2.8.0) (2026-05-13)
+
+
+### Features
+
+* **web:** scope class settings state per classId and wire invite/enroll flow ([dd78693](https://github.com/Tarikul3639/classflow-prime/commit/dd78693e1cf4cd26242e70d5194fa5b24c90e035))
+
 # [web-v2.7.1](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.0...web-v2.7.1) (2026-05-13)
 
 
