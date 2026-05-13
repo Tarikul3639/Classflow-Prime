@@ -9,8 +9,6 @@ import { meThunk } from "@/store/features/profile/thunks/fetch-user.thunk";
 import { Loader } from "@/components/ui/Loader";
 import { toast } from "sonner";
 
-import { WhatsNewDialog } from "@/components/ui/WhatsNewDialog";
-
 export default function MainLayout({
   children,
 }: {
@@ -57,12 +55,6 @@ export default function MainLayout({
 
       {/* Mobile Bottom Navbar */}
       <BottomNavbar />
-
-      {/* Whats a new */}
-      <WhatsNewDialog
-        open={whatsNewOpen}
-        onClose={() => setWhatsNewOpen(false)}
-      />
     </div>
   );
 }

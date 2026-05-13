@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { CalendarDays } from "lucide-react";
 import { useParams } from "next/navigation";
 
@@ -37,8 +37,8 @@ const DAYS: DayOfWeek[] = [
 
 export default function ClassRoutine() {
     const dispatch = useAppDispatch();
-
     const { classId } = useParams() as { classId: string };
+    const printRef = useRef<HTMLDivElement | null>(null);
 
     // ── Redux state ────────────────────────────────────────────────────────
 
@@ -195,6 +195,20 @@ export default function ClassRoutine() {
         }
     }
 
+    // ── Routine Print ──────────────────────────────────────────────────────────────
+
+    function onPrint() {
+        const printArea = printRef.current;
+        if (!printArea) return window.print();
+
+        const clone = printArea.cloneNode(true) as HTMLElement;
+        clone.id = "__print_clone__";
+        document.body.appendChild(clone);
+
+        window.print();
+
+        document.body.removeChild(clone);
+    }
     // ── Error ──────────────────────────────────────────────────────────────
 
     if (fetchError) {
@@ -227,10 +241,14 @@ export default function ClassRoutine() {
                                         const todayName = DAYS[new Date().getDay()];
                                         setActiveDay(todayName);
                                     }}
+                                    onPrint={onPrint}
                                 />
 
                                 {/* Desktop */}
-                                <div className="hidden px-4 py-6 md:block">
+                                <div
+                                    ref={printRef}
+                                    className="print-area hidden px-4 py-6 md:block"
+                                >
                                     <DesktopTable
                                         periods={routine.periods}
                                         schedule={routine.schedule}

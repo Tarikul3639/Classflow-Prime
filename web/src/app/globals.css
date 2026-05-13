@@ -82,12 +82,16 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+@media print {
+  body > *:not(#__print_clone__) {
+    display: none !important;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  #__print_clone__ {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    visibility: visible !important;
   }
 }
 
