@@ -1,6 +1,18 @@
 # [web-v2.8.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.0...web-v2.8.0) (2026-05-13)
 
 
+### Bug Fixes
+
+* **web:** Add subject color accents and improve UI ([1c63ad6](https://github.com/Tarikul3639/classflow-prime/commit/1c63ad66c478ece809e1c26e33ccd4926ed79ec6))
+
+
+### Features
+
+* **web:** Improve class UIs: skeletons, loading & filtering ([a23c7db](https://github.com/Tarikul3639/classflow-prime/commit/a23c7dbe4e622306b7408921068922dab186d916))
+
+# [web-v2.8.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.0...web-v2.8.0) (2026-05-13)
+
+
 ### Features
 
 * **web:** Improve class UIs: skeletons, loading & filtering ([a23c7db](https://github.com/Tarikul3639/classflow-prime/commit/a23c7dbe4e622306b7408921068922dab186d916))
