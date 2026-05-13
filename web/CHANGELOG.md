@@ -1,3 +1,18 @@
+# [web-v2.7.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.6.0...web-v2.7.0) (2026-05-13)
+
+
+### Bug Fixes
+
+* **web:** Add subject color accents and improve UI ([1c63ad6](https://github.com/Tarikul3639/classflow-prime/commit/1c63ad66c478ece809e1c26e33ccd4926ed79ec6))
+
+
+### Features
+
+* **web:** Add class routine module and UI ([40d0d9f](https://github.com/Tarikul3639/classflow-prime/commit/40d0d9f221f7c80314002707039633ab8ec41623))
+* **web:** Add print support to class routine ([de0867c](https://github.com/Tarikul3639/classflow-prime/commit/de0867c4ce1cd499539c432ee0fc175287f97a8d))
+* **web:** Improve class UIs: skeletons, loading & filtering ([a23c7db](https://github.com/Tarikul3639/classflow-prime/commit/a23c7dbe4e622306b7408921068922dab186d916))
+* **web:** Revise WhatsNewDialog updates and copy ([ee7ce9a](https://github.com/Tarikul3639/classflow-prime/commit/ee7ce9a5ad2c72ec30f2f50c97cd419f3745bfcd))
+
 # [web-v2.8.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.0...web-v2.8.0) (2026-05-13)
 
 
