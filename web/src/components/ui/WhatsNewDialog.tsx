@@ -26,152 +26,47 @@ const BADGE_STYLES = {
 
 const updates: UpdateItem[] = [
     {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-primary"
-            />
-        ),
+        icon: <Check size={15} strokeWidth={2.5} className="text-primary" />,
         iconBg: "bg-primary/10",
-        title: "New routine management system",
+        title: "Major routine system upgrade",
         description:
-            "Class routines are now fully redesigned with dynamic periods, slots, and weekly schedule support.",
+            "Introduced a fully redesigned routine system with dynamic periods, slot-based scheduling, weekly support, break periods, and inline editing for subjects, teachers, and rooms.",
         badge: "New",
     },
 
     {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-green-500"
-            />
-        ),
-        iconBg: "bg-green-50",
-        title: "Dynamic active day tabs",
+        icon: <Check size={15} strokeWidth={2.5} className="text-blue-500" />,
+        iconBg: "bg-blue-50",
+        title: "Improved routine UI (Desktop + Mobile)",
         description:
-            "Routine tabs now automatically show only active class days instead of all 7 weekdays.",
+            "Redesigned both desktop table and mobile timeline views with active day highlighting, cleaner layout, and better period visualization.",
         badge: "Improved",
     },
 
     {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-blue-500"
-            />
-        ),
-        iconBg: "bg-blue-50",
-        title: "Mobile routine timeline UI",
-        description:
-            "Added a cleaner mobile timeline view for daily class routines with active period highlighting.",
-        badge: "New",
-    },
-
-    {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-yellow-500"
-            />
-        ),
-        iconBg: "bg-yellow-50",
-        title: "Break period support",
-        description:
-            "You can now mark periods as breaks and display them separately in the routine layout.",
-        badge: "New",
-    },
-
-    {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-purple-500"
-            />
-        ),
+        icon: <Check size={15} strokeWidth={2.5} className="text-purple-500" />,
         iconBg: "bg-purple-50",
-        title: "Routine slot editing",
+        title: "Enhanced editing & controls",
         description:
-            "Teachers and admins can now edit subjects, teachers, rooms, and periods directly from the UI.",
+            "Teachers and admins can now directly edit routine slots and safely delete routines with confirmation dialogs.",
         badge: "Improved",
     },
 
     {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-red-500"
-            />
-        ),
-        iconBg: "bg-red-50",
-        title: "Routine deletion confirmation",
-        description:
-            "Added secure confirmation dialog before deleting an entire class routine.",
-        badge: "Fixed",
-    },
-
-    {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-primary"
-            />
-        ),
-        iconBg: "bg-primary/10",
-        title: "Skeleton loading for all class pages",
-        description:
-            "Added pixel-accurate skeleton screens for Updates, Faculty, Groups, Members, and Settings pages — matching the exact layout of each card and section.",
-        badge: "New",
-    },
-
-    {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-blue-500"
-            />
-        ),
-        iconBg: "bg-blue-50",
-        title: "Routine page skeleton UI",
-        description:
-            "Added full skeleton support for the class routine page — including the header, desktop table, mobile day tabs, and timeline slot cards.",
-        badge: "New",
-    },
-
-    {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-green-500"
-            />
-        ),
+        icon: <Check size={15} strokeWidth={2.5} className="text-green-500" />,
         iconBg: "bg-green-50",
-        title: "Proper skeleton → empty → list pattern",
+        title: "Consistent loading system",
         description:
-            "All pages now use a consistent mutually exclusive render pattern: skeleton on initial load, empty state when no data, and list when data is available.",
+            "Implemented a unified skeleton → empty → data pattern across all pages including routine, members, faculty, groups, and settings.",
         badge: "Improved",
     },
 
     {
-        icon: (
-            <Check
-                size={15}
-                strokeWidth={2.5}
-                className="text-yellow-500"
-            />
-        ),
+        icon: <Check size={15} strokeWidth={2.5} className="text-yellow-500" />,
         iconBg: "bg-yellow-50",
-        title: "Fixed class hero flash on refresh",
+        title: "Stability & UI fixes",
         description:
-            "Class layout now shows the hero skeleton immediately on refresh using a combined isLoading || !classDetails?.classId guard, preventing blank background flicker.",
+            "Fixed class hero flicker on refresh and improved overall loading stability with proper guard conditions.",
         badge: "Fixed",
     },
 ];
