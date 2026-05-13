@@ -1,3 +1,10 @@
+# [web-v2.7.1](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.7.0...web-v2.7.1) (2026-05-13)
+
+
+### Bug Fixes
+
+* **web:** Per-class fetching bucket + UI/loading fixes ([865a5c7](https://github.com/Tarikul3639/classflow-prime/commit/865a5c783146178a5e48274daf8bcd8592164620))
+
 # [web-v2.7.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.6.0...web-v2.7.0) (2026-05-13)
 
 
