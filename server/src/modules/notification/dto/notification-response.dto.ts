@@ -19,11 +19,11 @@ import { NotificationType } from '../../../database/entities/notification.entity
 export class NotificationMetadataDto {
     @IsOptional()
     @IsMongoId()
-    classId?: Types.ObjectId | null; // ← string → ObjectId
+    classId?: Types.ObjectId | null;
 
     @IsOptional()
     @IsMongoId()
-    updateId?: Types.ObjectId | null; // ← string → ObjectId
+    updateId?: Types.ObjectId | null;
 
     @IsOptional()
     @IsString()
@@ -45,77 +45,77 @@ export class NotificationMetadataDto {
 // ─── Single Notification ──────────────────────────────────
 export class NotificationDto {
     @IsMongoId()
-    _id: Types.ObjectId;
+    _id!: Types.ObjectId;
 
     @IsMongoId()
-    recipientId: Types.ObjectId;
+    recipientId!: Types.ObjectId;
 
     @IsOptional()
     @IsMongoId()
-    senderId: Types.ObjectId | null;
+    senderId?: Types.ObjectId | null;  // ! → ?
 
     @IsNotEmpty()
     @IsString()
-    title: string;
+    title!: string;
 
     @IsNotEmpty()
     @IsString()
-    message: string;
+    message!: string;
 
     @IsEnum(NotificationType)
-    type: NotificationType;
+    type!: NotificationType;
 
     @IsBoolean()
-    isRead: boolean;
+    isRead!: boolean;
 
     @IsOptional()
     @IsDateString()
-    readAt: Date | null;
+    readAt?: Date | null;  
 
     @IsOptional()
     @ValidateNested()
     @Type(() => NotificationMetadataDto)
-    metadata: NotificationMetadataDto;
+    metadata?: NotificationMetadataDto;  
 
     @IsOptional()
     @IsDateString()
-    createdAt?: Date;
+    createdAt?: Date;  
 
     @IsOptional()
     @IsDateString()
-    updatedAt?: Date;
+    updatedAt?: Date;  
 }
 
 // ─── Pagination Meta ──────────────────────────────────────
 export class NotificationPaginationMetaDto {
     @IsInt()
-    total: number;
+    total!: number;
 
     @IsInt()
-    unreadCount: number;
+    unreadCount!: number;
 
     @IsInt()
-    page: number;
+    page!: number;
 
     @IsInt()
-    limit: number;
+    limit!: number;
 
     @IsInt()
-    totalPages: number;
+    totalPages!: number;
 
     @IsBoolean()
-    hasMore: boolean;
+    hasMore!: boolean;
 }
 
-// ─── Generic API Wrapper (interceptor এর জন্য) ────────────
+// ─── Generic API Wrapper ──────────────────────────────────
 export class ApiResponseDto<T> {
     @IsBoolean()
-    success: boolean;
+    success!: boolean;
 
     @IsString()
-    message: string;
+    message!: string;
 
-    data: T;
+    data!: T;
 }
 
 // ─── GET /notifications ───────────────────────────────────
@@ -123,11 +123,11 @@ export class NotificationListDataDto {
     @IsArray()
     @ValidateNested({ each: true })
     @Type(() => NotificationDto)
-    data: NotificationDto[];
+    data!: NotificationDto[];
 
     @ValidateNested()
     @Type(() => NotificationPaginationMetaDto)
-    meta: NotificationPaginationMetaDto;
+    meta!: NotificationPaginationMetaDto;
 }
 
 export class GetNotificationsResponseDto extends ApiResponseDto<NotificationListDataDto> {
@@ -139,7 +139,7 @@ export class GetNotificationsResponseDto extends ApiResponseDto<NotificationList
 // ─── GET /notifications/unread-count ─────────────────────
 export class UnreadCountDataDto {
     @IsInt()
-    count: number;
+    count!: number;
 }
 
 export class UnreadCountResponseDto extends ApiResponseDto<UnreadCountDataDto> {

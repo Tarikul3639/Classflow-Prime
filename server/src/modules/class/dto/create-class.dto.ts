@@ -21,7 +21,7 @@ export class CreateClassRequestDto {
   @IsNotEmpty({ message: 'Class name is required' })
   @MinLength(3, { message: 'Class name must be at least 3 characters' })
   @MaxLength(30, { message: 'Class name must be at most 30 characters' })
-  className: string;
+  className!: string;
 
   @ApiProperty({
     example: 'Computer Science',
@@ -31,7 +31,7 @@ export class CreateClassRequestDto {
   @IsNotEmpty({ message: 'Department is required' })
   @MinLength(2, { message: 'Department must be at least 2 characters' })
   @MaxLength(30, { message: 'Department must be at most 30 characters' })
-  department: string;
+  department!: string;
 
   @ApiProperty({
     example: 'Fall 2024',
@@ -41,7 +41,7 @@ export class CreateClassRequestDto {
   @IsNotEmpty({ message: 'Semester is required' })
   @MinLength(2, { message: 'Semester must be at least 2 characters' })
   @MaxLength(10, { message: 'Semester must be at most 10 characters' })
-  semester: string;
+  semester!: string;
 
   @ApiProperty({
     example: 'https://example.com/cover-image.png',
@@ -78,16 +78,16 @@ export class CreateClassRequestDto {
 
 class CreateClassDataDto {
   @ApiProperty({ example: '65f1a2b3c4d5e6f7a8b9c0d1' })
-  classId: string;
+  classId!: string;
 }
 
 export class CreateClassResponseDto {
   @ApiProperty({ example: true })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ example: 'Class created successfully' })
-  message: string;
+  message!: string;
 
   @ApiProperty({ type: CreateClassDataDto })
-  data: CreateClassDataDto;
+  data!: CreateClassDataDto;
 }

@@ -13,26 +13,26 @@ import { Type } from 'class-transformer';
 export class ClassItemDto {
   @IsString()
   @IsNotEmpty()
-  classId: string;
+  classId!: string;
 
   @IsString()
-  department: string;
+  department!: string;
 
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @IsNumber()
-  students: number;
+  students!: number;
 
   @IsString()
-  instructor: string;
+  instructor!: string;
 
   @IsString()
-  semester: string;
+  semester!: string;
 
   @IsString()
-  themeColor: string;
+  themeColor!: string;
 
   @IsOptional()
   @IsString()
@@ -43,25 +43,25 @@ export class ClassItemDto {
   avatarUrl?: string | null;
 
   @IsEnum(['active', 'archived'])
-  status: 'active' | 'archived';
+  status!: 'active' | 'archived';
 }
 
 export class ClassesDataDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ClassItemDto)
-  classes: ClassItemDto[];
+  classes!: ClassItemDto[];
 }
 
 export class FetchClassesResponseDto {
   @IsBoolean()
-  success: boolean;
+  success!: boolean;
 
   @IsString()
   @IsNotEmpty()
-  message: string;
+  message!: string;
 
   @ValidateNested()
   @Type(() => ClassesDataDto)
-  data: ClassesDataDto;
+  data!: ClassesDataDto;
 }

@@ -95,6 +95,11 @@ export class Notification implements INotification {
                 of: String,
                 default: {},
             },
+            query: {
+                type: Map,
+                of: String,
+                default: {},
+            },
         },
         default: {},
         _id: false,
@@ -103,7 +108,9 @@ export class Notification implements INotification {
         classId?: Types.ObjectId | null;
         updateId?: Types.ObjectId | null;
         refModel?: 'ClassUpdate' | 'Class' | 'Enrollment' | 'Material' | null;
+        route?: string | null;
         params?: Record<string, string>;
+        query?: Record<string, string>;
     };
 }
 

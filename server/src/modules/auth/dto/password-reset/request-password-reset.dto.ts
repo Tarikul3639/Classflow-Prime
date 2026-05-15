@@ -10,5 +10,5 @@ export class RequestPasswordResetDto {
   @IsEmail()
   @IsNotEmpty()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 }

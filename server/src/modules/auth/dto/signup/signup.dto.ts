@@ -27,7 +27,7 @@ export class SignUpDto implements ISignUpDto {
   @MinLength(2, { message: 'Name must be at least 2 characters' })
   @MaxLength(60, { message: 'Name must be at most 60 characters' })
   @Transform(({ value }) => value?.trim())
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'tarikul@example.com',
@@ -36,7 +36,7 @@ export class SignUpDto implements ISignUpDto {
   @IsEmail({}, { message: 'Please provide a valid email' })
   @IsNotEmpty({ message: 'Email is required' })
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: 'StrongPass123',
@@ -46,7 +46,7 @@ export class SignUpDto implements ISignUpDto {
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
   @MinLength(6, { message: 'Password must be at least 6 characters' })
-  password: string;
+  password!: string;
 
   @ApiPropertyOptional({
     example: 'https://api.dicebear.com/7.x/avataaars/svg?seed=abc123',

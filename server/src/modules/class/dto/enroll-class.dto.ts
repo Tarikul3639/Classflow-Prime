@@ -20,7 +20,7 @@ export class EnrollClassRequestDto {
   @IsString()
   @IsNotEmpty({ message: 'Enroll code is required' })
   @Length(6, 6, { message: 'Enroll code must be exactly 6 characters' })
-  enrollCode: string;
+  enrollCode!: string;
 }
 
 /**
@@ -34,7 +34,7 @@ class EnrollClassDataDto {
   })
   @IsOptional()
   @IsString()
-  classId: string | null;
+  classId?: string | null;
 }
 
 /**
@@ -46,14 +46,14 @@ export class EnrollClassResponseDto {
     description: 'Indicates if the enroll operation was successful',
   })
   @IsBoolean()
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     example: 'Successfully enrolled the class',
     description: 'Message providing additional information',
   })
   @IsString()
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: 'Data returned upon enrolling',
@@ -61,5 +61,5 @@ export class EnrollClassResponseDto {
   })
   @ValidateNested()
   @Type(() => EnrollClassDataDto)
-  data: EnrollClassDataDto;
+  data!: EnrollClassDataDto;
 }

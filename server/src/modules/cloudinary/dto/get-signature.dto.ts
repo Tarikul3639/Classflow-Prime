@@ -6,7 +6,8 @@ export class GetSignatureRequestDto {
     @IsString()
     @MaxLength(100)
     @Matches(/^[a-zA-Z0-9/_-]+$/, {
-        message: 'subfolder can only contain letters, numbers, slash, underscore, and hyphen',
+        message:
+            'subfolder can only contain letters, numbers, slash, underscore, and hyphen',
     })
     subfolder?: string;
 }
@@ -14,15 +15,15 @@ export class GetSignatureRequestDto {
 // This DTO is used to define the structure of the response returned by the getSignature method in CloudinaryService. It includes the signature, timestamp, API key, cloud name, and folder path needed for client-side uploads to Cloudinary.
 
 export class GetSignature {
-    signature: string;
-    timestamp: number;
-    apiKey: string;
-    cloudName: string;
-    folder: string;
+    signature!: string;
+    timestamp!: number;
+    apiKey!: string;
+    cloudName!: string;
+    folder!: string;
 }
 
 export class GetSignatureResponseDto {
-    success: boolean;
-    message: string;
-    data: GetSignature;
+    success!: boolean;
+    message!: string;
+    data!: GetSignature;
 }

@@ -13,7 +13,7 @@ import { NotificationType } from '../../../database/entities/notification.entity
 
 export class CreateNotificationDto {
     @IsMongoId()
-    recipientId: string; // ← string
+    recipientId!: string;
 
     @IsOptional()
     @IsMongoId()
@@ -22,12 +22,12 @@ export class CreateNotificationDto {
     @IsNotEmpty()
     @IsString()
     @MaxLength(100)
-    title: string;
+    title!: string;
 
     @IsNotEmpty()
     @IsString()
     @MaxLength(500)
-    message: string;
+    message!: string;
 
     @IsOptional()
     @IsEnum(NotificationType)
@@ -36,8 +36,8 @@ export class CreateNotificationDto {
     @IsOptional()
     @IsObject()
     metadata?: {
-        classId?: string | null;   // ← string
-        updateId?: string | null;  // ← string
+        classId?: string | null;
+        updateId?: string | null;
         refModel?: 'ClassUpdate' | 'Class' | 'Enrollment' | 'Material' | null;
         route?: string | null;
         params?: Record<string, string>;
@@ -45,12 +45,11 @@ export class CreateNotificationDto {
     };
 }
 
-// OmitType is used to create a new DTO for bulk creation, excluding the recipientId since it will be an array of recipientIds instead.
 export class CreateBulkNotificationDto extends OmitType(
     CreateNotificationDto,
     ['recipientId'],
 ) {
     @IsArray()
     @IsMongoId({ each: true })
-    recipientIds: string[]; // ← string[]
+    recipientIds!: string[];
 }

@@ -8,91 +8,61 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
-/**
- * DTO for updating user profile
- */
 export class UpdateProfileDto {
-  /**
-   * User's full name
-   * @example John Doe
-   */
   @ApiProperty({
     example: 'John Doe',
     description: 'User full name',
   })
   @IsString({ message: 'Name must be a string' })
   @IsNotEmpty({ message: 'Name is required' })
-  name: string;
+  name!: string;
 
-  /**
-   * User's email address
-   * @example john.doe@example.com
-   * Note: Email is optional for profile updates, but if provided, it must be valid.
-   */
   @ApiProperty({
     example: 'john.doe@example.com',
     description: 'User email address',
   })
   @Transform(({ value }) => value?.toLowerCase().trim())
-  @IsEmail({}, { message: 'Email must be a valid email address' })
-  @IsNotEmpty({ message: 'Email is required' })
   @IsOptional()
-  email: string;
+  @IsEmail({}, { message: 'Email must be a valid email address' })
+  email?: string;
 
-  /**
-   * User's bio or description
-   * @example Software developer with a passion for open source.
-   */
   @ApiProperty({
     example: 'Software developer with a passion for open source.',
     description: 'User bio or description',
   })
+  @IsOptional()
   @IsString({ message: 'Bio must be a string' })
-  bio: string;
+  bio?: string;
 
-  /**
-   * URL to the user's avatar image
-   * @example https://example.com/avatar.jpg
-   * Note: Avatar URL is optional, but if provided, it should be a valid URL.
-   */
   @ApiProperty({
     example: 'https://example.com/avatar.jpg',
     description: 'URL to the user avatar image',
   })
-  @IsString({ message: 'Avatar URL must be a string' })
+  @IsOptional()
   @IsUrl({}, { message: 'Avatar URL must be a valid URL' })
-  avatarUrl: string;
+  avatarUrl?: string;
 }
 
-/**
- * DTO for the response after updating user profile
- */
-
 export class IUser {
-  _id: string;
-  name: string;
-  email: string;
+  _id!: string;
+  name!: string;
+  email!: string;
   avatarUrl?: string;
   bio?: string;
 }
-
-/**
- * DTO for the response after updating user profile
- */
 
 export class UpdateProfileResponseDto {
   @ApiProperty({
     example: true,
     description: 'Indicates if the profile update was successful',
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     example: 'Profile updated for user',
-    description:
-      'Response message indicating the result of the profile update operation',
+    description: 'Response message indicating the result of the profile update operation',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({
     example: {
@@ -104,7 +74,7 @@ export class UpdateProfileResponseDto {
     },
     description: 'Updated user profile data',
   })
-  data: {
+  data!: {
     user: IUser;
   };
 }

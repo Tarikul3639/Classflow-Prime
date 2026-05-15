@@ -20,11 +20,11 @@ import { UpdateCategory } from '../../../database/interface/update.interface';
 class PostedByDto {
   @ApiProperty({ example: 'u123' })
   @IsString()
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'Ariful Islam' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'https://cdn.example.com/avatar.jpg',
@@ -32,7 +32,7 @@ class PostedByDto {
     nullable: true,
   })
   @IsOptional()
-  avatarUrl: string | null;
+  avatarUrl!: string | null;
 }
 
 /**
@@ -41,11 +41,11 @@ class PostedByDto {
 class UpdateEngagementDto {
   @ApiProperty({ type: [String], example: ['url1', 'url2'] })
   @IsArray()
-  avatars: string[];
+  avatars!: string[];
 
   @ApiProperty({ example: 5 })
   @IsInt()
-  commentCount: number;
+  commentCount!: number;
 }
 
 /**
@@ -54,23 +54,23 @@ class UpdateEngagementDto {
 class MaterialDto {
   @ApiProperty({ example: 'm789' })
   @IsString()
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'Lecture_Notes.pdf' })
   @IsString()
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: 2500000, description: 'Size in bytes' })
   @IsInt()
-  size: number;
+  size!: number;
 
   @ApiProperty({ example: 'https://storage.example.com/file.pdf' })
   @IsUrl()
-  url: string;
+  url!: string;
 
   @ApiProperty({ example: 'pdf' })
   @IsString()
-  type: string;
+  type!: string;
 }
 
 /**
@@ -79,33 +79,33 @@ class MaterialDto {
 export class ClassUpdateItemDto {
   @ApiProperty({ example: 'up123' })
   @IsString()
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'c456' })
   @IsString()
-  classId: string;
+  classId!: string;
 
   @ApiProperty({ enum: UpdateCategory, example: 'exam' })
   @IsEnum(UpdateCategory)
-  category: UpdateCategory;
+  category!: UpdateCategory;
 
   @ApiProperty({ example: 'Midterm Exam Schedule' })
   @IsString()
   @IsNotEmpty()
-  title: string;
+  title!: string;
 
   @ApiProperty({ example: 'Please be advised the exam is moved to Wednesday.' })
   @IsString()
-  description: string;
+  description!: string;
 
   @ApiProperty({ example: false })
   @IsBoolean()
-  isPinned: boolean;
+  isPinned!: boolean;
 
   @ApiProperty({ type: PostedByDto })
   @ValidateNested()
   @Type(() => PostedByDto)
-  postedBy: PostedByDto;
+  postedBy!: PostedByDto;
 
   @ApiProperty({
     type: Date,
@@ -116,12 +116,12 @@ export class ClassUpdateItemDto {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
-  eventAt: Date | null;
+  eventAt!: Date | null;
 
   @ApiProperty({ type: Date, example: '2026-03-24T05:00:00Z' })
   @IsDate()
   @Type(() => Date)
-  createdAt: Date;
+  createdAt!: Date;
 
   @ApiProperty({ type: Date, example: '2026-03-24T06:00:00Z', required: false })
   @IsOptional()
@@ -153,7 +153,7 @@ export class FetchSingleClassUpdateDataDto {
   })
   @ValidateNested()
   @Type(() => ClassUpdateItemDto)
-  update: ClassUpdateItemDto; // Note: Not an array [ ]
+  update!: ClassUpdateItemDto;
 }
 
 /**
@@ -162,14 +162,14 @@ export class FetchSingleClassUpdateDataDto {
 export class FetchSingleClassUpdateResponseDto {
   @ApiProperty({ example: true })
   @IsBoolean()
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ example: 'Class update fetched successfully' })
   @IsString()
-  message: string;
+  message!: string;
 
   @ApiProperty({ type: FetchSingleClassUpdateDataDto })
   @ValidateNested()
   @Type(() => FetchSingleClassUpdateDataDto)
-  data: FetchSingleClassUpdateDataDto;
+  data!: FetchSingleClassUpdateDataDto;
 }

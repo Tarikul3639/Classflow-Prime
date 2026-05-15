@@ -17,7 +17,7 @@ export class SignInDto {
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @IsNotEmpty({ message: 'Email is required' })
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   /**
    * User's password
@@ -29,5 +29,5 @@ export class SignInDto {
   })
   @IsString({ message: 'Password must be a string' })
   @IsNotEmpty({ message: 'Password is required' })
-  password: string;
+  password!: string;
 }

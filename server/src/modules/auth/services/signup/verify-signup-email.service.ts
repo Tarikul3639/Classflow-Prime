@@ -27,9 +27,9 @@ import { TokenService } from '../token/token.service';
 import { EmailValidator } from '../../../../shared/utils/email-validator.util';
 
 export class SignUpResponseDto {
-  success: boolean;
-  message: string;
-  data: {
+  success!: boolean;
+  message!: string;
+  data!: {
     user: IUser | null;
     tokens: ITokens;
   };
@@ -39,14 +39,17 @@ export class SignUpResponseDto {
 export class VerifySignupEmailService {
   constructor(
     @InjectModel(User.name)
-    private readonly userModel: Model<UserDocument & IUser>,
+    private readonly userModel: Model<UserDocument>,
+
     @InjectModel(Account.name)
     private readonly accountModel: Model<AccountDocument>,
+
     @InjectModel(Verification.name)
     private readonly verificationModel: Model<VerificationDocument>,
+
     private readonly mailService: MailService,
     private readonly tokenService: TokenService,
-  ) {}
+  ) { }
 
   async execute(
     dto: VerifySignupEmailDto,
@@ -55,24 +58,19 @@ export class VerifySignupEmailService {
   ): Promise<SignUpResponseDto> {
     const email = dto.email.toLowerCase().trim();
 
-    // 1️) Validate email format
     if (!EmailValidator.isValidFormat(email)) {
       throw new BadRequestException('Invalid email format');
     }
 
-    // 2️) Disposable / temporary email block
     EmailValidator.validateOrThrow(email);
 
-    // 3️) Load user
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
 
-    // 4️) Already verified?
     if (user.emailVerified) {
       throw new BadRequestException('Email is already verified');
     }
 
-    // 5️) Load verification token
     const verificationToken = await this.verificationModel.findOne({
       identifier: email,
       value: dto.code,
@@ -83,19 +81,16 @@ export class VerifySignupEmailService {
       throw new ForbiddenException('Invalid or expired verification code');
     }
 
-    const mongoSession = await this.userModel.db.startSession();
+    const session = await this.userModel.db.startSession();
+
     try {
-      mongoSession.startTransaction();
+      session.startTransaction();
 
-      // 6️) Mark user as verified
       user.emailVerified = true;
-      await user.save({ session: mongoSession });
+      await user.save({ session });
 
-      // 7️) Delete used verification token
-      await verificationToken.deleteOne({ session: mongoSession });
+      await verificationToken.deleteOne({ session });
 
-      // 8️) Generate JWT tokens
-      // Note: TokenService'r createSession internally model save a Session document with hashed refresh token for security
       const tokens: ITokens = await this.tokenService.createSession(
         user._id.toString(),
         user.email,
@@ -104,13 +99,12 @@ export class VerifySignupEmailService {
         userAgent,
       );
 
-      // 9️) Optional: store refresh token in Account (hashed)
       let account = await this.accountModel
         .findOne({
           userId: user._id,
           providerId: AccountProvider.PASSWORD,
         })
-        .session(mongoSession);
+        .session(session);
 
       if (!account) {
         account = new this.accountModel({
@@ -120,15 +114,13 @@ export class VerifySignupEmailService {
         });
       }
 
-      await account.save({ session: mongoSession });
+      await account.save({ session });
 
-      await mongoSession.commitTransaction();
-      mongoSession.endSession();
+      await session.commitTransaction();
+      session.endSession();
 
-      // 10️) Optional welcome email
       await this.mailService.sendWelcomeEmail(user.email, user.name);
 
-      // 11️) Return sanitized user + tokens
       const userData: IUser = {
         _id: user._id,
         name: user.name,
@@ -137,6 +129,7 @@ export class VerifySignupEmailService {
         avatarUrl: user.avatarUrl,
         emailVerified: user.emailVerified,
       };
+
       return {
         success: true,
         message: 'Email verified successfully',
@@ -144,10 +137,11 @@ export class VerifySignupEmailService {
           user: userData,
           tokens,
         },
-      } as SignUpResponseDto;
-    } catch (err: unknown) {
-      await mongoSession.abortTransaction();
-      mongoSession.endSession();
+      };
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+
       throw new InternalServerErrorException(
         'Failed to verify email. Please try again.',
       );

@@ -16,7 +16,7 @@ export class VerifySignupEmailDto {
   @IsEmail()
   @IsNotEmpty()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example: '123456',
@@ -28,5 +28,5 @@ export class VerifySignupEmailDto {
   @IsNotEmpty()
   @Length(6, 6, { message: 'Code must be exactly 6 digits' })
   @Matches(/^\d{6}$/, { message: 'Code must contain only digits' })
-  code: string;
+  code!: string;
 }

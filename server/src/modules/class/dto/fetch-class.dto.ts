@@ -8,7 +8,7 @@ export class FetchClassRequestDto {
   })
   @IsNotEmpty({ message: 'Class ID is required' })
   @IsString({ message: 'Class ID must be a string' })
-  classId: string;
+  classId!: string;
 }
 
 class ClassDetailsDto {
@@ -16,44 +16,44 @@ class ClassDetailsDto {
     example: '123',
     description: 'Unique identifier of the class',
   })
-  classId: string;
+  classId!: string;
 
   @ApiProperty({
     example: 'Computer Science',
     description: 'Department offering the class',
   })
-  department: string;
+  department!: string;
 
   @ApiProperty({
     example: 'Introduction to Programming',
     description: 'Name of the class',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 30,
     description:
       'Number of student, assistant and teacher enrolled in the class',
   })
-  members: number;
+  members!: number;
 
   @ApiProperty({
     example: 'John Doe',
     description: 'Name of the instructor for the class',
   })
-  instructor: string;
+  instructor!: string;
 
   @ApiProperty({
     example: 'Fall 2024',
     description: 'Semester during which the class is offered',
   })
-  semester: string;
+  semester!: string;
 
   @ApiProperty({
     example: '#FF5733',
     description: 'Theme color associated with the class in HEX format',
   })
-  themeColor: string;
+  themeColor!: string;
 
   @ApiProperty({
     example: 'https://example.com/cover.jpg',
@@ -75,26 +75,26 @@ class ClassDetailsDto {
     example: 'active',
     description: 'Status of the class (e.g., active, archived)',
   })
-  status: 'active' | 'archived';
+  status!: 'active' | 'archived';
 
   @ApiProperty({
     example: true,
     description: 'Indicates if the current user is the instructor of the class',
   })
-  isInstructor: boolean;
+  isInstructor!: boolean;
 
   @ApiProperty({
     example: false,
     description: 'Indicates if the current user is an assistant of the class',
   })
-  isAssistant: boolean;
+  isAssistant!: boolean;
 }
 
 export class FetchClassDataDto {
   @ApiProperty({
     description: 'Detailed information about the class',
   })
-  class: ClassDetailsDto | null;
+  class!: ClassDetailsDto | null;
 }
 
 export class FetchClassResponseDto {
@@ -102,7 +102,7 @@ export class FetchClassResponseDto {
     example: true,
     description: 'Indicates whether the fetch operation was successful',
   })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({
     example: 'Class details fetched successfully',
@@ -110,10 +110,10 @@ export class FetchClassResponseDto {
       'Response message indicating the result of the fetch operation',
   })
   @IsString()
-  message: string;
+  message!: string;
 
   @ApiProperty({
     description: 'Data containing the class details',
   })
-  data: FetchClassDataDto;
+  data!: FetchClassDataDto;
 }

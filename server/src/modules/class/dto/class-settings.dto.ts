@@ -1,31 +1,30 @@
-// class-settings.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LeaveClassResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'You have left the class.' })
-    message: string;
+    message!: string;
 }
 
 export class DeleteClassResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'Class deleted successfully.' })
-    message: string;
+    message!: string;
 }
 
 export class MarkClassAsEndedResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'Class marked as ended.' })
-    message: string;
+    message!: string;
 
     @ApiProperty({ example: { classId: '123', isEnded: true } })
-    data: {
+    data!: {
         classId: string;
         isEnded: boolean;
     };
@@ -33,13 +32,13 @@ export class MarkClassAsEndedResponseDto {
 
 export class FetchClassSettingsResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'Class code fetched successfully.' })
-    message: string;
+    message!: string;
 
     @ApiProperty({ example: { code: 'ABC123' } })
-    data: {
+    data!: {
         code: string;
         isJoiningAllowed: boolean;
     };
@@ -47,25 +46,26 @@ export class FetchClassSettingsResponseDto {
 
 export class RegenerateClassCodeResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
+
     @ApiProperty({ example: 'Class code regenerated successfully.' })
-    message: string;
+    message!: string;
+
     @ApiProperty({ example: { code: 'NEW456' } })
-    data: {
+    data!: {
         code: string;
     };
 }
 
-
 export class ToggleJoiningAllowedResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'Joining allowed status updated successfully.' })
-    message: string;
+    message!: string;
 
     @ApiProperty({ example: { classId: '123', isJoiningAllowed: true } })
-    data: {
+    data!: {
         classId: string;
         isJoiningAllowed: boolean;
     };

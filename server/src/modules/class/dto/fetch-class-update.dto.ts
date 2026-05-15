@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsString,
-  IsEnum,
   IsBoolean,
   IsOptional,
   IsArray,
@@ -21,7 +20,7 @@ export class FetchClassUpdateRequestDto {
   })
   @IsNotEmpty()
   @IsString()
-  classId: string;
+  classId!: string;
 }
 
 /**
@@ -29,16 +28,16 @@ export class FetchClassUpdateRequestDto {
  */
 class PostedByDto {
   @ApiProperty({ example: 'u123', description: 'Unique ID of the user' })
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'Ariful Islam', description: 'Name of the user' })
-  name: string;
+  name!: string;
 
   @ApiProperty({
     example: 'https://cdn.example.com/avatar.jpg',
     required: false,
   })
-  avatarUrl: string | null;
+  avatarUrl!: string | null;
 }
 
 /**
@@ -50,11 +49,11 @@ class UpdateEngagementDto {
     example: ['url1', 'url2'],
     description: 'List of avatar URLs of commenter',
   })
-  avatars: string[];
+  avatars!: string[];
 
   @ApiProperty({ example: 5, description: 'Number of comments' })
   @IsInt()
-  commentCount: number;
+  commentCount!: number;
 }
 
 /**
@@ -62,20 +61,20 @@ class UpdateEngagementDto {
  */
 class MaterialDto {
   @ApiProperty({ example: 'a456', description: 'Unique ID of the material' })
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'Lecture_Notes.pdf' })
-  name: string;
+  name!: string;
 
   @ApiProperty({ example: '2.5 MB' })
-  size: string;
+  size!: string;
 
   @ApiProperty({ example: 'https://storage.example.com/file.pdf' })
   @IsUrl()
-  url: string;
+  url!: string;
 
   @ApiProperty({ example: 'pdf' })
-  type: string;
+  type!: string;
 }
 
 /**
@@ -83,37 +82,37 @@ class MaterialDto {
  */
 export class ClassUpdateItemDto {
   @ApiProperty({ example: 'up123' })
-  _id: string;
+  _id!: string;
 
   @ApiProperty({ example: 'c456' })
-  classId: string;
+  classId!: string;
 
   @ApiProperty({ enum: UpdateCategory, example: 'exam' })
-  category: UpdateCategory;
+  category!: UpdateCategory;
 
   @ApiProperty({ example: 'Midterm Exam Schedule' })
-  title: string;
+  title!: string;
 
   @ApiProperty({ example: 'Please be advised the exam is moved to Wednesday.' })
-  description: string;
+  description!: string;
 
   @ApiProperty({ example: false })
   @IsBoolean()
-  isPinned: boolean;
+  isPinned!: boolean;
 
   @ApiProperty({ type: PostedByDto })
-  postedBy: PostedByDto;
+  postedBy!: PostedByDto;
 
   @ApiProperty({ example: '2026-03-24T05:43:38Z', required: false })
-  eventAt: string | null;
+  eventAt!: string | null;
 
   @ApiProperty({ example: '2026-03-24T05:00:00Z' })
   @IsString()
-  createdAt: string;
+  createdAt!: string;
 
   @ApiProperty({ example: '2026-03-24T05:43:38Z' })
   @IsString()
-  updatedAt: string;
+  updatedAt!: string;
 
   @ApiProperty({ type: [MaterialDto], required: false })
   @IsOptional()
@@ -133,7 +132,7 @@ export class FetchClassUpdateDataDto {
     type: [ClassUpdateItemDto],
     description: 'List of updates for the class',
   })
-  update: ClassUpdateItemDto[];
+  update!: ClassUpdateItemDto[];
 }
 
 /**
@@ -141,11 +140,11 @@ export class FetchClassUpdateDataDto {
  */
 export class FetchClassUpdateResponseDto {
   @ApiProperty({ example: true })
-  success: boolean;
+  success!: boolean;
 
   @ApiProperty({ example: 'Class updates fetched successfully' })
-  message: string;
+  message!: string;
 
   @ApiProperty({ type: FetchClassUpdateDataDto })
-  data: FetchClassUpdateDataDto;
+  data!: FetchClassUpdateDataDto;
 }

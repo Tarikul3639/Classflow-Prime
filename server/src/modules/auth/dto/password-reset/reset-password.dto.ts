@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsString,
   MaxLength,
-  Matches,
   MinLength,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
@@ -17,7 +16,7 @@ export class ResetPasswordDto {
   @IsEmail()
   @IsNotEmpty()
   @Transform(({ value }) => value?.toLowerCase().trim())
-  email: string;
+  email!: string;
 
   @ApiProperty({
     example:
@@ -28,7 +27,7 @@ export class ResetPasswordDto {
   @IsNotEmpty()
   @MinLength(20)
   @MaxLength(255)
-  resetToken: string;
+  resetToken!: string;
 
   @ApiProperty({
     example: 'NewStrongPass123',
@@ -38,5 +37,5 @@ export class ResetPasswordDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(6, { message: 'Password must be at least 6 characters' })
-  newPassword: string;
+  newPassword!: string;
 }

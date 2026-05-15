@@ -1,5 +1,3 @@
-// toggle-pin-class-update.dto.ts
-
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean } from 'class-validator';
 
@@ -7,27 +5,27 @@ import { IsBoolean } from 'class-validator';
 export class TogglePinClassUpdateRequestDto {
     @ApiProperty({ description: 'New pin status', example: true })
     @IsBoolean()
-    isPinned: boolean;
+    isPinned!: boolean;
 }
 
 // Response DTO
 class UpdatedPinData {
     @ApiProperty({ description: 'The ID of the update', example: '65f1...' })
-    updateId: string; 
+    updateId!: string;
 
     @ApiProperty({ description: 'Indicates if the update is now pinned', example: true })
-    isPinned: boolean;
+    isPinned!: boolean;
 }
 
 export class TogglePinClassUpdateResponseDto {
     @ApiProperty({ example: true })
-    success: boolean;
+    success!: boolean;
 
     @ApiProperty({ example: 'Pin status updated successfully' })
-    message: string;
+    message!: string;
 
     @ApiProperty({ type: UpdatedPinData })
-    data: {
-        update: UpdatedPinData; 
+    data!: {
+        update: UpdatedPinData;
     };
 }
