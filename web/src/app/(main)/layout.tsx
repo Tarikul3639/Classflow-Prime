@@ -14,8 +14,6 @@ export default function MainLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-
   const dispatch = useAppDispatch();
   const { loading } = useAppSelector((state) => state.profile.fetchUser.status);
   const userId = useAppSelector((state) => state.profile.fetchUser.user?._id);
