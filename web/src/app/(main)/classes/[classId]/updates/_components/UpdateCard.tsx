@@ -10,6 +10,7 @@ import { RichTextContent } from "@/components/ui/RichTextContent";
 
 interface UpdateCardProps {
   updateId: string;
+  isAdmin?: boolean;
   isPast?: boolean;
   icon?: LucideIcon;
   iconBg?: string;
@@ -26,10 +27,11 @@ interface UpdateCardProps {
   onTogglePin?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
-  showActions?: boolean;
+  onCopy?: () => void;
 }
 
 export default function UpdateCard({
+  isAdmin = false,
   updateId,
   isPast = false,
   icon: Icon,
@@ -43,10 +45,10 @@ export default function UpdateCard({
   isPinned,
   createdAt,
   updatedAt,
+  onCopy,
   onTogglePin,
   onEdit,
   onDelete,
-  showActions,
 }: UpdateCardProps) {
   return (
     <article id={updateId} className={`bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col gap-3 active:bg-slate-50 transition-all overflow-hidden ${isPast ? "opacity-50 hover:opacity-90" : "hover:shadow-md"}`}>
@@ -95,14 +97,14 @@ export default function UpdateCard({
           </div>
         </div>
 
-        {showActions && (
-          <UpdateActionMenu
-            isPinned={isPinned}
-            onTogglePin={onTogglePin}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        )}
+        <UpdateActionMenu
+          isAdmin={isAdmin}
+          isPinned={isPinned}
+          onTogglePin={onTogglePin}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onCopy={onCopy}
+        />
       </div>
 
       {/* Schedule / Event */}

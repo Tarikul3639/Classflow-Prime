@@ -1,4 +1,4 @@
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 
 import {
     DropdownMenu,
@@ -27,6 +27,7 @@ interface PeriodSlotCardProps {
     className?: string;
     onEdit: (slot: RoutineSlot) => void;
     onRemove: (slot: RoutineSlot) => void;
+    addRoutineToGoogleCalendar: (slotId: string, periodNo: number) => void;
 }
 
 /**
@@ -84,6 +85,7 @@ export function PeriodSlotCard({
     className,
     onEdit,
     onRemove,
+    addRoutineToGoogleCalendar,
 }: PeriodSlotCardProps) {
     const isActive = checkIsActive(period, activeDay);
 
@@ -156,22 +158,23 @@ export function PeriodSlotCard({
                         : undefined
                 }
             >
-                {/* Admin menu */}
-                {isAdmin && (
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button
-                                className={cn(
-                                    "absolute top-2.5 right-2.5 p-1.5 rounded-lg opacity-40 hover:opacity-100 transition-opacity cursor-pointer outline-none",
-                                    isActive ? "hover:bg-white/10" : "hover:bg-black/5",
-                                )}
-                                aria-label="More options"
-                            >
-                                <MoreVertical size={14} />
-                            </button>
-                        </DropdownMenuTrigger>
+                {/* menu */}
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button
+                            className={cn(
+                                "absolute top-2.5 right-2.5 p-1.5 rounded-lg opacity-40 hover:opacity-100 transition-opacity cursor-pointer outline-none",
+                                isActive ? "hover:bg-white/10" : "hover:bg-black/5",
+                            )}
+                            aria-label="More options"
+                        >
+                            <MoreVertical size={14} />
+                        </button>
+                    </DropdownMenuTrigger>
 
-                        <DropdownMenuContent align="end" className="w-36">
+                    <DropdownMenuContent align="end" className="w-44 border border-gray-300">
+
+                        {isAdmin && (
                             <DropdownMenuItem
                                 onClick={() => onEdit(slot)}
                                 className="gap-2.5 cursor-pointer"
@@ -179,9 +182,20 @@ export function PeriodSlotCard({
                                 <Pencil size={13} className="text-muted-foreground" />
                                 Edit
                             </DropdownMenuItem>
+                        )}
 
-                            <DropdownMenuSeparator />
+                        {/* ADD to google Calender */}
+                        <DropdownMenuItem
+                            onClick={() => addRoutineToGoogleCalendar(slot.slotId, slot.periodNo)}
+                            className="gap-2.5 cursor-pointer"
+                        >
+                            <Plus size={13} className="text-muted-foreground" />
+                            Add to Calendar
+                        </DropdownMenuItem>
 
+                        <DropdownMenuSeparator />
+
+                        {isAdmin && (
                             <DropdownMenuItem
                                 onClick={() => onRemove(slot)}
                                 className="gap-2.5 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
@@ -189,9 +203,10 @@ export function PeriodSlotCard({
                                 <Trash2 size={13} />
                                 Remove
                             </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                )}
+                        )}
+
+                    </DropdownMenuContent>
+                </DropdownMenu>
 
                 {/* Subject */}
                 <p

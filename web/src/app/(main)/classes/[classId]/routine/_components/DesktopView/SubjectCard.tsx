@@ -1,6 +1,6 @@
 import type { RoutineSlot } from "@/types/routine.types";
 import type { SubjectColor } from "../SubjectColors";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,11 +21,13 @@ function getInitials(name: string): string {
 }
 
 interface SubjectCardProps {
+    isAdmin?: boolean;
     day: string;
     slot: RoutineSlot | undefined;
     color: SubjectColor | undefined;
     onEdit: (day: string, slot: RoutineSlot) => void;
     onRemove: (slot: RoutineSlot) => void;
+    addRoutineToGoogleCalendar: (slotId: string, periodNo: number) => void;
 }
 
 const FALLBACK_COLOR: SubjectColor = {
@@ -34,7 +36,7 @@ const FALLBACK_COLOR: SubjectColor = {
     avatarText: "hsl(220, 55%, 28%)",
 };
 
-export function SubjectCard({ day, slot, color, onEdit, onRemove }: SubjectCardProps) {
+export function SubjectCard({ day, slot, color, onEdit, onRemove, addRoutineToGoogleCalendar, isAdmin }: SubjectCardProps) {
     if (!slot) {
         return (
             <div className="h-full min-h-22.5 rounded-md border border-dashed border-gray-200 dark:border-gray-800 flex items-center justify-center">
@@ -72,22 +74,37 @@ export function SubjectCard({ day, slot, color, onEdit, onRemove }: SubjectCardP
                     </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-44 border border-gray-300">
+                    {isAdmin && (
+                        <DropdownMenuItem
+                            onClick={() => onEdit(day, slot)}
+                            className="text-xs gap-2 cursor-pointer"
+                        >
+                            <Pencil size={11} className="text-muted-foreground" />
+                            Edit
+                        </DropdownMenuItem>
+                    )}
+
+                    {/* ADD to google Calender */}
                     <DropdownMenuItem
-                        onClick={() => onEdit(day, slot)}
-                        className="text-xs gap-2 cursor-pointer"
+                        onClick={() => addRoutineToGoogleCalendar(slot.slotId, slot.periodNo)}
+                        className="gap-2.5 cursor-pointer"
                     >
-                        <Pencil size={11} className="text-muted-foreground" />
-                        Edit
+                        <Plus size={13} className="text-muted-foreground" />
+                        Add to Calendar
                     </DropdownMenuItem>
+
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        onClick={() => onRemove(slot)}
-                        className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
-                    >
-                        <Trash2 size={11} />
-                        Remove
-                    </DropdownMenuItem>
+
+                    {isAdmin && (
+                        <DropdownMenuItem
+                            onClick={() => onRemove(slot)}
+                            className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                        >
+                            <Trash2 size={11} />
+                            Remove
+                        </DropdownMenuItem>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 

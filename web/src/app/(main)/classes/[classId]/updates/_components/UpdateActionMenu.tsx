@@ -1,6 +1,6 @@
 "use client";
 
-import { MoreVertical, Pin, PinOff, Pencil, Trash2 } from "lucide-react";
+import { MoreVertical, Pin, PinOff, Pencil, Trash2, Copy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,14 +10,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface UpdateActionMenuProps {
+  isAdmin?: boolean;
   isPinned?: boolean;
+  onCopy?: () => void;
   onTogglePin?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
 }
 
 export default function UpdateActionMenu({
+  isAdmin = false,
   isPinned,
+  onCopy,
   onTogglePin,
   onEdit,
   onDelete,
@@ -30,30 +34,43 @@ export default function UpdateActionMenu({
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-40">
-        {isPinned ? (
-          <DropdownMenuItem onClick={onTogglePin}>
-            <PinOff size={14} />
-            Unpin
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onClick={onTogglePin}>
-            <Pin size={14} />
-            Pin
+      <DropdownMenuContent align="end" className="w-40 border border-gray-300">
+        {isAdmin &&
+          (isPinned ? (
+            <DropdownMenuItem onClick={onTogglePin}>
+              <PinOff size={14} />
+              Unpin
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={onTogglePin}>
+              <Pin size={14} />
+              Pin
+            </DropdownMenuItem>
+          ))}
+
+        {isAdmin && (
+          <DropdownMenuItem onClick={onEdit}>
+            <Pencil size={14} />
+            Edit
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuItem onClick={onEdit}>
-          <Pencil size={14} />
-          Edit
+        <DropdownMenuItem onClick={onCopy}>
+          <Copy size={14} />
+          Copy
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator /> 
+        <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={onDelete} className="text-red-500 focus:text-red-500">
-          <Trash2 size={14} />
-          Delete
-        </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem
+            onClick={onDelete}
+            className="text-red-500 focus:text-red-500"
+          >
+            <Trash2 size={14} />
+            Delete
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

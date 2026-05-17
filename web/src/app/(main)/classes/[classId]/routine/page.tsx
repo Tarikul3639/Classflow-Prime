@@ -30,9 +30,16 @@ import { editSlot } from "@/store/features/classes/thunks/routine/editSlotThunk"
 import { removeSlot } from "@/store/features/classes/thunks/routine/removeSlotThunk";
 import { deleteRoutine } from "@/store/features/classes/thunks/routine/deleteRoutine.thunk";
 
+import { addRoutineToGoogleCalendar } from "@/utils/googleCalendar.utils";
+
 const DAYS: DayOfWeek[] = [
-    "Sunday", "Monday", "Tuesday", "Wednesday",
-    "Thursday", "Friday", "Saturday",
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
 ];
 
 export default function ClassRoutine() {
@@ -58,9 +65,8 @@ export default function ClassRoutine() {
         (state) => state.classes.routine.editSlot,
     );
 
-    const { loading: deletingRoutine, error: deleteRoutineError } = useAppSelector(
-        (state) => state.classes.routine.deleteRoutine,
-    );
+    const { loading: deletingRoutine, error: deleteRoutineError } =
+        useAppSelector((state) => state.classes.routine.deleteRoutine);
 
     // Class details for admin check and refetching on class change
     const classEntry = useAppSelector(
@@ -78,7 +84,8 @@ export default function ClassRoutine() {
     // ── Memoized subject wise color map ────────────────────────────────────
 
     const colorMap = useMemo(
-        () => buildSubjectColorMap(routine?.schedule.map((d) => d.slots ?? []) ?? []),
+        () =>
+            buildSubjectColorMap(routine?.schedule.map((d) => d.slots ?? []) ?? []),
         [routine?.schedule],
     );
 
@@ -179,7 +186,9 @@ export default function ClassRoutine() {
         }
     }
 
-    async function handleCreateRoutine(periods: Omit<RoutinePeriod, "periodId">[]) {
+    async function handleCreateRoutine(
+        periods: Omit<RoutinePeriod, "periodId">[],
+    ) {
         try {
             await dispatch(createRoutine({ classId, periods })).unwrap();
             setCreateOpen(false);
@@ -250,6 +259,7 @@ export default function ClassRoutine() {
                                     className="print-area hidden px-4 py-6 md:block"
                                 >
                                     <DesktopTable
+                                        isAdmin={isAdmin}
                                         periods={routine.periods}
                                         schedule={routine.schedule}
                                         loading={fetching}
@@ -257,6 +267,9 @@ export default function ClassRoutine() {
                                         colorMap={colorMap}
                                         onEdit={onEdit}
                                         onRemove={onRemove}
+                                        addRoutineToGoogleCalendar={(slotId, periodNo) =>
+                                            addRoutineToGoogleCalendar(routine, slotId, periodNo)
+                                        }
                                     />
                                 </div>
 
@@ -295,6 +308,9 @@ export default function ClassRoutine() {
                                                                 color={colorMap.get(slot.subject)}
                                                                 onEdit={(slot) => onEdit(activeDay, slot)}
                                                                 onRemove={(slot) => onRemove(slot)}
+                                                                addRoutineToGoogleCalendar={(slotId, periodNo) =>
+                                                                    addRoutineToGoogleCalendar(routine, slotId, periodNo)
+                                                                }
                                                             />
                                                         );
                                                     })}
