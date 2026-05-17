@@ -10,6 +10,7 @@ const todayName = new Date().toLocaleDateString("en-US", {
 });
 
 interface DesktopTableProps {
+    isAdmin?: boolean;
     periods: RoutinePeriod[];
     schedule: DaySchedule[];
     loading: boolean;
@@ -17,6 +18,7 @@ interface DesktopTableProps {
     colorMap: Map<string, SubjectColor>;
     onEdit: (day: string, slot: RoutineSlot) => void;
     onRemove: (slot: RoutineSlot) => void;
+    addRoutineToGoogleCalendar: (slotId: string, periodNo: number) => void;
 }
 
 function BreakCell({ label }: { label: string }) {
@@ -31,6 +33,7 @@ function BreakCell({ label }: { label: string }) {
 }
 
 export function DesktopTable({
+    isAdmin = false,
     periods,
     schedule,
     loading,
@@ -38,6 +41,7 @@ export function DesktopTable({
     colorMap,
     onEdit,
     onRemove,
+    addRoutineToGoogleCalendar,
 }: DesktopTableProps) {
 
     if (loading) {
@@ -144,11 +148,13 @@ export function DesktopTable({
                                             className="px-1.5 py-2 align-top border-l border-slate-100"
                                         >
                                             <SubjectCard
+                                                isAdmin={isAdmin}
                                                 day={dayData.day}
                                                 slot={slot}
                                                 color={colorMap.get(slot?.subject ?? "")}
                                                 onEdit={onEdit}
                                                 onRemove={onRemove}
+                                                addRoutineToGoogleCalendar={addRoutineToGoogleCalendar}
                                             />
                                         </td>
                                     );

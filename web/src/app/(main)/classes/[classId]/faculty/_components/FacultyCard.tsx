@@ -11,18 +11,24 @@ import ActionMenu from "./ActionMenu";
 import type { ClassFaculty } from "@/store/features/classes/class.types";
 
 interface FacultyCardProps {
+  isAdmin?: boolean;
   faculty: ClassFaculty;
   onTogglePin?: () => void;
+  onSaveContact?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onCopy?: () => void;
   showActions?: boolean;
 }
 
 export const FacultyCard = ({
+  isAdmin = false,
   faculty,
+  onSaveContact,
   onDelete,
   onEdit,
   onTogglePin,
+  onCopy,
   showActions = true,
 }: FacultyCardProps) => {
   const [copied, setCopied] = useState<string | null>(null);
@@ -74,9 +80,12 @@ export const FacultyCard = ({
         {showActions && (
           <div className="ml-auto">
             <ActionMenu
+              isAdmin={isAdmin}
               onDelete={onDelete}
               onEdit={onEdit}
               onTogglePin={onTogglePin}
+              onSaveContact={onSaveContact}
+              onCopy={onCopy}
             />
           </div>
         )}

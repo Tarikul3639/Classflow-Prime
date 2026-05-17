@@ -27,7 +27,7 @@ import {
 } from "@/store/features/classes/selectors/class-updates.selectors";
 
 // Types & Configurations
-import { UPDATE_TYPE_CONFIG, UpdateCategory } from "@/types/update.types";
+import { UPDATE_TYPE_CONFIG, ClassUpdateItem, UpdateCategory } from "@/types/update.types";
 
 interface Filter {
   id: string;
@@ -130,6 +130,30 @@ export default function UpdatesPage() {
     });
   };
 
+  const handleCopy = async (update: ClassUpdateItem) => {
+    try {
+      const plainDescription = update.description
+        .replace(/<[^>]*>/g, "") // remove HTML tags
+        .trim();
+
+      const info = [
+        `Title: ${update.title}`,
+        `Description: ${plainDescription}`,
+        `Category: ${update.category}`,
+        update.eventAt ? `Event Time: ${new Date(update.eventAt).toLocaleString()}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n");
+
+      await navigator.clipboard.writeText(info);
+
+      toast.success("Update copied successfully");
+    } catch (err) {
+      console.error("Copy failed:", err);
+      toast.error("Failed to copy update");
+    }
+  };
+
   const handleDelete = (updateId: string) => {
     const promise = dispatch(
       deleteSingleClassUpdate({ classId, updateId })
@@ -199,6 +223,7 @@ export default function UpdatesPage() {
                     return (
                       <UpdateCard
                         key={update._id}
+                        isAdmin={isAdmin}
                         updateId={update._id}
                         isPast={!!isPast}
                         icon={config.icon}
@@ -219,7 +244,7 @@ export default function UpdatesPage() {
                           router.push(`/classes/${classId}/updates/${update._id}`)
                         }
                         onDelete={() => handleDelete(update._id)}
-                        showActions={isAdmin}
+                        onCopy={() => handleCopy(update)}
                       />
                     );
                   })}

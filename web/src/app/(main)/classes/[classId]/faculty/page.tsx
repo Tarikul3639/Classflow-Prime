@@ -21,6 +21,7 @@ import {
     selectClassFaculties,
     selectIsFacultyFetched,
 } from "@/store/features/classes/selectors/class-faculty.selectors";
+import { ClassFaculty } from "@/store/features/classes/class.types";
 
 export default function FacultyPage() {
     const router = useRouter();
@@ -74,6 +75,49 @@ export default function FacultyPage() {
             error: (err) => err || "Failed to delete faculty",
         });
     };
+
+    // ── Save Contact Handlers ─────────────────────────────────────────────────────────
+    const handleSaveContact = (faculty: ClassFaculty) => {
+        const vCard = [
+            "BEGIN:VCARD",
+            "VERSION:3.0",
+            `FN:${faculty.name}`,
+            `TITLE:${faculty.designation}`,
+            "ORG:ClassFlow",
+            `TEL:${faculty.phone}`,
+            `EMAIL:${faculty.email}`,
+            `NOTE:Location: ${faculty.location} | Classroom Code: ${faculty.classroomCode}`,
+            `PHOTO:${faculty.avatarUrl}`,
+            "END:VCARD",
+        ].join("\n");
+
+        const blob = new Blob([vCard], { type: "text/vcard" });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${faculty.name}.vcf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+    };
+
+    // ── Copy Info Handler ─────────────────────────────────────────────────────────
+    const handleInfoCopy = (faculty: ClassFaculty) => {
+        const info = `Name: ${faculty.name}\nDesignation: ${faculty.designation}\nLocation: ${faculty.location}\nEmail: ${faculty.email}\nPhone: ${faculty.phone}\nClassroom Code: ${faculty.classroomCode}`;
+
+        navigator.clipboard
+            .writeText(info)
+            .then(() => {
+                toast.success("Faculty information copied to clipboard");
+            })
+            .catch((err) => {
+                console.error("Failed to copy:", err);
+                toast.error("Failed to copy faculty information");
+            });
+    }
 
     // ── Render ─────────────────────────────────────────────────────────────────
     return (
@@ -136,6 +180,7 @@ export default function FacultyPage() {
                         {faculties.map((faculty) => (
                             <FacultyCard
                                 key={faculty.facultyId}
+                                isAdmin={isAdmin}
                                 faculty={faculty}
                                 onDelete={() => handleDelete(faculty.facultyId)}
                                 onEdit={() =>
@@ -146,7 +191,8 @@ export default function FacultyPage() {
                                 onTogglePin={() => {
                                     console.log("Toggle pin:", faculty.facultyId);
                                 }}
-                                showActions={isAdmin}
+                                onSaveContact={() => handleSaveContact(faculty)}
+                                onCopy={() => handleInfoCopy(faculty)}
                             />
                         ))}
                     </div>
