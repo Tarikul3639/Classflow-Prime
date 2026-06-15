@@ -1,5 +1,5 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiSecurity } from '@nestjs/swagger';
 
 import { 
   CreateClassUpdateRequestDto, 
@@ -20,12 +20,17 @@ export class CreateClassUpdateController {
   @Post(':classId/updates')
   @UseGuards(HybridAuthGuard)
   @ApiOperation({ summary: 'Create a new update for a class' })
-  @ApiResponse({ status: 201, description: 'Class update created successfully' })
+  @ApiParam({ name: 'classId', example: '69f25d97124a37014d7f03d7', description: 'Target class ID' })
+  @ApiSecurity('JWT-auth')
+  @ApiSecurity('x-api-key')
+  @ApiResponse({ status: 201, description: 'Class update created successfully', type: CreateClassUpdateResponseDto })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
   async createClassUpdate(
     @CurrentActor() actor: IActor,
     @Param('classId') classId: string,
     @Body() dto: CreateClassUpdateRequestDto,
   ): Promise<CreateClassUpdateResponseDto> {
-    return await this.createClassUpdateService.execute(classId, actor, dto);
+    return this.createClassUpdateService.execute(classId, actor, dto);
   }
 }
