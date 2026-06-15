@@ -1,3 +1,10 @@
+# [web-v2.10.2](https://github.com/Tarikul3639/Classflow-Prime/compare/web-v2.10.1...web-v2.10.2) (2026-06-15)
+
+
+### Bug Fixes
+
+* Phone app icon view ([9bf4342](https://github.com/Tarikul3639/Classflow-Prime/commit/9bf434227605dc8384f84bd3166fc07328cd12b3))
+
 # [web-v2.10.1](https://github.com/Tarikul3639/Classflow-Prime/compare/web-v2.10.0...web-v2.10.1) (2026-06-15)
 
 
