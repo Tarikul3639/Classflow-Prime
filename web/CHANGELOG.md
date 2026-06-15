@@ -1,3 +1,11 @@
+# [web-v2.10.0](https://github.com/Tarikul3639/Classflow-Prime/compare/web-v2.9.0...web-v2.10.0) (2026-06-15)
+
+
+### Features
+
+* **agent:** redesign agent management and simplify state handling ([e21386c](https://github.com/Tarikul3639/Classflow-Prime/commit/e21386c57232771c95277d058891ac899969f9ea))
+* **auth,agent,class,web:** add hybrid auth and agent management system ([1c87932](https://github.com/Tarikul3639/Classflow-Prime/commit/1c87932b022ae2cb72b02d2c4a5ec36aac8b6cef))
+
 # [web-v2.9.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.8.1...web-v2.9.0) (2026-05-17)
 
 
