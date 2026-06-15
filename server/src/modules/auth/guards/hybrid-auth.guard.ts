@@ -20,6 +20,7 @@ export class HybridAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const apiKey = request.headers['x-api-key'];
 
+    console.log("========== HYBRID GUARD ==========");
     console.log('[HybridAuthGuard]', {
       apiKey,
       cookies: {

@@ -3,17 +3,18 @@ import { JwtModule } from '@nestjs/jwt';
 
 import { LoggerMiddleware } from './middleware/logger.middleware';
 
-import { JwtAuthGuard } from '../modules/auth/guards/jwt-auth.guard';
+import { HybridAuthGuard } from '../modules/auth/guards/hybrid-auth.guard';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './interceptors/transform.interceptor';
 import { AuthModule } from '../modules/auth/auth.module';
+import { AgentModule } from '../modules/agent/agent.module';
 
 @Module({
-  imports: [AuthModule, JwtModule.register({})],
+  imports: [AuthModule, AgentModule, JwtModule.register({})],
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: HybridAuthGuard,
     },
     {
       provide: APP_INTERCEPTOR,
