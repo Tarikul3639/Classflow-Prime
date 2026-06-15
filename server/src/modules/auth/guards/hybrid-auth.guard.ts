@@ -18,25 +18,22 @@ export class HybridAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
     const apiKey = request.headers['x-api-key'];
 
-    // JWT Authentication
-    if (authHeader) {
-      const isAllowed = await this.jwtAuthGuard.canActivate(context);
-      if (!isAllowed) throw new UnauthorizedException();
+    console.log('[HybridAuthGuard]', {
+      apiKey,
+      cookies: {
+        accessToken: !!request.cookies?.accessToken,
+        refreshToken: !!request.cookies?.refreshToken,
+      },
+    });
 
-      request.actor = {
-        type: ActorType.USER,
-        userId: request.user.userId,
-      };
-      return true;
-    }
-
-    // Agent Authentication
+    // 1. Agent Authentication
     if (apiKey) {
       const isAllowed = await this.agentGuard.canActivate(context);
-      if (!isAllowed) throw new UnauthorizedException();
+      if (!isAllowed) {
+        throw new UnauthorizedException('Invalid API key');
+      }
 
       request.actor = {
         type: ActorType.AGENT,
@@ -47,6 +44,19 @@ export class HybridAuthGuard implements CanActivate {
       return true;
     }
 
-    throw new UnauthorizedException('Authentication required');
+    // 2. User Authentication (Cookie Based)
+    const isAllowed = await this.jwtAuthGuard.canActivate(context);
+    if (!isAllowed) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    console.log('[HybridAuthGuard User]', request.user);
+
+    request.actor = {
+      type: ActorType.USER,
+      userId: request.user.userId,
+    };
+
+    return true;
   }
 }
