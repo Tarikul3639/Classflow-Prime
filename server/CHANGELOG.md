@@ -1,3 +1,10 @@
+# [server-v1.2.0](https://github.com/Tarikul3639/Classflow-Prime/compare/server-v1.1.0...server-v1.2.0) (2026-06-15)
+
+
+### Features
+
+* **agent:** redesign agent management and simplify state handling ([e21386c](https://github.com/Tarikul3639/Classflow-Prime/commit/e21386c57232771c95277d058891ac899969f9ea))
+
 # [server-v1.1.0](https://github.com/Tarikul3639/Classflow-Prime/compare/server-v1.0.0...server-v1.1.0) (2026-06-15)
 
 
