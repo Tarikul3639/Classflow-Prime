@@ -71,17 +71,7 @@ import notificationReducer from "./features/notifications/slices/notification.sl
 import dashboardReducer from "./features/dashboard/slice/dashboard.slice";
 
 // Agent slices
-import createAgentSlice from "./features/agent/slices/create-agent.slice";
-import fetchAgentsSlice from "./features/agent/slices/fetch-agents.slice";
-import updateAgentSlice from "./features/agent/slices/update-agent.slice";
-import deleteAgentSlice from "./features/agent/slices/delete-agent.slice";
-
-const agentReducer = combineReducers({
-  createAgent: createAgentSlice,
-  fetchAgents: fetchAgentsSlice,
-  updateAgent: updateAgentSlice,
-  deleteAgent: deleteAgentSlice,
-});
+import agentReducer from "./features/agent/agent.slice";
 
 // Root store
 export const store = configureStore({

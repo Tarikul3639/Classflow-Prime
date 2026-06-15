@@ -72,6 +72,7 @@ export class FetchAgentsService {
                     return {
                         _id: agent._id.toString(),
                         name: agent.name,
+                        apiKey: agent.apiKey,
                         apiKeyPrefix: agent.apiKeyPrefix,
                         scopes: {
                             create: agent.scopes?.create ?? false,

@@ -12,7 +12,8 @@ import { TopLoader } from "@/components/ui/TopLoader";
 
 const AgentsPage: React.FC = () => {
     const dispatch = useAppDispatch();
-    const { agents, status } = useAppSelector((state) => state.agent.fetchAgents);
+    const { loading, error } = useAppSelector((state) => state.agent.fetch.status);
+    const agents = useAppSelector((state) => state.agent.agents);
 
     useEffect(() => {
         dispatch(fetchAgentsThunk());
@@ -23,21 +24,21 @@ const AgentsPage: React.FC = () => {
             <AgentHeader>
                 <CreateAgentDialog />
             </AgentHeader>
-            
+
             <div className="flex-1">
-                {status.loading && (
+                {loading && (
                     <div className="flex items-center justify-center py-20">
-                        <TopLoader isLoading={status.loading} />
+                        <TopLoader isLoading={loading} />
                     </div>
                 )}
 
-                {!status.loading && agents.length === 0 && (
+                {!loading && agents.length === 0 && (
                     <div className="px-4 lg:px-8 py-6">
                         <EmptyAgents />
                     </div>
                 )}
 
-                {!status.loading && agents.length > 0 && (
+                {!loading && agents.length > 0 && (
                     <div className="mx-auto px-4 lg:px-8 py-6">
                         <AgentList agents={agents} />
                     </div>

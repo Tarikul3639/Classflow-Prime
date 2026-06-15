@@ -14,7 +14,7 @@ export interface IAgentScopes {
 export interface IAgent {
     name: string;
     userId: Types.ObjectId;
-    apiKeyHash: string;
+    apiKey: string;
     apiKeyPrefix: string;
     scopes: IAgentScopes; 
     allowedClassIds: Types.ObjectId[];

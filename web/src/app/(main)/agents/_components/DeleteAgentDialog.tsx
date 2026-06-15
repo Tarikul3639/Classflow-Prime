@@ -26,7 +26,7 @@ interface Props {
 
 export default function DeleteAgentDialog({ agentId }: Props) {
     const dispatch = useAppDispatch();
-    const { loading } = useAppSelector((state) => state.agent.deleteAgent.status);
+    const { loading } = useAppSelector((state) => state.agent.delete.status);
 
     const handleDelete = () => {
         const promise = dispatch(deleteAgentThunk(agentId)).unwrap();
@@ -43,13 +43,13 @@ export default function DeleteAgentDialog({ agentId }: Props) {
             <AlertDialogTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="w-full justify-start text-sm cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50"
+                    className="w-full justify-start text-sm cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50 rounded-sm"
                 >
                     <Trash2 className="size-3.5" />
                     Delete
                 </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="rounded-2xl border-slate-200">
+            <AlertDialogContent className="rounded-lg border-slate-200">
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Agent</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -57,10 +57,12 @@ export default function DeleteAgentDialog({ agentId }: Props) {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel className="cursor-pointer rounded-sm border-gray-200 bg-gray-50 hover:bg-gray-100">
+                        Cancel
+                    </AlertDialogCancel>
                     <AlertDialogAction
                         onClick={handleDelete}
-                        className="bg-red-500 hover:bg-red-600 text-white"
+                        className="bg-red-500 hover:bg-red-600 text-white cursor-pointer rounded-sm"
                     >
                         {loading ? (
                             <>

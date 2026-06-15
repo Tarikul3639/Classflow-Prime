@@ -18,6 +18,7 @@ export interface IClassListItem {
 export interface IAgent {
     _id: string;
     name: string;
+    apiKey: string;
     apiKeyPrefix: string;
     scopes: IAgentScopes;
     classList: IClassListItem[];

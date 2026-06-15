@@ -33,6 +33,9 @@ class AgentItemDto {
     @ApiProperty({ example: 'hat_live' })
     apiKeyPrefix!: string;
 
+    @ApiProperty({ example: 'bcrypt_hashed_api_key' })
+    apiKey!: string;
+
     @ApiProperty({ type: AgentScopesDto })
     scopes!: AgentScopesDto;
 
