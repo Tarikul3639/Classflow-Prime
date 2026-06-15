@@ -1,3 +1,10 @@
+# [server-v1.1.0](https://github.com/Tarikul3639/Classflow-Prime/compare/server-v1.0.0...server-v1.1.0) (2026-06-15)
+
+
+### Features
+
+* **auth,agent,class,web:** add hybrid auth and agent management system ([1c87932](https://github.com/Tarikul3639/Classflow-Prime/commit/1c87932b022ae2cb72b02d2c4a5ec36aac8b6cef))
+
 # server-v1.0.0 (2026-05-15)
 
 
