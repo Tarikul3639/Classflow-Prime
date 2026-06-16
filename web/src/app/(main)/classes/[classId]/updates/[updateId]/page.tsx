@@ -33,9 +33,11 @@ export default function EditUpdatePage() {
     const updateId = params.updateId as string;
 
     // Select update data from Redux
-    const { data, loading, updating, error } = useAppSelector((state) =>
+    const { data, loading, error } = useAppSelector((state) =>
         selectSingleUpdateState(state, classId, updateId)
     );
+
+    const updating = useAppSelector((state) => state.classes.classUpdates.updatesByClass[classId]?.update.loading);
 
     // Original snapshot —> dirty tracking
     const originalFormRef = useRef<CreateUpdateFormData | null>(null);

@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Class, ClassSchema } from '../../database/entities/class.entity';
+import { Class, ClassSchema } from '../../infrastructure/database/entities/class.entity';
 import {
   Enrollment,
   EnrollmentSchema,
-} from '../../database/entities/enrollment.entity';
+} from '../../infrastructure/database/entities/enrollment.entity';
 import {
   ClassUpdate,
   ClassUpdateSchema,
-} from '../../database/entities/update.entity';
+} from '../../infrastructure/database/entities/update.entity';
 import {
   Material,
   MaterialSchema,
-} from '../../database/entities/material.entity';
+} from '../../infrastructure/database/entities/material.entity';
 import {
   ClassGroup,
   ClassGroupSchema,
-} from '../../database/entities/group.entity';
+} from '../../infrastructure/database/entities/group.entity';
 
-import { User, UserSchema } from '../../database/entities/user.entity';
+import { User, UserSchema } from '../../infrastructure/database/entities/user.entity';
 
-import { Faculty, FacultySchema } from '../../database/entities/faculty.entity';
+import { Faculty, FacultySchema } from '../../infrastructure/database/entities/faculty.entity';
 
 import { CreateClassController } from './controllers/create-class.controller';
 import { CreateClassService } from './services/create-class.service';
@@ -81,13 +81,11 @@ import { RegenerateClassCodeService } from './services/regenerate-class-code.ser
 import { ClassJoinAllowedToggleService } from './services/class-join-allowed-toggle.service';
 
 import { ClassAccessService } from './services/class-access.service';
-import { AuthModule } from '../auth/auth.module';
 import { AgentModule } from '../agent/agent.module';
 
 
 @Module({
   imports: [
-    AuthModule,
     AgentModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([{ name: Class.name, schema: ClassSchema }]),

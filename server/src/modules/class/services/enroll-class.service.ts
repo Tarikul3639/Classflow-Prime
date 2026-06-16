@@ -1,16 +1,16 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import {
   Enrollment,
   EnrollmentDocument,
-} from '../../../database/entities/enrollment.entity';
+} from '../../../infrastructure/database/entities/enrollment.entity';
 import {
   EnrollClassRequestDto,
   EnrollClassResponseDto,
 } from '../dto/enroll-class.dto';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 @Injectable()
 export class EnrollClassService {

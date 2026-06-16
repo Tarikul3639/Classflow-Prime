@@ -2,9 +2,9 @@ import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
-import { ClassDocument } from '../../../database/entities/class.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 import { ActorType, type IActor } from '../../auth/interfaces/actor.interface';
 
 @Injectable()

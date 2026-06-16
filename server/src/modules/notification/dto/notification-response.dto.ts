@@ -13,7 +13,7 @@ import {
     IsString,
     ValidateNested,
 } from 'class-validator';
-import { NotificationType } from '../../../database/entities/notification.entity';
+import { NotificationType } from '../../../infrastructure/database/entities/notification.entity';
 
 // ─── Metadata ─────────────────────────────────────────────
 export class NotificationMetadataDto {

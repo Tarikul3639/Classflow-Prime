@@ -12,7 +12,7 @@ import {
   IsDate,
   ValidateNested,
 } from 'class-validator';
-import { UpdateCategory } from '../../../database/interface/update.interface';
+import { UpdateCategory } from '../../../infrastructure/database/interface/update.interface';
 
 /**
  * DTO for the user who posted the update (Reuse the same logic)

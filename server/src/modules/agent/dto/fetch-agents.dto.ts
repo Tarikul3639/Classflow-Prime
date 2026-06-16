@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AgentStatus } from '../../../database/interface/agent.interface';
+import { AgentStatus } from '../../../infrastructure/database/interface/agent.interface';
 
 class AgentScopesDto {
     @ApiProperty({ example: false })

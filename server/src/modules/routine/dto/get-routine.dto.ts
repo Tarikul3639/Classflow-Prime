@@ -2,7 +2,7 @@
 
 import { Type } from 'class-transformer';
 
-import { DayOfWeek } from '../../../database/entities/routine/day-of-week.enum';
+import { DayOfWeek } from '../../../infrastructure/database/entities/routine/day-of-week.enum';
 
 //
 // PERIOD RESPONSE

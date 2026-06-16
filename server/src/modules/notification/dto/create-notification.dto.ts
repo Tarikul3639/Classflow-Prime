@@ -9,7 +9,7 @@ import {
     MaxLength,
 } from 'class-validator';
 import { OmitType } from '@nestjs/mapped-types';
-import { NotificationType } from '../../../database/entities/notification.entity';
+import { NotificationType } from '../../../infrastructure/database/entities/notification.entity';
 
 export class CreateNotificationDto {
     @IsMongoId()

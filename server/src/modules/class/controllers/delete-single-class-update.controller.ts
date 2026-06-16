@@ -1,8 +1,8 @@
 import { Param, Controller, Delete } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../../modules/auth/interfaces/jwt-payload.interface';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import { DeleteSingleClassUpdateResponseDto } from '../dto/delete-single-class-update.dto';
 import { DeleteSingleClassUpdateService } from '../services/delete-single-class-update.service';

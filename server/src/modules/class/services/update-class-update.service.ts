@@ -7,27 +7,27 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassStatus } from '../../../database/interface/class.interface';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 import {
   ClassUpdate,
   ClassUpdateDocument,
-} from '../../../database/entities/update.entity';
+} from '../../../infrastructure/database/entities/update.entity';
 import {
   Material,
   MaterialDocument,
-} from '../../../database/entities/material.entity';
+} from '../../../infrastructure/database/entities/material.entity';
 import { UpdateClassUpdateRequestDto } from '../dto/update-class-update.dto';
 import { UpdateClassUpdateResponseDto } from '../dto/update-class-update.dto';
 
 import {
   Enrollment,
   EnrollmentDocument,
-} from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 import { NotificationService } from '../../notification/services/notification.service';
-import { NotificationType } from '../../../database/entities/notification.entity';
+import { NotificationType } from '../../../infrastructure/database/entities/notification.entity';
 
 @Injectable()
 export class UpdateClassUpdateService {

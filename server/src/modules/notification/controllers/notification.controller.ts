@@ -11,8 +11,8 @@ import {
 import { NotificationService } from '../services/notification.service';
 import { QueryNotificationDto } from '../dto/query-notification.dto';
 
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../../modules/auth/interfaces/jwt-payload.interface';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import {
     GetNotificationsResponseDto,

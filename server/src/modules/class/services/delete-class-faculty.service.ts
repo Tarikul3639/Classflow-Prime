@@ -6,16 +6,16 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import {
   Enrollment,
   EnrollmentDocument,
-} from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 import {
   Faculty,
   FacultyDocument,
-} from '../../../database/entities/faculty.entity';
+} from '../../../infrastructure/database/entities/faculty.entity';
 
 import { DeleteClassFacultyResponseDto } from '../dto/class-faculty.dto';
 

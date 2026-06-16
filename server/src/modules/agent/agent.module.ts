@@ -5,17 +5,17 @@ import { MongooseModule } from '@nestjs/mongoose';
 import {
   Agent,
   AgentSchema,
-} from '../../database/entities/agent.entity';
+} from '../../infrastructure/database/entities/agent.entity';
 
 import {
   Class,
   ClassSchema,
-} from '../../database/entities/class.entity';
+} from '../../infrastructure/database/entities/class.entity';
 
 import {
   Enrollment,
   EnrollmentSchema,
-} from '../../database/entities/enrollment.entity';
+} from '../../infrastructure/database/entities/enrollment.entity';
 
 import { AgentController } from './controllers/agent.controller';
 
@@ -27,7 +27,7 @@ import { DeleteAgentService } from './services/delete-agent.service';
 
 import { FetchAgentsService } from './services/fetch-agents.service';
 
-import { AgentGuard } from './guards/agent.guard';
+import { AgentGuard } from '../../common/guards/agent.guard';
 
 @Module({
   imports: [

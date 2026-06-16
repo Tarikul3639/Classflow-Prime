@@ -8,7 +8,7 @@ import {
   IsUrl,
   IsInt,
 } from 'class-validator';
-import { UpdateCategory } from '../../../database/interface/update.interface';
+import { UpdateCategory } from '../../../infrastructure/database/interface/update.interface';
 
 /**
  * Request DTO for fetching updates by Class ID

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import { CreateAgentRequestDto, CreateAgentResponseDto } from '../dto/create-agent.dto';

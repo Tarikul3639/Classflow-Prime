@@ -5,12 +5,12 @@ import { MongooseModule } from "@nestjs/mongoose";
 import {
     Routine,
     RoutineSchema,
-} from "../../database/entities/routine/routine.entity";
+} from "../../infrastructure/database/entities/routine/routine.entity";
 
 import {
     RoutineSlot,
     RoutineSlotSchema,
-} from "../../database/entities/routine/routine-slot.entity";
+} from "../../infrastructure/database/entities/routine/routine-slot.entity";
 
 import {
     AddSlotService,
@@ -19,24 +19,24 @@ import {
     CreateRoutineService,
     RemoveSlotService,
     DeleteRoutineService,
-} from "./service";
+} from "./services";
 
 import { RoutineController } from "./routine.controller";
 
 import {
     User,
     UserSchema,
-} from "../../database/entities/user.entity";
+} from "../../infrastructure/database/entities/user.entity";
 
 import {
     Class,
     ClassSchema,
-} from "../../database/entities/class.entity";
+} from "../../infrastructure/database/entities/class.entity";
 
 import {
     Enrollment,
     EnrollmentSchema,
-} from "../../database/entities/enrollment.entity";
+} from "../../infrastructure/database/entities/enrollment.entity";
 
 @Module({
     imports: [

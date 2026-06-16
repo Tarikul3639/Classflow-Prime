@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { AgentGuard } from '../../agent/guards/agent.guard';
-import { ActorType } from '../interfaces/actor.interface';
+import { AgentGuard } from './agent.guard';
+import { ActorType } from '../../modules/auth/interfaces/actor.interface';
 
 @Injectable()
 export class HybridAuthGuard implements CanActivate {
@@ -19,15 +19,6 @@ export class HybridAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const apiKey = request.headers['x-api-key'];
-
-    console.log("========== HYBRID GUARD ==========");
-    console.log('[HybridAuthGuard]', {
-      apiKey,
-      cookies: {
-        accessToken: !!request.cookies?.accessToken,
-        refreshToken: !!request.cookies?.refreshToken,
-      },
-    });
 
     // 1. Agent Authentication
     if (apiKey) {
@@ -51,7 +42,11 @@ export class HybridAuthGuard implements CanActivate {
       throw new UnauthorizedException('Authentication required');
     }
 
-    console.log('[HybridAuthGuard User]', request.user);
+    // If JwtAuthGuard returned true but user is not set (e.g. @Public() route),
+    // skip actor assignment — the route is public and doesn't need an actor
+    if (!request.user) {
+      return true;
+    }
 
     request.actor = {
       type: ActorType.USER,

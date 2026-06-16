@@ -9,8 +9,8 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../../modules/auth/interfaces/jwt-payload.interface';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import { GetClassMembersResponseWrapperDto, AssignAssistantRequestDto, RevokeAssistantRequestDto } from '../dto/class-member.dto';
 import { FetchClassMembersService } from '../services/fetch-class-members.service';

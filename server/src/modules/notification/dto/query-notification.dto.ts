@@ -1,6 +1,6 @@
 import { IsBoolean, IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { NotificationType } from '../../../database/entities/notification.entity';
+import { NotificationType } from '../../../infrastructure/database/entities/notification.entity';
 
 export class QueryNotificationDto {
     @IsOptional()

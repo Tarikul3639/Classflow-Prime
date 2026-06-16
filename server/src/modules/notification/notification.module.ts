@@ -1,13 +1,13 @@
 import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Notification, NotificationSchema } from '../../database/entities/notification.entity';
+import { Notification, NotificationSchema } from '../../infrastructure/database/entities/notification.entity';
 
 // Feature services
 import { NotificationService } from './services/notification.service';
 import { NotificationController } from './controllers/notification.controller';
 
 // Push Subscription
-import { PushSubscription, PushSubscriptionSchema } from '../../database/entities/push-subscription.entity';
+import { PushSubscription, PushSubscriptionSchema } from '../../infrastructure/database/entities/push-subscription.entity';
 import { PushSubscriptionController } from './controllers/push-subscription.controller';
 import { PushSubscriptionService } from './services/push-subscription.service';
 

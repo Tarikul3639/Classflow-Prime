@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import { FetchClassResponseDto } from '../dto/fetch-class.dto';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 @Injectable()
 export class FetchClassService {

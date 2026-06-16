@@ -3,12 +3,12 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
-import { Material, MaterialDocument } from '../../../database/entities/material.entity';
-import { ClassUpdate, ClassUpdateDocument } from '../../../database/entities/update.entity';
-import { Faculty, FacultyDocument } from '../../../database/entities/faculty.entity';
-import { ClassGroup, GroupDocument } from '../../../database/entities/group.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { Material, MaterialDocument } from '../../../infrastructure/database/entities/material.entity';
+import { ClassUpdate, ClassUpdateDocument } from '../../../infrastructure/database/entities/update.entity';
+import { Faculty, FacultyDocument } from '../../../infrastructure/database/entities/faculty.entity';
+import { ClassGroup, GroupDocument } from '../../../infrastructure/database/entities/group.entity';
 import { DeleteClassResponseDto } from '../dto/class-settings.dto';
 
 @Injectable()

@@ -1,4 +1,4 @@
-import type { IAgentScopes } from '../../../database/interface/agent.interface';
+import type { IAgentScopes } from '../../../infrastructure/database/interface/agent.interface';
 
 export enum ActorType {
     USER = 'user',

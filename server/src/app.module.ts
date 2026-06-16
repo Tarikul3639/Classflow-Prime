@@ -3,9 +3,9 @@ import { ConfigModule } from '@nestjs/config';
 import configs from './config';
 
 // Import the DatabaseModule
-import { DatabaseModule } from './database/database.module';
+import { DatabaseModule } from './infrastructure/database/database.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { MailModule } from './modules/mail/mail.module';
+import { MailModule } from './infrastructure/mail/mail.module';
 import { ProfileModule } from './modules/profile/profile.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { ClassModule } from './modules/class/class.module';
@@ -14,7 +14,7 @@ import { AgentModule } from './modules/agent/agent.module';
 import { RoutineModule } from './modules/routine/routine.module';
 // Import the DashboardModule
 import { DashboardModule } from './modules/dashboard/dashboard.module';
-import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { CloudinaryModule } from './infrastructure/cloudinary/cloudinary.module';
 import { CoreModule } from './core/core.module';
 
 @Module({

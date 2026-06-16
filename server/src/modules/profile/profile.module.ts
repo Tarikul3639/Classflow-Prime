@@ -8,7 +8,7 @@ import { MeController } from './controllers/me.controller';
 import { ProfileUpdateController } from './controllers/update-profile.controller';
 import { GetCurrentUserService } from './services/me/get-current-user.service';
 import { UpdateProfileService } from './services/update/update-profile.service';
-import { User, UserSchema } from '../../database/entities/user.entity';
+import { User, UserSchema } from '../../infrastructure/database/entities/user.entity';
 
 @Module({
   imports: [

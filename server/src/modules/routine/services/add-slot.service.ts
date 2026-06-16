@@ -1,49 +1,45 @@
-// remove-slot.service.ts
-
 import {
     Injectable,
+    BadRequestException,
     NotFoundException,
     ForbiddenException,
 } from "@nestjs/common";
 
 import { InjectModel } from "@nestjs/mongoose";
-
 import { Model, Types } from "mongoose";
 
-import {
-    Routine,
-    RoutineDocument,
-} from "../../../database/entities/routine/routine.entity";
-
-import {
-    RoutineSlot,
-    RoutineSlotDocument,
-} from "../../../database/entities/routine/routine-slot.entity";
-
-import {
-    User,
-    UserDocument,
-} from "../../../database/entities/user.entity";
-
-import {
-    Class,
-    ClassDocument,
-} from "../../../database/entities/class.entity";
+import { Class, ClassDocument } from "../../../infrastructure/database/entities/class.entity";
 
 import {
     Enrollment,
     EnrollmentDocument,
-} from "../../../database/entities/enrollment.entity";
+} from "../../../infrastructure/database/entities/enrollment.entity";
 
-import { EnrollmentRole } from "../../../database/interface/enrollment.interface";
-
-import { DayOfWeek } from "../../../database/entities/routine/day-of-week.enum";
+import { EnrollmentRole } from "../../../infrastructure/database/interface/enrollment.interface";
 
 import {
-    RemoveSlotResponseDto,
-} from "../dto/remove-slot.dto";
+    User,
+    UserDocument,
+} from "../../../infrastructure/database/entities/user.entity";
 
-const DAY_ORDER: DayOfWeek[] = [
+import {
+    Routine,
+    RoutineDocument,
+} from "../../../infrastructure/database/entities/routine/routine.entity";
+
+import {
+    RoutineSlot,
+    RoutineSlotDocument,
+} from "../../../infrastructure/database/entities/routine/routine-slot.entity";
+
+import { DayOfWeek } from "../../../infrastructure/database/entities/routine/day-of-week.enum";
+
+import {
+    AddSlotDto,
+    AddSlotResponseDto,
+} from "../dto/add-slot.dto";
+
+const WEEK_DAYS: DayOfWeek[] = [
     DayOfWeek.Sunday,
     DayOfWeek.Monday,
     DayOfWeek.Tuesday,
@@ -54,7 +50,7 @@ const DAY_ORDER: DayOfWeek[] = [
 ];
 
 @Injectable()
-export class RemoveSlotService {
+export class AddSlotService {
     constructor(
         @InjectModel(Routine.name)
         private readonly routineModel: Model<RoutineDocument>,
@@ -62,26 +58,23 @@ export class RemoveSlotService {
         @InjectModel(RoutineSlot.name)
         private readonly routineSlotModel: Model<RoutineSlotDocument>,
 
+        @InjectModel(Enrollment.name)
+        private readonly enrollmentModel: Model<EnrollmentDocument>,
+
         @InjectModel(User.name)
         private readonly userModel: Model<UserDocument>,
 
         @InjectModel(Class.name)
         private readonly classModel: Model<ClassDocument>,
-
-        @InjectModel(Enrollment.name)
-        private readonly enrollmentModel: Model<EnrollmentDocument>,
-    ) { }
+    ) {}
 
     async execute(
         userId: string,
         classId: string,
-        slotId: string,
-    ): Promise<RemoveSlotResponseDto> {
+        dto: AddSlotDto,
+    ): Promise<AddSlotResponseDto> {
         const userObjectId = new Types.ObjectId(userId);
-
         const classObjectId = new Types.ObjectId(classId);
-
-        const slotObjectId = new Types.ObjectId(slotId);
 
         // ── Validate user ─────────────────────────────────────────────
         const user = await this.userModel.findById(userObjectId);
@@ -109,7 +102,7 @@ export class RemoveSlotService {
 
         if (!isInstructor && !isAssistant) {
             throw new ForbiddenException(
-                "Only instructors and assistants can remove slots",
+                "Only instructors and assistants can edit the routine",
             );
         }
 
@@ -122,18 +115,56 @@ export class RemoveSlotService {
             throw new NotFoundException("Routine not found");
         }
 
-        // ── Find slot ─────────────────────────────────────────────────
-        const slot =
-            await this.routineSlotModel.findById(slotObjectId);
+        // ── Validate period definition ────────────────────────────────
+        const periodDefinition = routine.periods.find(
+            (p) => p.periodNo === dto.periodNo,
+        );
 
-        if (!slot) {
-            throw new NotFoundException("Slot not found");
+        if (!periodDefinition) {
+            throw new BadRequestException(
+                `Period ${dto.periodNo} is not defined in this routine`,
+            );
         }
 
-        // ── Remove slot ───────────────────────────────────────────────
-        await slot.deleteOne();
+        // ── Prevent assigning to break period ─────────────────────────
+        if (periodDefinition.isBreak) {
+            throw new BadRequestException(
+                `Cannot assign subject to break period ${dto.periodNo}`,
+            );
+        }
 
-        // ── Fetch updated slots ───────────────────────────────────────
+        // ── Prevent duplicate slot ────────────────────────────────────
+        const alreadyExists = await this.routineSlotModel.exists({
+            routineId: routine._id,
+            classId: classObjectId,
+            day: dto.day,
+            periodNo: dto.periodNo,
+        });
+
+        if (alreadyExists) {
+            throw new BadRequestException(
+                `Period ${dto.periodNo} already exists for ${dto.day}`,
+            );
+        }
+
+        // ── Create slot ───────────────────────────────────────────────
+        await this.routineSlotModel.create({
+            routineId: routine._id,
+
+            classId: classObjectId,
+
+            day: dto.day,
+
+            periodNo: dto.periodNo,
+
+            subject: dto.subject,
+
+            teacherName: dto.teacherName,
+
+            room: dto.room ?? "",
+        });
+
+        // ── Get updated slots ─────────────────────────────────────────
         const allSlots = await this.routineSlotModel
             .find({
                 routineId: routine._id,
@@ -143,14 +174,15 @@ export class RemoveSlotService {
                 periodNo: 1,
             });
 
-        // ── Group schedule ────────────────────────────────────────────
+        // ── Active days ───────────────────────────────────────────────
         const activeDays = [
             ...new Set(allSlots.map((slot) => slot.day)),
         ].sort(
             (a, b) =>
-                DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b),
+                WEEK_DAYS.indexOf(a) - WEEK_DAYS.indexOf(b),
         );
 
+        // ── Group schedule ────────────────────────────────────────────
         const groupedSchedule = activeDays.map((day) => {
             const daySlots = allSlots
                 .filter((slot) => slot.day === day)
@@ -165,21 +197,22 @@ export class RemoveSlotService {
                 slots: daySlots.map((slot) => ({
                     slotId: slot._id.toString(),
 
-                    periodNo: slot.periodNo,
+                    periodNo: slot.periodNo ?? 0,
 
-                    subject: slot.subject,
+                    subject: slot.subject ?? "",
 
-                    teacherName: slot.teacherName,
+                    teacherName: slot.teacherName ?? "",
 
                     room: slot.room ?? "",
                 })),
             };
         });
 
+        // ── Response ──────────────────────────────────────────────────
         return {
             success: true,
 
-            message: "Slot removed successfully",
+            message: "Slot added successfully",
 
             data: {
                 routineId: routine._id.toString(),

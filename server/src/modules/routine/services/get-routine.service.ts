@@ -5,14 +5,14 @@ import { Model, Types } from 'mongoose';
 import {
     Routine,
     RoutineDocument,
-} from '../../../database/entities/routine/routine.entity';
+} from '../../../infrastructure/database/entities/routine/routine.entity';
 
 import {
     RoutineSlot,
     RoutineSlotDocument,
-} from '../../../database/entities/routine/routine-slot.entity';
+} from '../../../infrastructure/database/entities/routine/routine-slot.entity';
 
-import { DayOfWeek } from '../../../database/entities/routine/day-of-week.enum';
+import { DayOfWeek } from '../../../infrastructure/database/entities/routine/day-of-week.enum';
 
 import { GetRoutineResponseDto } from '../dto/get-routine.dto';
 

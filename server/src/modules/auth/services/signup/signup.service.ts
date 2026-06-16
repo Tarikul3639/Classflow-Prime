@@ -8,21 +8,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 
 import { SignUpDto } from '../../dto/signup/signup.dto';
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Account,
   AccountDocument,
-} from '../../../../database/entities/account.entity';
-import { AccountProvider } from '../../../../database/interface/account.interface';
+} from '../../../../infrastructure/database/entities/account.entity';
+import { AccountProvider } from '../../../../infrastructure/database/interface/account.interface';
 import {
   Verification,
   VerificationDocument,
-} from '../../../../database/entities/verification.entity';
-import { IUser } from '../../../../database/interface/user.interface';
-import { IVerification } from '../../../../database/interface/verification.interface';
+} from '../../../../infrastructure/database/entities/verification.entity';
+import { IUser } from '../../../../infrastructure/database/interface/user.interface';
+import { IVerification } from '../../../../infrastructure/database/interface/verification.interface';
 
-import { MailService } from '../../../../modules/mail/services/mail.service';
-import { EmailValidator } from '../../utils/email-validator.util';
+import { MailService } from '../../../../infrastructure/mail/mail.service';
+import { EmailValidator } from '../../../../common/utils/email-validator.util';
 
 @Injectable()
 export class SignUpService {

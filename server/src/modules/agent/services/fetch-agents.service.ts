@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Agent, AgentDocument } from '../../../database/entities/agent.entity';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
+import { Agent, AgentDocument } from '../../../infrastructure/database/entities/agent.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
 import { FetchAgentsResponseDto } from '../dto/fetch-agents.dto';
 
 interface IClass {

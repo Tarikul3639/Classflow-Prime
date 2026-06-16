@@ -1,5 +1,5 @@
 import { createParamDecorator, type ExecutionContext } from '@nestjs/common';
-import type { IActor } from '../interfaces/actor.interface';
+import type { IActor } from '../../modules/auth/interfaces/actor.interface';
 
 /**
  * CurrentActor Decorator

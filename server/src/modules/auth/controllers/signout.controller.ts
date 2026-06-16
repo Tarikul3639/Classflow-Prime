@@ -15,13 +15,13 @@ import {
 } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import type { IJwtPayload } from '../interfaces/jwt-payload.interface';
 
 import { SignOutDto } from '../dto/signout/signout.dto';
 import { SignOutService } from '../services/signout/signout.service';
 
-import { clearAuthCookies } from '../utils/auth-cookies.util';
+import { clearAuthCookies } from '../../../common/utils/auth-cookies.util';
 
 @ApiTags('Auth')
 @ApiBearerAuth('JWT-auth')

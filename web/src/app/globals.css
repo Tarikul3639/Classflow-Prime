@@ -82,6 +82,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @media print {
   body > *:not(#__print_clone__) {
     display: none !important;

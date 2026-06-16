@@ -8,8 +8,8 @@ import { Model } from 'mongoose';
 import {
   Throttle,
   ThrottleDocument,
-} from '../../../../database/entities/throttle.entity';
-import { ThrottlePurpose } from '../../../../database/interface/throttle.interface';
+} from '../../../../infrastructure/database/entities/throttle.entity';
+import { ThrottlePurpose } from '../../../../infrastructure/database/interface/throttle.interface';
 
 @Injectable()
 export class AuthThrottleService {

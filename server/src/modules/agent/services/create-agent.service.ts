@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { randomBytes } from 'crypto';
 
-import { Agent, AgentDocument } from '../../../database/entities/agent.entity';
-import { AgentStatus } from '../../../database/interface/agent.interface';
+import { Agent, AgentDocument } from '../../../infrastructure/database/entities/agent.entity';
+import { AgentStatus } from '../../../infrastructure/database/interface/agent.interface';
 import { CreateAgentRequestDto, CreateAgentResponseDto } from '../dto/create-agent.dto';
 
 @Injectable()

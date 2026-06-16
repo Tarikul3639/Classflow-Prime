@@ -37,10 +37,16 @@ export default function MembersPage() {
   const members = useAppSelector((state) => selectMembers(state, classId));
   const isStale = useAppSelector((state) => selectIsStale(state, classId));
 
-  const { loading: isFetching, error: fetchError } = useAppSelector(
+  const isFetching = useAppSelector(
     (state) =>
-      state.classes.classMembers.membersByClass[classId]?.fetchMembers || {}
+      state.classes.classMembers.membersByClass[classId]?.fetchMembers
+        ?.loading ?? false
   );
+  // const fetchError = useAppSelector(
+  //   (state) =>
+  //     state.classes.classMembers.membersByClass[classId]?.fetchMembers
+  //       ?.error ?? null
+  // );
 
   const myId = useAppSelector((state) => state.profile.fetchUser.user?._id);
 

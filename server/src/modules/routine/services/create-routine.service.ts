@@ -9,23 +9,23 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { User, UserDocument } from '../../../database/entities/user.entity';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { User, UserDocument } from '../../../infrastructure/database/entities/user.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import {
     Enrollment,
     EnrollmentDocument,
-} from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 import {
     Routine,
     RoutineDocument,
-} from '../../../database/entities/routine/routine.entity';
+} from '../../../infrastructure/database/entities/routine/routine.entity';
 
 import { CreateRoutineDto } from '../dto/create-routine.dto';
 import { CreateRoutineResponseDto } from '../dto/create-routine.dto';
 
-import { DayOfWeek } from '../../../database/entities/routine/day-of-week.enum';
+import { DayOfWeek } from '../../../infrastructure/database/entities/routine/day-of-week.enum';
 
 @Injectable()
 export class CreateRoutineService {

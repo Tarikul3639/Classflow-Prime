@@ -14,8 +14,8 @@ import {
     ApiTags,
 } from "@nestjs/swagger";
 
-import { CurrentUser } from "../auth/decorators/current-user.decorator";
-import type { IJwtPayload } from "../../modules/auth/interfaces/jwt-payload.interface";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+import type { IJwtPayload } from "../auth/interfaces/jwt-payload.interface";
 
 import {
     AddSlotService,
@@ -24,7 +24,7 @@ import {
     CreateRoutineService,
     RemoveSlotService,
     DeleteRoutineService,
-} from "./service";
+} from "./services";
 
 import { AddSlotDto } from "./dto/add-slot.dto";
 import { EditSlotDto } from "./dto/edit-slot.dto";

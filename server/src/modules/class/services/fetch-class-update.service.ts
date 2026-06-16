@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import { FetchClassUpdateResponseDto } from '../dto/fetch-class-update.dto';
 
 // TODO: Have some issue with the aggregation pipeline

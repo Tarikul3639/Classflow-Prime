@@ -3,8 +3,8 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassGroup, GroupDocument } from '../../../database/entities/group.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { ClassGroup, GroupDocument } from '../../../infrastructure/database/entities/group.entity';
 import { GetClassGroupsResponseDto } from '../dto/class-group.dto';
 
 @Injectable()

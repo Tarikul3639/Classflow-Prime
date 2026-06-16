@@ -8,16 +8,16 @@ import type { Model } from 'mongoose';
 
 import { SignInDto } from '../../dto/signin/signin.dto';
 import { TokenService } from '../token/token.service';
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Account,
   AccountDocument,
-} from '../../../../database/entities/account.entity';
-import { AccountProvider } from '../../../../database/interface/account.interface';
-import { ThrottlePurpose } from '../../../../database/interface/throttle.interface';
+} from '../../../../infrastructure/database/entities/account.entity';
+import { AccountProvider } from '../../../../infrastructure/database/interface/account.interface';
+import { ThrottlePurpose } from '../../../../infrastructure/database/interface/throttle.interface';
 import { AuthThrottleService } from '../throttle/auth-throttle.service';
 import { ITokens } from '../token/token.types';
-import { IUser } from '../../../../database/interface/user.interface';
+import { IUser } from '../../../../infrastructure/database/interface/user.interface';
 
 export class SignInResponseDto {
   success!: boolean;

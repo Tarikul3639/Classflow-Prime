@@ -11,31 +11,31 @@ import { Model, Types } from "mongoose";
 import {
     Class,
     ClassDocument,
-} from "../../../database/entities/class.entity";
+} from "../../../infrastructure/database/entities/class.entity";
 
 import {
     Enrollment,
     EnrollmentDocument,
-} from "../../../database/entities/enrollment.entity";
+} from "../../../infrastructure/database/entities/enrollment.entity";
 
-import { EnrollmentRole } from "../../../database/interface/enrollment.interface";
+import { EnrollmentRole } from "../../../infrastructure/database/interface/enrollment.interface";
 
 import {
     User,
     UserDocument,
-} from "../../../database/entities/user.entity";
+} from "../../../infrastructure/database/entities/user.entity";
 
 import {
     Routine,
     RoutineDocument,
-} from "../../../database/entities/routine/routine.entity";
+} from "../../../infrastructure/database/entities/routine/routine.entity";
 
 import {
     RoutineSlot,
     RoutineSlotDocument,
-} from "../../../database/entities/routine/routine-slot.entity";
+} from "../../../infrastructure/database/entities/routine/routine-slot.entity";
 
-import { DayOfWeek } from "../../../database/entities/routine/day-of-week.enum";
+import { DayOfWeek } from "../../../infrastructure/database/entities/routine/day-of-week.enum";
 
 import {
     EditSlotDto,

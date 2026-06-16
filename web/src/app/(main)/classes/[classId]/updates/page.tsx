@@ -60,13 +60,15 @@ export default function UpdatesPage() {
   );
 
   // Fetch status flags for conditional UI states
-  const {
-    loading: isFetching,
-    error: fetchingError,
-  } = useAppSelector(
+  const fetchState = useAppSelector(
     (state) =>
-      state.classes.classUpdates.updatesByClass[classId]?.fetch || {}
+      state.classes.classUpdates
+        .updatesByClass[classId]
+        ?.fetch
   );
+
+  const isFetching = fetchState?.loading ?? false;
+  const fetchingError = fetchState?.error ?? null;
 
   // Class-level permissions
   const classEntry = useAppSelector(
@@ -126,7 +128,7 @@ export default function UpdatesPage() {
     toast.promise(promise, {
       loading: "Updating pin status...",
       success: !isPinned ? "Pinned successfully" : "Unpinned successfully",
-      error: (err) => err.message || "Failed to update pin",
+      error: (err) => err.message ?? "Failed to update pin",
     });
   };
 
@@ -162,7 +164,7 @@ export default function UpdatesPage() {
     toast.promise(promise, {
       loading: "Deleting update...",
       success: "Update deleted successfully",
-      error: (err) => err.message || "Failed to delete",
+      error: (err) => err.message ?? "Failed to delete",
     });
   };
 

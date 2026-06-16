@@ -11,7 +11,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import { IAgentScopes, AgentStatus } from '../../../database/interface/agent.interface';
+import { IAgentScopes, AgentStatus } from '../../../infrastructure/database/interface/agent.interface';
 
 export class AgentScopesDto implements IAgentScopes {
     @ApiProperty({ example: false })

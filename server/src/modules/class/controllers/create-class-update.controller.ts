@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiSecurity } from '@nestjs/swagger';
 
 import { 
@@ -6,8 +6,7 @@ import {
   CreateClassUpdateResponseDto 
 } from '../dto/create-class-update.dto';
 import { CreateClassUpdateService } from '../services/create-class-update.service';
-import { CurrentActor } from '../../auth/decorators/current-actor.decorator';
-import { HybridAuthGuard } from '../../auth/guards/hybrid-auth.guard';
+import { CurrentActor } from '../../../common/decorators/current-actor.decorator';
 import type { IActor } from '../../auth/interfaces/actor.interface';
 
 @ApiTags('Class')
@@ -18,7 +17,6 @@ export class CreateClassUpdateController {
   ) {}
 
   @Post(':classId/updates')
-  @UseGuards(HybridAuthGuard)
   @ApiOperation({ summary: 'Create a new update for a class' })
   @ApiParam({ name: 'classId', example: '69f25d97124a37014d7f03d7', description: 'Target class ID' })
   @ApiSecurity('JWT-auth')

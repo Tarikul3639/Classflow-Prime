@@ -7,16 +7,16 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
 import {
     Enrollment,
     EnrollmentDocument,
-} from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 import {
     ClassGroup,
     GroupDocument,
-} from '../../../database/entities/group.entity';
+} from '../../../infrastructure/database/entities/group.entity';
 
 @Injectable()
 export class DeleteClassGroupService {

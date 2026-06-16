@@ -8,7 +8,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 // ─── Response Class members DTO ─────────────────────────────────────────────────────────────
 

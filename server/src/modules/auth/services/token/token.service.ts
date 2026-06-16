@@ -12,12 +12,12 @@ import ms from 'ms';
 
 import type { IJwtPayload } from '../../interfaces/jwt-payload.interface';
 import type { ITokens } from './token.types';
-import { User, UserDocument } from '../../../../database/entities/user.entity';
-import { UserRole } from '../../../../database/interface/user.interface';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
+import { UserRole } from '../../../../infrastructure/database/interface/user.interface';
 import {
   Session,
   SessionDocument,
-} from '../../../../database/entities/session.entity';
+} from '../../../../infrastructure/database/entities/session.entity';
 
 @Injectable()
 export class TokenService {

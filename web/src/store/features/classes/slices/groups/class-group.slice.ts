@@ -133,7 +133,7 @@ const classGroupSlice = createSlice({
 
                 if (bucket) {
                     bucket.fetch.loading = false;
-                    bucket.groups = action.payload.groups || [];
+                    bucket.groups = action.payload.groups ?? [];
                 }
             })
 

@@ -9,13 +9,13 @@ import {
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
-import { Public } from '../decorators/public.decorator';
-import { RequestInfo } from '../decorators/request-info.decorator';
-import type { IRequestInfo } from '../decorators/request-info.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
+import { RequestInfo } from '../../../common/decorators/request-info.decorator';
+import type { IRequestInfo } from '../../../common/decorators/request-info.decorator';
 import {
   IAuthTokens,
   setAuthCookies,
-} from '../utils/auth-cookies.util';
+} from '../../../common/utils/auth-cookies.util';
 
 import { SignUpDto } from '../dto/signup/signup.dto';
 import { VerifySignupEmailDto } from '../dto/signup/verify-signup-email.dto';

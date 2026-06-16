@@ -14,8 +14,8 @@ import {
   IsDateString,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { UpdateCategory } from '../../../database/interface/update.interface';
-import { MaterialType } from '../../../database/interface/material.interface';
+import { UpdateCategory } from '../../../infrastructure/database/interface/update.interface';
+import { MaterialType } from '../../../infrastructure/database/interface/material.interface';
 
 // ==================== Material DTO ====================
 

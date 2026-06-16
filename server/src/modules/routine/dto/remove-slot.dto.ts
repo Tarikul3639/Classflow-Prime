@@ -6,7 +6,7 @@ import {
     Min,
 } from "class-validator";
 
-import { DayOfWeek } from "../../../database/entities/routine/day-of-week.enum";
+import { DayOfWeek } from "../../../infrastructure/database/entities/routine/day-of-week.enum";
 
 import { GetRoutineResponseDto } from "./get-routine.dto";
 

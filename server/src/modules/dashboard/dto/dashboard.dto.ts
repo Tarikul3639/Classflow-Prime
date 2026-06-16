@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ClassStatus } from '../../../database/interface/class.interface';
-import { UpdateCategory } from '../../../database/interface/update.interface';
-import { MaterialType } from '../../../database/interface/material.interface';
-import { GroupPlatform } from '../../../database/interface/group.interface';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
+import { UpdateCategory } from '../../../infrastructure/database/interface/update.interface';
+import { MaterialType } from '../../../infrastructure/database/interface/material.interface';
+import { GroupPlatform } from '../../../infrastructure/database/interface/group.interface';
 
 // ─── Nested DTOs ──────────────────────────────────────────────────────────────
 

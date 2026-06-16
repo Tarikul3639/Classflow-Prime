@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, PipelineStage } from 'mongoose';
 
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 
 export interface IUser {
   _id: string;

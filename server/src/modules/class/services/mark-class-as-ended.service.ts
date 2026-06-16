@@ -3,8 +3,8 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassStatus} from '../../../database/interface/class.interface';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { ClassStatus} from '../../../infrastructure/database/interface/class.interface';
 import { MarkClassAsEndedResponseDto } from '../dto/class-settings.dto';
 
 @Injectable()

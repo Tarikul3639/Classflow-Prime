@@ -2,20 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassStatus } from '../../../database/interface/class.interface';
-import { ClassUpdate, ClassUpdateDocument } from '../../../database/entities/update.entity';
-import { Material, MaterialDocument } from '../../../database/entities/material.entity';
-import { Faculty, FacultyDocument } from '../../../database/entities/faculty.entity';
-import { ClassGroup, GroupDocument } from '../../../database/entities/group.entity';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
+import { ClassUpdate, ClassUpdateDocument } from '../../../infrastructure/database/entities/update.entity';
+import { Material, MaterialDocument } from '../../../infrastructure/database/entities/material.entity';
+import { Faculty, FacultyDocument } from '../../../infrastructure/database/entities/faculty.entity';
+import { ClassGroup, GroupDocument } from '../../../infrastructure/database/entities/group.entity';
 
-import { IClass } from '../../../database/interface/class.interface';
-import { IClassUpdate } from '../../../database/interface/update.interface';
-import { IFaculty } from '../../../database/interface/faculty.interface';
-import { IClassGroup } from '../../../database/interface/group.interface';
-import { IMaterial } from '../../../database/interface/material.interface';
+import { IClass } from '../../../infrastructure/database/interface/class.interface';
+import { IClassUpdate } from '../../../infrastructure/database/interface/update.interface';
+import { IFaculty } from '../../../infrastructure/database/interface/faculty.interface';
+import { IClassGroup } from '../../../infrastructure/database/interface/group.interface';
+import { IMaterial } from '../../../infrastructure/database/interface/material.interface';
 
 import {
     DashboardResponseDto,

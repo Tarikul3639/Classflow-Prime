@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import {
     PushSubscription,
     PushSubscriptionDocument,
-} from '../../../database/entities/push-subscription.entity';
+} from '../../../infrastructure/database/entities/push-subscription.entity';
 
 @Injectable()
 export class PushSubscriptionService {

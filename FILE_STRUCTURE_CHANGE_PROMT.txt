@@ -1,0 +1,425 @@
+You are a senior NestJS architect and refactoring assistant.
+
+I have an existing NestJS ClassFlow Prime backend project with working business logic and APIs.
+
+Your task is ONLY to reorganize the file/folder structure into a production-level architecture.
+
+IMPORTANT RULES:
+
+1. DO NOT change any business logic.
+2. DO NOT modify service logic, controller logic, DTO validation, entity fields, or interfaces.
+3. DO NOT rename classes, methods, DTO names, interfaces, decorators, guards, or entities unless absolutely required by file relocation.
+4. DO NOT change API routes or behavior.
+5. DO NOT optimize or rewrite code.
+6. Preserve git history as much as possible by moving files instead of recreating them.
+7. Update ALL import paths according to the new file locations.
+8. Update barrel exports (`index.ts`) if needed.
+9. Update module imports/providers/controllers arrays only when file paths change.
+10. Ensure the project builds successfully after refactoring.
+
+Target Architecture:
+
+src/
+├── main.ts                              # App bootstrap
+├── app.module.ts                        # Root module
+
+├── config/                              # Pure configuration
+│   ├── app.config.ts
+│   ├── cloudinary.config.ts
+│   ├── database.config.ts
+│   ├── index.ts
+│   ├── jwt.config.ts
+│   ├── mail.config.ts
+│   └── web-push.config.ts
+
+├── common/                              # Reusable cross-cutting stuff
+│   ├── decorators/
+│   │   ├── current-actor.decorator.ts
+│   │   ├── current-agent.decorator.ts
+│   │   ├── current-user.decorator.ts
+│   │   ├── public.decorator.ts
+│   │   ├── request-info.decorator.ts
+│   │   └── roles.decorator.ts
+│   ├── guards/
+│   │   ├── agent.guard.ts
+│   │   ├── hybrid-auth.guard.ts
+│   │   ├── jwt-auth.guard.ts
+│   │   └── roles.guard.ts
+│   ├── interceptors/
+│   │   └── transform.interceptor.ts
+│   ├── middleware/
+│   │   └── logger.middleware.ts
+│   ├── pipes/
+│   │   └── validation.pipe.ts
+│   ├── filters/
+│   │   └── http-exception.filter.ts
+│   ├── exceptions/
+│   │   ├── app.exception.ts
+│   │   └── error-codes.ts
+│   ├── constants/
+│   │   ├── messages.constant.ts
+│   │   ├── permissions.constant.ts
+│   │   └── roles.constant.ts
+│   ├── utils/
+│   │   ├── date.util.ts
+│   │   ├── pagination.util.ts
+│   │   └── string.util.ts
+│   └── types/
+│       ├── paginated-response.type.ts
+│       └── request-with-user.type.ts
+
+├── infrastructure/                      # External integrations
+│   ├── database/
+│   │   ├── database.module.ts
+│   │   ├── entities/
+│   │   │   ├── account.entity.ts
+│   │   │   ├── agent.entity.ts
+│   │   │   ├── class.entity.ts
+│   │   │   ├── enrollment.entity.ts
+│   │   │   ├── faculty.entity.ts
+│   │   │   ├── group.entity.ts
+│   │   │   ├── material.entity.ts
+│   │   │   ├── notification.entity.ts
+│   │   │   ├── push-subscription.entity.ts
+│   │   │   ├── session.entity.ts
+│   │   │   ├── throttle.entity.ts
+│   │   │   ├── update.entity.ts
+│   │   │   ├── user.entity.ts
+│   │   │   ├── verification.entity.ts
+│   │   │   └── routine/
+│   │   │       ├── day-of-week.enum.ts
+│   │   │       ├── period.entity.ts
+│   │   │       ├── routine.entity.ts
+│   │   │       └── routine-slot.entity.ts
+│   │   ├── migrations/
+│   │   ├── repositories/
+│   │   └── subscribers/
+│   ├── mail/
+│   │   ├── mail.module.ts
+│   │   ├── mail.service.ts
+│   │   └── templates/
+│   │       ├── password-changed.hbs
+│   │       ├── verification.hbs
+│   │       └── welcome.hbs
+│   ├── cloudinary/
+│   │   ├── cloudinary.module.ts
+│   │   ├── cloudinary.service.ts
+│   │   └── dto/
+│   │       └── get-signature.dto.ts
+│   └── web-push/
+│       ├── web-push.config.ts
+│       ├── web-push.module.ts
+│       └── web-push.service.ts
+
+├── modules/                             # Business features
+│   ├── auth/
+│   │   ├── auth.module.ts
+│   │   ├── controllers/
+│   │   │   ├── debug.controller.ts
+│   │   │   ├── password-reset.controller.ts
+│   │   │   ├── signin.controller.ts
+│   │   │   ├── signout.controller.ts
+│   │   │   └── signup.controller.ts
+│   │   ├── decorators/
+│   │   │   ├── current-actor.decorator.ts
+│   │   │   ├── current-agent.decorator.ts
+│   │   │   ├── current-user.decorator.ts
+│   │   │   ├── public.decorator.ts
+│   │   │   ├── request-info.decorator.ts
+│   │   │   └── roles.decorator.ts
+│   │   ├── dto/
+│   │   │   ├── debug/
+│   │   │   │   └── debug.dto.ts
+│   │   │   ├── password-reset/
+│   │   │   │   ├── request-password-reset.dto.ts
+│   │   │   │   ├── reset-password.dto.ts
+│   │   │   │   └── verify-password-reset.dto.ts
+│   │   │   ├── signin/
+│   │   │   │   └── signin.dto.ts
+│   │   │   ├── signout/
+│   │   │   │   └── signout.dto.ts
+│   │   │   └── signup/
+│   │   │       ├── resend-signup-verification.dto.ts
+│   │   │       ├── signup.dto.ts
+│   │   │       └── verify-signup-email.dto.ts
+│   │   ├── guards/
+│   │   │   ├── hybrid-auth.guard.ts
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   └── roles.guard.ts
+│   │   ├── interfaces/
+│   │   │   ├── actor.interface.ts
+│   │   │   ├── auth.interface.ts
+│   │   │   ├── jwt-payload.interface.ts
+│   │   │   └── token-response.interface.ts
+│   │   ├── pipes/
+│   │   │   └── validation.pipe.ts
+│   │   ├── services/
+│   │   │   ├── password-reset/
+│   │   │   │   ├── request.service.ts
+│   │   │   │   ├── resend-otp.service.ts
+│   │   │   │   ├── reset-password.service.ts
+│   │   │   │   └── verify-otp.service.ts
+│   │   │   ├── signin/
+│   │   │   │   └── signin.service.ts
+│   │   │   ├── signout/
+│   │   │   │   └── signout.service.ts
+│   │   │   ├── signup/
+│   │   │   │   ├── resend-signup-verification.service.ts
+│   │   │   │   ├── signup.service.ts
+│   │   │   │   └── verify-signup-email.service.ts
+│   │   │   ├── throttle/
+│   │   │   │   └── auth-throttle.service.ts
+│   │   │   └── token/
+│   │   │       ├── token.service.ts
+│   │   │       └── token.types.ts
+│   │   ├── utils/
+│   │   │   ├── auth-cookies.util.ts
+│   │   │   ├── disposable-email-domains.ts
+│   │   │   └── email-validator.util.ts
+│   │   └── auth.module.ts
+│   │
+│   ├── profile/
+│   │   ├── profile.module.ts
+│   │   ├── controllers/
+│   │   │   ├── me.controller.ts
+│   │   │   └── update-profile.controller.ts
+│   │   ├── dto/
+│   │   │   ├── create-user.dto.ts
+│   │   │   └── update-profile.dto.ts
+│   │   ├── interfaces/
+│   │   │   └── user.interface.ts
+│   │   └── services/
+│   │       ├── me/
+│   │       │   └── get-current-user.service.ts
+│   │       └── update/
+│   │           └── update-profile.service.ts
+│   │
+│   ├── agent/
+│   │   ├── agent.module.ts
+│   │   ├── controllers/
+│   │   │   └── agent.controller.ts
+│   │   ├── dto/
+│   │   │   ├── create-agent.dto.ts
+│   │   │   ├── fetch-agents.dto.ts
+│   │   │   └── update-agent.dto.ts
+│   │   ├── guards/
+│   │   │   └── agent.guard.ts
+│   │   └── services/
+│   │       ├── create-agent.service.ts
+│   │       ├── delete-agent.service.ts
+│   │       ├── fetch-agents.service.ts
+│   │       └── update-agent.service.ts
+│   │
+│   ├── class/
+│   │   ├── class.module.ts
+│   │   ├── controllers/
+│   │   │   ├── class-faculty.controller.ts
+│   │   │   ├── class-group.controller.ts
+│   │   │   ├── class-member.controller.ts
+│   │   │   ├── class-settings.controller.ts
+│   │   │   ├── create-class-update.controller.ts
+│   │   │   ├── create-class.controller.ts
+│   │   │   ├── delete-single-class-update.controller.ts
+│   │   │   ├── enroll-class.controller.ts
+│   │   │   ├── fetch-class-update.controller.ts
+│   │   │   ├── fetch-class.controller.ts
+│   │   │   ├── fetch-enrolled-classes.controller.ts
+│   │   │   ├── fetch-single-class-update.controller.ts
+│   │   │   ├── toggle-pin-class-update.controller.ts
+│   │   │   └── update-class-update.controller.ts
+│   │   ├── dto/
+│   │   │   ├── class-faculty.dto.ts
+│   │   │   ├── class-group.dto.ts
+│   │   │   ├── class-member.dto.ts
+│   │   │   ├── class-settings.dto.ts
+│   │   │   ├── create-class-update.dto.ts
+│   │   │   ├── create-class.dto.ts
+│   │   │   ├── delete-single-class-update.dto.ts
+│   │   │   ├── enroll-class.dto.ts
+│   │   │   ├── fetch-class-update.dto.ts
+│   │   │   ├── fetch-class.dto.ts
+│   │   │   ├── fetch-enrolled-classes.dto.ts
+│   │   │   ├── fetch-single-class-update.dto.ts
+│   │   │   ├── toggle-pin-class-update.dto.ts
+│   │   │   └── update-class-update.dto.ts
+│   │   ├── services/
+│   │   │   ├── assistant-assign-class-member.service.ts
+│   │   │   ├── assistant-revoke-class-member.service.ts
+│   │   │   ├── class-access.service.ts
+│   │   │   ├── class-join-allowed-toggle.service.ts
+│   │   │   ├── create-class-faculty.service.ts
+│   │   │   ├── create-class-group.service.ts
+│   │   │   ├── create-class-update.service.ts
+│   │   │   ├── create-class.service.ts
+│   │   │   ├── delete-class-faculty.service.ts
+│   │   │   ├── delete-class-group.service.ts
+│   │   │   ├── delete-class.service.ts
+│   │   │   ├── delete-single-class-update.service.ts
+│   │   │   ├── enroll-class.service.ts
+│   │   │   ├── fetch-class-faculties.service.ts
+│   │   │   ├── fetch-class-groups.service.ts
+│   │   │   ├── fetch-class-members.service.ts
+│   │   │   ├── fetch-class-settings.service.ts
+│   │   │   ├── fetch-class-update.service.ts
+│   │   │   ├── fetch-class.service.ts
+│   │   │   ├── fetch-enrolled-classes.service.ts
+│   │   │   ├── fetch-single-class-faculty.service.ts
+│   │   │   ├── fetch-single-class-group.service.ts
+│   │   │   ├── fetch-single-class-update.service.ts
+│   │   │   ├── leave-class.service.ts
+│   │   │   ├── mark-class-as-ended.service.ts
+│   │   │   ├── member-revoke-class-member.service.ts
+│   │   │   ├── regenerate-class-code.service.ts
+│   │   │   ├── toggle-pin-class-update.service.ts
+│   │   │   ├── update-class-group.service.ts
+│   │   │   ├── update-class-update.service.ts
+│   │   │   └── update-single-class-faculty.service.ts
+│   │   └── interfaces/
+│   │       └── class.interface.ts
+│   │
+│   ├── notification/
+│   │   ├── notification.module.ts
+│   │   ├── controllers/
+│   │   │   ├── notification.controller.ts
+│   │   │   └── push-subscription.controller.ts
+│   │   ├── dto/
+│   │   │   ├── create-notification.dto.ts
+│   │   │   ├── notification-response.dto.ts
+│   │   │   └── query-notification.dto.ts
+│   │   ├── interfaces/
+│   │   │   └── notification.interface.ts
+│   │   └── services/
+│   │       ├── notification.service.ts
+│   │       └── push-subscription.service.ts
+│   │
+│   ├── dashboard/
+│   │   ├── dashboard.module.ts
+│   │   ├── controllers/
+│   │   │   └── dashboard.controller.ts
+│   │   ├── dto/
+│   │   │   └── dashboard.dto.ts
+│   │   └── services/
+│   │       └── dashboard.service.ts
+│   │
+│   ├── routine/
+│   │   ├── routine.module.ts
+│   │   ├── routine.controller.ts
+│   │   ├── dto/
+│   │   │   ├── add-slot.dto.ts
+│   │   │   ├── create-routine.dto.ts
+│   │   │   ├── edit-slot.dto.ts
+│   │   │   ├── get-routine.dto.ts
+│   │   │   └── remove-slot.dto.ts
+│   │   ├── service/
+│   │   │   ├── add-slot.service.ts
+│   │   │   ├── create-routine.service.ts
+│   │   │   ├── delete-period.service.ts
+│   │   │   ├── delete-routine.service.ts
+│   │   │   ├── edit-slot.service.ts
+│   │   │   ├── get-routine.service.ts
+│   │   │   ├── index.ts
+│   │   │   └── remove-slot.service.ts
+│   │   └── interfaces/
+│   │       └── routine.interface.ts
+│   │
+│   └── health/
+│       ├── health.module.ts
+│       └── health.controller.ts
+
+├── database/                            # If you keep legacy structure, move to infrastructure/database
+│   ├── entities/
+│   │   ├── account.entity.ts
+│   │   ├── agent.entity.ts
+│   │   ├── class.entity.ts
+│   │   ├── enrollment.entity.ts
+│   │   ├── faculty.entity.ts
+│   │   ├── group.entity.ts
+│   │   ├── material.entity.ts
+│   │   ├── notification.entity.ts
+│   │   ├── push-subscription.entity.ts
+│   │   ├── session.entity.ts
+│   │   ├── throttle.entity.ts
+│   │   ├── update.entity.ts
+│   │   ├── user.entity.ts
+│   │   ├── verification.entity.ts
+│   │   └── routine/
+│   │       ├── day-of-week.enum.ts
+│   │       ├── period.entity.ts
+│   │       ├── routine-slot.entity.ts
+│   │       └── routine.entity.ts
+│   ├── interface/
+│   │   ├── account.interface.ts
+│   │   ├── agent.interface.ts
+│   │   ├── class.interface.ts
+│   │   ├── enrollment.interface.ts
+│   │   ├── faculty.interface.ts
+│   │   ├── group.interface.ts
+│   │   ├── material.interface.ts
+│   │   ├── notification.interface.ts
+│   │   ├── session.interface.ts
+│   │   ├── throttle.interface.ts
+│   │   ├── update.interface.ts
+│   │   ├── user.interface.ts
+│   │   └── verification.interface.ts
+│   └── database.module.ts
+
+├── core/                                # If you keep legacy structure, move to common/
+│   ├── interceptors/
+│   │   └── transform.interceptor.ts
+│   ├── middleware/
+│   │   └── logger.middleware.ts
+│   └── core.module.ts
+
+Refactoring Process:
+
+Step 1:
+Analyze the current project tree completely.
+
+Step 2:
+Create a detailed migration plan showing:
+- old path
+- new path
+
+Step 3:
+Move files only.
+Do not rewrite file contents except:
+- import paths
+- export paths
+- module import paths
+
+Step 4:
+Update:
+- relative imports
+- path aliases if tsconfig uses them
+- barrel exports
+- Nest module imports
+
+Step 5:
+Run a full project-wide validation:
+- no broken imports
+- no circular dependency introduced
+- all modules compile
+- all decorators and metadata remain intact
+
+Step 6:
+Provide:
+1. Migration summary
+2. List of moved files
+3. List of changed imports
+4. Any unresolved issues
+
+CRITICAL:
+This is a STRUCTURAL REFACTOR ONLY.
+
+Never change:
+- business logic
+- validation rules
+- database schema
+- entity properties
+- controller routes
+- service algorithms
+- DTO fields
+- interfaces
+- decorators behavior
+
+Only move files and fix imports so the application behaves exactly the same after the refactor.

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
-import cloudinaryConfig from '../../../config/cloudinary.config';
-import { GetSignatureResponseDto } from '../dto/get-signature.dto';
+import cloudinaryConfig from '../../config/cloudinary.config';
+import { GetSignatureResponseDto } from './dto/get-signature.dto';
 
 @Injectable()
 export class CloudinaryService {

@@ -6,7 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Agent, AgentDocument } from '../../../database/entities/agent.entity';
+import { Agent, AgentDocument } from '../../../infrastructure/database/entities/agent.entity';
 
 @Injectable()
 export class DeleteAgentService {

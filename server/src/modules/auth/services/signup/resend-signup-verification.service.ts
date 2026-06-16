@@ -8,13 +8,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import type { Model } from 'mongoose';
 
 import { ResendSignupVerificationDto } from '../../dto/signup/resend-signup-verification.dto';
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Verification,
   VerificationDocument,
-} from '../../../../database/entities/verification.entity';
-import { MailService } from '../../../../modules/mail/services/mail.service';
-import { EmailValidator } from '../../utils/email-validator.util';
+} from '../../../../infrastructure/database/entities/verification.entity';
+import { MailService } from '../../../../infrastructure/mail/mail.service';
+import { EmailValidator } from '../../../../common/utils/email-validator.util';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

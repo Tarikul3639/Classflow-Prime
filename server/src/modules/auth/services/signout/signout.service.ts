@@ -2,11 +2,11 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Session,
   SessionDocument,
-} from '../../../../database/entities/session.entity';
+} from '../../../../infrastructure/database/entities/session.entity';
 import { TokenService } from '../token/token.service';
 
 @Injectable()

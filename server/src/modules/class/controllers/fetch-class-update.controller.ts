@@ -1,8 +1,8 @@
 import { Get, Param, Controller } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../../modules/auth/interfaces/jwt-payload.interface';
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import { FetchClassUpdateResponseDto } from '../dto/fetch-class-update.dto';
 import { FetchClassUpdateService } from '../services/fetch-class-update.service';

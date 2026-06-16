@@ -7,8 +7,8 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Agent, AgentDocument } from '../../../database/entities/agent.entity';
-import { AgentStatus } from '../../../database/interface/agent.interface';
+import { Agent, AgentDocument } from '../../infrastructure/database/entities/agent.entity';
+import { AgentStatus } from '../../infrastructure/database/interface/agent.interface';
 
 @Injectable()
 export class AgentGuard implements CanActivate {

@@ -11,18 +11,18 @@ import ms, { StringValue } from 'ms';
 
 import { RequestPasswordResetDto } from '../../dto/password-reset/request-password-reset.dto';
 
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Throttle,
   ThrottleDocument,
-} from '../../../../database/entities/throttle.entity';
+} from '../../../../infrastructure/database/entities/throttle.entity';
 import {
   Verification,
   VerificationDocument,
-} from '../../../../database/entities/verification.entity';
+} from '../../../../infrastructure/database/entities/verification.entity';
 
-import { ThrottlePurpose } from '../../../../database/interface/throttle.interface';
-import { MailService } from '../../../../modules/mail/services/mail.service';
+import { ThrottlePurpose } from '../../../../infrastructure/database/interface/throttle.interface';
+import { MailService } from '../../../../infrastructure/mail/mail.service';
 
 @Injectable()
 export class RequestService {

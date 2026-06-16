@@ -1,9 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { CloudinaryService } from '../services/cloudinary.service';
+import { CloudinaryService } from './cloudinary.service';
 import {
     GetSignatureRequestDto,
     GetSignatureResponseDto,
-} from '../dto/get-signature.dto';
+} from './dto/get-signature.dto';
 
 @Controller('cloudinary')
 export class CloudinaryController {

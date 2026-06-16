@@ -6,7 +6,7 @@ import { Model, Types } from 'mongoose';
 import {
     Notification,
     NotificationDocument,
-} from '../../../database/entities/notification.entity';
+} from '../../../infrastructure/database/entities/notification.entity';
 
 import {
     CreateNotificationDto,

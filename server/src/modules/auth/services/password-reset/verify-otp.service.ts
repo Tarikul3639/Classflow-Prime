@@ -10,11 +10,11 @@ import ms, { StringValue } from 'ms';
 import * as crypto from 'crypto';
 
 import { VerifyPasswordResetDto } from '../../dto/password-reset/verify-password-reset.dto';
-import { User, UserDocument } from '../../../../database/entities/user.entity';
+import { User, UserDocument } from '../../../../infrastructure/database/entities/user.entity';
 import {
   Verification,
   VerificationDocument,
-} from '../../../../database/entities/verification.entity';
+} from '../../../../infrastructure/database/entities/verification.entity';
 
 /**
  * Service: VerifyOtpService

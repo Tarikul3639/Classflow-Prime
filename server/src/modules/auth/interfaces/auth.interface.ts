@@ -1,4 +1,4 @@
-import { IUser } from '../../../database/interface/user.interface';
+import { IUser } from '../../../infrastructure/database/interface/user.interface';
 
 /**
  * Token response structure

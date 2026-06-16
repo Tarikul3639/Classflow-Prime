@@ -7,14 +7,14 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { ClassUpdate, ClassUpdateDocument } from '../../../database/entities/update.entity';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { Material, MaterialDocument } from '../../../database/entities/material.entity';
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
-import { NotificationType } from '../../../database/entities/notification.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
-import { ClassStatus } from '../../../database/interface/class.interface';
-import { MaterialType } from '../../../database/interface/material.interface';
+import { ClassUpdate, ClassUpdateDocument } from '../../../infrastructure/database/entities/update.entity';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { Material, MaterialDocument } from '../../../infrastructure/database/entities/material.entity';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { NotificationType } from '../../../infrastructure/database/entities/notification.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
+import { MaterialType } from '../../../infrastructure/database/interface/material.interface';
 
 import { CreateClassUpdateRequestDto, CreateClassUpdateResponseDto } from '../dto/create-class-update.dto';
 import { NotificationService } from '../../notification/services/notification.service';

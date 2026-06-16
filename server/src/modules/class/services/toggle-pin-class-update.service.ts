@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Class, ClassDocument } from '../../../database/entities/class.entity';
-import { ClassStatus } from '../../../database/interface/class.interface';
-import { Enrollment, EnrollmentDocument } from '../../../database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../database/interface/enrollment.interface';
+import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 import {
     ClassUpdate,
     ClassUpdateDocument,
-} from '../../../database/entities/update.entity';
+} from '../../../infrastructure/database/entities/update.entity';
 
 import { TogglePinClassUpdateRequestDto, TogglePinClassUpdateResponseDto } from '../dto/toggle-pin-class-update.dto';
 

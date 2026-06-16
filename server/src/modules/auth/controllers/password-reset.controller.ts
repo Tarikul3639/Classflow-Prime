@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { Public } from '../decorators/public.decorator';
-import { RequestInfo } from '../decorators/request-info.decorator';
-import type { IRequestInfo } from '../decorators/request-info.decorator';
+import { Public } from '../../../common/decorators/public.decorator';
+import { RequestInfo } from '../../../common/decorators/request-info.decorator';
+import type { IRequestInfo } from '../../../common/decorators/request-info.decorator';
 
 import { RequestPasswordResetDto } from '../dto/password-reset/request-password-reset.dto';
 import { VerifyPasswordResetDto } from '../dto/password-reset/verify-password-reset.dto';

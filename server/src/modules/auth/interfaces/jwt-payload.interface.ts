@@ -1,5 +1,5 @@
 import type { Types } from 'mongoose';
-import type { UserRole } from '../../../database/interface/user.interface';
+import type { UserRole } from '../../../infrastructure/database/interface/user.interface';
 
 /**
  * JWT payload structure

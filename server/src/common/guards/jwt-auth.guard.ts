@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Response, Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { TokenService } from '../services/token/token.service';
+import { TokenService } from '../../modules/auth/services/token/token.service';
 import { setAuthCookies } from '../utils/auth-cookies.util';
 
 @Injectable()
@@ -35,15 +35,8 @@ export class JwtAuthGuard implements CanActivate {
     const accessToken = request.cookies?.['accessToken'];
     const refreshToken = request.cookies?.['refreshToken'];
 
-    // DEBUG: Add in JwtAuthGuard right after reading cookie:
-    console.log('[DEBUG guard] cookies:', {
-      access: accessToken ? accessToken.slice(0, 20) : null,
-      refresh: refreshToken ? refreshToken.slice(0, 20) : null,
-    });
-
     // 2️) Exit if no tokens are present in cookies
     if (!accessToken && !refreshToken) {
-      console.log('Authentication token missing');
       throw new UnauthorizedException('Authentication tokens missing');
     }
 
@@ -92,7 +85,6 @@ export class JwtAuthGuard implements CanActivate {
         // Clear cookies on refresh failure to prevent infinite loops
         response.clearCookie('accessToken');
         response.clearCookie('refreshToken');
-        console.log('Token refresh failed:', error.message || error);
         throw new UnauthorizedException(
           error instanceof ForbiddenException
             ? error.message
