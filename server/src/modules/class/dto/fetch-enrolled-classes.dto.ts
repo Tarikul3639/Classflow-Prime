@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 
 export class ClassItemDto {
   @IsString()
@@ -36,14 +37,14 @@ export class ClassItemDto {
 
   @IsOptional()
   @IsString()
-  coverImage?: string;
+  coverImage?: string | null;
 
   @IsOptional()
   @IsString()
   avatarUrl?: string | null;
 
-  @IsEnum(['active', 'archived'])
-  status!: 'active' | 'archived';
+  @IsEnum(ClassStatus)
+  status!: ClassStatus;
 }
 
 export class ClassesDataDto {

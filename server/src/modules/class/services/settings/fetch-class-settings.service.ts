@@ -1,5 +1,4 @@
-// fetch-class-code.service.ts
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -8,29 +7,28 @@ import { FetchClassSettingsResponseDto } from '../../dto/class-settings.dto';
 
 @Injectable()
 export class FetchClassSettingsService {
-    constructor(
-        @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
-    ) { }
+  constructor(
+    @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
+  ) {}
 
-    async execute(userId: string, classId: string): Promise<FetchClassSettingsResponseDto> {
-        const userObjectId = new Types.ObjectId(userId);
-        const classObjectId = new Types.ObjectId(classId);
+  async execute(classId: string): Promise<FetchClassSettingsResponseDto> {
+    const classObjectId = new Types.ObjectId(classId);
 
-        // Check if class exists
-        const existingClass = await this.classModel.findById(classObjectId);
-        if (!existingClass) throw new NotFoundException('Class not found');
+    // ── Fetch & Validate Class Settings ──────────
+    const existingClass = await this.classModel
+      .findById(classObjectId)
+      .select('enrollCode allowEnroll')
+      .lean();
 
-        if (!existingClass.instructorId.equals(userObjectId)) {
-            throw new ForbiddenException('Only the instructor can view the class code');
-        }
+    if (!existingClass) throw new NotFoundException('Class not found');
 
-        return {
-            success: true,
-            message: 'Class code fetched successfully.',
-            data: {
-                code: existingClass.enrollCode,
-                isJoiningAllowed: existingClass.allowEnroll,
-            },
-        };
-    }
+    return {
+      success: true,
+      message: 'Class settings fetched successfully.',
+      data: {
+        code: existingClass.enrollCode,
+        isJoiningAllowed: existingClass.allowEnroll,
+      },
+    };
+  }
 }

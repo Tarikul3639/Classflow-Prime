@@ -12,7 +12,8 @@ function isProtectedPath(pathname: string) {
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/classes') ||
     pathname.startsWith('/profile') ||
-    pathname.startsWith('/notifications')
+    pathname.startsWith('/notifications') ||
+    pathname.startsWith('/agents')
   );
 }
 
@@ -55,5 +56,6 @@ export const config = {
     '/classes/:path*',
     '/profile/:path*',
     '/notifications/:path*',
+    '/agents/:path*',
   ],
 };

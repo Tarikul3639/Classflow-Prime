@@ -10,7 +10,7 @@ export enum ClassStatus {
 export interface IClassDetails {
     classId: string;
     department: string;
-    name: string;
+    className: string;
     members: number;
     instructor: string;
     semester: string;
@@ -20,6 +20,7 @@ export interface IClassDetails {
     status: ClassStatus;
     isInstructor: boolean; // ← bonus field to indicate if the current user is the instructor
     isAssistant: boolean; // ← bonus field to indicate if the current user is an assistant
+    allowEnroll: boolean; // ← bonus field to indicate if enrollment is allowed
 }
 
 interface FetchClassResponse {
@@ -44,7 +45,7 @@ export const fetchSingleClass = createAsyncThunk<
             });
         }
 
-        // console.log("Fetch Class of " + `${data.data.class.name}: ` + JSON.stringify(data.data.class, null, 2));
+        // console.log("Fetch Class of " + `${data.data.class.className}: ` + JSON.stringify(data.data.class, null, 2));
 
         return data.data.class;
     } catch (error: unknown) {

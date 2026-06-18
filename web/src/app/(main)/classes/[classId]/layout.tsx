@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Share2, Users } from "lucide-react";
+import { ArrowLeft, Share2, SquarePen, Users } from "lucide-react";
 import { usePathname, useRouter, useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { useEffect } from "react";
@@ -165,7 +165,7 @@ export default function ClassLayout({
                             <AvatarImage
                                 className="object-cover"
                                 src={classDetails?.coverImage || undefined}
-                                alt={classDetails?.name || "Class Cover Image"}
+                                alt={classDetails?.className || "Class Cover Image"}
                             />
                             <AvatarFallback
                                 className="rounded-none w-full h-full text-4xl font-bold tracking-widest flex items-center justify-center uppercase"
@@ -174,7 +174,7 @@ export default function ClassLayout({
                                     color: classDetails?.themeColor,
                                 }}
                             >
-                                {classDetails?.name
+                                {classDetails?.className
                                     ?.split(" ")
                                     .map((n) => n[0])
                                     .join("")}
@@ -213,7 +213,7 @@ export default function ClassLayout({
                                     {classDetails?.department}.{classDetails?.semester}
                                 </p>
                                 <h2 className="text-2xl font-extrabold mb-4 leading-tight">
-                                    {classDetails?.name}
+                                    {classDetails?.className}
                                 </h2>
                                 <div className="flex items-center gap-3 pt-4 border-t border-white/20">
                                     <Avatar className="w-10 h-10 rounded-full ring-2 ring-white/30">
@@ -233,6 +233,17 @@ export default function ClassLayout({
                                         <p className="text-xs text-gray-50 font-medium">Instructor</p>
                                         <p className="text-sm font-bold">{classDetails?.instructor}</p>
                                     </div>
+                                    {/* Edit Button */}
+                                    {classDetails?.isInstructor && (
+                                        <Link
+                                            href={`/classes/edit/${classId}`}
+                                            className="flex items-center ml-auto px-3 py-1.5 text-xs font-medium rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white/30 transition-colors"
+                                        >
+                                            <SquarePen className="inline-block mr-1" size={14} />
+                                            Edit
+                                            <span className="ml-1 hidden sm:inline">Class</span>
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -249,11 +260,10 @@ export default function ClassLayout({
                             <Link
                                 key={tab.id}
                                 href={tab.href}
-                                className={`relative flex-none px-4 py-4 text-[12px] md:text-[13px] lg:text-[14px] font-semibold transition-colors overflow-hidden ${
-                                    active
-                                        ? "text-primary font-bold"
-                                        : "text-slate-800 hover:text-slate-900"
-                                }`}
+                                className={`relative flex-none px-4 py-4 text-[12px] md:text-[13px] lg:text-[14px] font-semibold transition-colors overflow-hidden ${active
+                                    ? "text-primary font-bold"
+                                    : "text-slate-800 hover:text-slate-900"
+                                    }`}
                             >
                                 {tab.label}
                                 {active && (

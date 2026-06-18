@@ -9,34 +9,28 @@ export interface IAgentScopes {
     delete: boolean;
 }
 
-export interface IClassListItem {
+export interface IAgentClass {
     _id: string;
-    name: string;
-    allowed: boolean;
+    className: string;
 }
 
 export interface IAgent {
     _id: string;
     name: string;
-    apiKey: string;
     apiKeyPrefix: string;
+    apiKey: string;
     scopes: IAgentScopes;
-    classList: IClassListItem[];
+    class: IAgentClass | null;
     status: AgentStatus;
     expiresAt?: string | null;
+    lastUsedAt?: string | null;
+    createdAt: string;
 }
 
 export interface ICreateAgentRequest {
     name: string;
+    classId: string;
     scopes?: Partial<IAgentScopes>;
-    allowedClassIds?: string[];
-    expiresAt?: string;
-}
-
-export interface IUpdateAgentRequest {
-    name?: string;
-    scopes?: Partial<IAgentScopes>;
-    allowedClassIds?: string[];
     expiresAt?: string;
 }
 
@@ -44,23 +38,21 @@ export interface ICreateAgentResponse {
     success: boolean;
     message: string;
     data: {
-        agent: IAgent & {
-            apiKey: string;
-        };
+        agent: IAgent
     };
 }
 
-export interface IUpdateAgentResponse {
+export interface IClassSearchItem {
+    _id: string;
+    className: string;
+}
+
+export interface ISearchClassesResponse {
     success: boolean;
     message: string;
     data: {
-        agent: IAgent;
+        classes: IClassSearchItem[];
     };
-}
-
-export interface IDeleteAgentResponse {
-    success: boolean;
-    message: string;
 }
 
 export interface IFetchAgentsResponse {

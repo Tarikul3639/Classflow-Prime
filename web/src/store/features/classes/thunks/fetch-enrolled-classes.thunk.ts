@@ -2,6 +2,13 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiClient } from "@/api/axios";
 import { AxiosError } from "axios";
 
+export enum ClassStatus {
+    ACTIVE = 'active',
+    ENDED = 'ended',
+    UPCOMING = 'upcoming',
+    ALL = 'all'
+}
+
 export interface IClass {
     classId: string;
     department: string;
@@ -12,7 +19,7 @@ export interface IClass {
     themeColor: string;
     coverImage?: string;
     avatarUrl?: string | null;
-    status: "active" | "archived";
+    status: ClassStatus;
 }
 
 interface FetchEnrolledClassesResponse {
@@ -34,7 +41,7 @@ export const fetchEnrolledClasses = createAsyncThunk<
 
         if (!data.success) {
             return rejectWithValue({
-                message:data.message || "Failed to fetch classes",
+                message: data.message || "Failed to fetch classes",
             });
         }
 

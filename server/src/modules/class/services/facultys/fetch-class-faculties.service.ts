@@ -1,54 +1,32 @@
-import {
-    Injectable,
-    NotFoundException,
-    ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Class, ClassDocument } from '../../../../infrastructure/database/entities/class.entity';
-import {
-    Enrollment,
-    EnrollmentDocument,
-} from '../../../../infrastructure/database/entities/enrollment.entity';
-
-import {
-    Faculty,
-    FacultyDocument,
-} from '../../../../infrastructure/database/entities/faculty.entity';
+import { Faculty, FacultyDocument } from '../../../../infrastructure/database/entities/faculty.entity';
 import { FetchClassFacultiesResponseDto } from '../../dto/class-faculty.dto';
 
 @Injectable()
 export class FetchClassFacultiesService {
     constructor(
         @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
-        @InjectModel(Enrollment.name)
-        private readonly enrollmentModel: Model<EnrollmentDocument>,
-        @InjectModel(Faculty.name)
-        private readonly facultyModel: Model<FacultyDocument>,
+        @InjectModel(Faculty.name) private readonly facultyModel: Model<FacultyDocument>,
     ) { }
 
-    async execute(
-        userId: string,
-        classId: string,
-    ): Promise<FetchClassFacultiesResponseDto> {
-        const userObjectId = new Types.ObjectId(userId);
+    async execute(classId: string): Promise<FetchClassFacultiesResponseDto> {
         const classObjectId = new Types.ObjectId(classId);
 
-        const existingClass = await this.classModel.findById(classObjectId);
+        // ── Validate Class Existence ──────────────────
+        const existingClass = await this.classModel
+            .findById(classObjectId)
+            .select('_id')
+            .lean();
+
         if (!existingClass) throw new NotFoundException('Class not found');
 
-        const enrollment = await this.enrollmentModel.findOne({
-            classId: classObjectId,
-            userId: userObjectId,
-        });
-
-        if (!enrollment && !existingClass.instructorId.equals(userObjectId)) {
-            throw new ForbiddenException('You are not enrolled in this class');
-        }
-
+        // ── Fetch Faculties ──────────────────────────
         const faculties = await this.facultyModel
-            .find({ classId: new Types.ObjectId(classId) })
+            .find({ classId: classObjectId })
             .lean()
             .exec();
 

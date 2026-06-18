@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { fetchSingleClass } from "../thunks/fetch-single-class.thunk";
 import { IClassDetails } from "../thunks/fetch-single-class.thunk";
-import { ClassStatus } from "@/store/features/profile/profile.types";
+import { updateClass } from "../thunks/update-class.thunk";
 
 // ─── Bucket Structure ───────────────────────────────────────────────
 interface SingleClassBucket {
@@ -86,6 +86,21 @@ const fetchSingleClassSlice = createSlice({
                     bucket.fetch.loading = false;
                     bucket.fetch.error =
                         action.payload?.message ?? "Failed to fetch class details.";
+                }
+            });
+
+            // ── Update Class (to keep details in sync after an update) ───────
+
+            builder
+            .addCase(updateClass.fulfilled, (state, action) => {
+                const { classId, data } = action.meta.arg;
+                const bucket = state.classesByClassId[classId];
+
+                if (bucket && bucket.classDetails) {
+                    bucket.classDetails = {
+                        ...bucket.classDetails,
+                        ...data,
+                    };
                 }
             });
     },

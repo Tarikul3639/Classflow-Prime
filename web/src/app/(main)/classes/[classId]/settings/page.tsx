@@ -145,7 +145,7 @@ export default function ClassSettingsPage() {
             ) : (
                 <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
                     <ClassInfoCard
-                        className={classDetails.name}
+                        className={classDetails.className}
                         classCode={classCode}
                         instructor={classDetails.instructor}
                         isInstructor={classDetails.isInstructor}
@@ -155,7 +155,7 @@ export default function ClassSettingsPage() {
                     />
                     <NotificationSettings />
                     <DangerZone
-                        className={classDetails.name}
+                        className={classDetails.className}
                         isInstructor={classDetails.isInstructor}
                         isJoiningAllowed={isJoiningAllowed}
                         isClassEnded={classDetails.status === "ended"}

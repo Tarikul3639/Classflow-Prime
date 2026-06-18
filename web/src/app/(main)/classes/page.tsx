@@ -1,23 +1,20 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Users,
-  UserPlus,
-  BookOpen,
-  LayersPlus,
-} from "lucide-react";
+import { Search, Users, UserPlus, BookOpen, LayersPlus } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { fetchEnrolledClasses } from "@/store/features/classes/thunks/fetch-enrolled-classes.thunk";
+import {
+  fetchEnrolledClasses,
+  ClassStatus,
+} from "@/store/features/classes/thunks/fetch-enrolled-classes.thunk";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { ClassesSkeleton } from "./ClassesSkeleton";
 import { toast } from "sonner";
 
 const Classes: React.FC = () => {
-  const [activeFilter, setActiveFilter] = useState('active'); // Default to first filter
+  const [activeFilter, setActiveFilter] = useState(ClassStatus.ACTIVE); // Default to first filter
   const [searchQuery, setSearchQuery] = useState("");
   const dispatch = useAppDispatch();
   const { classes, loading } = useAppSelector(
@@ -25,9 +22,10 @@ const Classes: React.FC = () => {
   );
 
   const filters = [
-    { id: "active", label: "Active" },
-    { id: "archived", label: "Archived" },
-    { id: "all", label: "All" },
+    { id: ClassStatus.ACTIVE, label: 'Active' },
+    { id: ClassStatus.ENDED, label: 'Ended' },
+    { id: ClassStatus.UPCOMING, label: 'Upcoming' },
+    { id: ClassStatus.ALL, label: 'All' },
   ];
 
   useEffect(() => {
@@ -47,8 +45,12 @@ const Classes: React.FC = () => {
 
   const filteredClasses = safeClasses
     .filter((cls) => {
-      if (activeFilter === "active") return cls.status === "active";
-      if (activeFilter === "archived") return cls.status === "archived";
+      if (activeFilter === ClassStatus.ACTIVE)
+        return cls.status === ClassStatus.ACTIVE;
+      if (activeFilter === ClassStatus.ENDED)
+        return cls.status === ClassStatus.ENDED;
+      if (activeFilter === ClassStatus.UPCOMING)
+        return cls.status === ClassStatus.UPCOMING;
       return true; // for "all"
     })
     .filter(
@@ -153,7 +155,7 @@ const Classes: React.FC = () => {
       </header>
 
       {/* Scrollable Content */}
-      {loading && classes.length ===0 ? (
+      {loading && classes.length === 0 ? (
         <ClassesSkeleton />
       ) : (
         <div className="flex-1 overflow-y-auto">
@@ -325,12 +327,21 @@ const Classes: React.FC = () => {
 
             {!loading && filteredClasses.length === 0 && (
               <div className="flex flex-col items-center justify-center py-24 gap-4">
-
                 <EmptyState
                   icon={BookOpen}
                   size="md"
-                  title={searchQuery ? `No results for "${searchQuery}"` : activeFilter !== "all" ? `You have no ${activeFilter} classes` : "No classes yet"}
-                  description={searchQuery ? "Try adjusting your search or filter to find what you're looking for." : "You haven't enrolled in or created any classes yet."}
+                  title={
+                    searchQuery
+                      ? `No results for "${searchQuery}"`
+                      : activeFilter !== ClassStatus.ALL
+                        ? `You have no ${activeFilter} classes`
+                        : "No classes yet"
+                  }
+                  description={
+                    searchQuery
+                      ? "Try adjusting your search or filter to find what you're looking for."
+                      : "You haven't enrolled in or created any classes yet."
+                  }
                   actionLabel="Enroll a class"
                   onAction={() => {
                     // Redirect to enroll page

@@ -1,29 +1,19 @@
-// class-group.controller.ts
-import {
-    Body,
-    Controller,
-    Delete,
-    Param,
-    Patch,
-    Post,
-    Get,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-
-import {
-    GetClassGroupsResponseDto,
-    ClassGroupDto,
-    CreateClassGroupRequestDto,
-} from '../dto/class-group.dto';
-
+import { CreateClassGroupRequestDto } from '../dto/class-group.dto';
 import { FetchClassGroupsService } from '../services/group/fetch-class-groups.service';
 import { FetchSingleClassGroupService } from '../services/group/fetch-single-class-group.service';
 import { CreateClassGroupService } from '../services/group/create-class-group.service';
 import { UpdateClassGroupService } from '../services/group/update-class-group.service';
 import { DeleteClassGroupService } from '../services/group/delete-class-group.service';
+
+import { CurrentUser } from '../../../common/decorators/current-user.decorator';
+import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
+
+import { ClassRoleGuard } from '../guards/class-role.guard';
+import { ClassRole } from '../decorators/class-role.decorator';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 @ApiTags('Class Group')
 @Controller('classes/:classId/groups')
@@ -34,45 +24,52 @@ export class ClassGroupController {
         private readonly createClassGroupService: CreateClassGroupService,
         private readonly updateClassGroupService: UpdateClassGroupService,
         private readonly deleteClassGroupService: DeleteClassGroupService,
-    ) {}
+    ) { }
 
     @Get()
-    @ApiOperation({ summary: 'Fetch all groups of a class' })
-    @ApiResponse({ status: 200, type: GetClassGroupsResponseDto })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+        EnrollmentRole.LEARNER,
+    )
     async fetchGroups(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
-    ): Promise<GetClassGroupsResponseDto> {
-        return await this.fetchClassGroupsService.execute(
-            user.userId.toString(),
+    ) {
+        return this.fetchClassGroupsService.execute(
             classId,
         );
     }
 
     @Get(':groupId')
-    @ApiOperation({ summary: 'Fetch a single group of a class' })
-    @ApiResponse({ status: 200 })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+        EnrollmentRole.LEARNER,
+    )
     async fetchSingleGroup(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Param('groupId') groupId: string,
     ) {
-        return await this.fetchSingleClassGroupService.execute(
-            user.userId.toString(),
+        return this.fetchSingleClassGroupService.execute(
             classId,
             groupId,
         );
     }
 
     @Post()
-    @ApiOperation({ summary: 'Add a group to a class' })
-    @ApiResponse({ status: 201 })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+    )
     async createGroup(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
+        @CurrentUser() user: IJwtPayload,
         @Body() dto: CreateClassGroupRequestDto,
     ) {
-        return await this.createClassGroupService.execute(
+        return this.createClassGroupService.execute(
             user.userId.toString(),
             classId,
             dto,
@@ -80,34 +77,24 @@ export class ClassGroupController {
     }
 
     @Patch(':groupId')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
     @ApiOperation({ summary: 'Update a group in a class' })
     @ApiResponse({ status: 200 })
     async updateGroup(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Param('groupId') groupId: string,
         @Body() dto: Partial<CreateClassGroupRequestDto>,
     ) {
-        return await this.updateClassGroupService.execute(
-            user.userId.toString(),
-            classId,
-            groupId,
-            dto,
-        );
+        return this.updateClassGroupService.execute(classId, groupId, dto);
     }
 
     @Delete(':groupId')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
     @ApiOperation({ summary: 'Remove a group from a class' })
     @ApiResponse({ status: 200 })
-    async deleteGroup(
-        @CurrentUser() user: IJwtPayload,
-        @Param('classId') classId: string,
-        @Param('groupId') groupId: string,
-    ) {
-        return await this.deleteClassGroupService.execute(
-            user.userId.toString(),
-            classId,
-            groupId,
-        );
+    async deleteGroup(@Param('classId') classId: string, @Param('groupId') groupId: string) {
+        return this.deleteClassGroupService.execute(classId, groupId);
     }
 }

@@ -11,7 +11,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <>
       <ReduxProvider store={store}>
         {children}
-        <Toaster />
+        <Toaster 
+          position="top-center"
+        />
       </ReduxProvider>
     </>
   );

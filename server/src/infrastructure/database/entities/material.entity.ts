@@ -6,6 +6,9 @@ export type MaterialDocument = HydratedDocument<Material & IMaterial>;
 
 @Schema({ timestamps: true })
 export class Material implements IMaterial {
+  @Prop({ type: Types.ObjectId, auto: true })
+  _id!: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId, ref: 'Class', required: true, index: true })
   classId!: Types.ObjectId;
 
@@ -31,6 +34,12 @@ export class Material implements IMaterial {
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   uploadedBy!: Types.ObjectId; // Instructor / assistant
+
+  @Prop()
+  createdAt!: Date;
+
+  @Prop()
+  updatedAt!: Date;
 }
 
 export const MaterialSchema = SchemaFactory.createForClass(Material);

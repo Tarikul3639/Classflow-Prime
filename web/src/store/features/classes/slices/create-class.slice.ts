@@ -13,7 +13,7 @@ interface IRequestStatus {
     success: boolean;
     message: string | null;
     error: {
-        field: Errorfield;
+        field: Errorfield | null;
         message: string | null;
     };
 }
@@ -25,7 +25,7 @@ interface IClassFormData {
     themeColor?: string;
     coverImage?: string;
 
-    allowEnroll?: boolean;
+    allowEnroll: boolean;
 }
 
 interface CreateClassState extends IRequestStatus {

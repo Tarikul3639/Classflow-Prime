@@ -29,6 +29,12 @@ export class ClassUpdate implements IClassUpdate {
 
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   postedBy!: Types.ObjectId; // Instructor or assistant who posted the update
+
+  @Prop()
+  createdAt!: Date;
+
+  @Prop()
+  updatedAt!: Date;
 }
 
 export const ClassUpdateSchema = SchemaFactory.createForClass(ClassUpdate);

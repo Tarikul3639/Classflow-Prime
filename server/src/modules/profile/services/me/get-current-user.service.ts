@@ -56,7 +56,7 @@ export class GetCurrentUserService {
                   { $match: { $expr: { $eq: ['$_id', '$$classId'] } } },
                   {
                     $project: {
-                      name: 1,
+                      className: 1,
                       status: 1,
                       themeColor: 1,
                       coverImage: 1,
@@ -77,7 +77,7 @@ export class GetCurrentUserService {
                 classId: 1,
                 role: 1,
                 enrolledAt: 1,
-                className: '$classDetails.name',
+                className: '$classDetails.className',
                 status: '$classDetails.status',
                 themeColor: '$classDetails.themeColor',
                 coverImage: '$classDetails.coverImage',

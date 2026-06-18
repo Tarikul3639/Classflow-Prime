@@ -13,7 +13,7 @@ export class Class implements IClass {
     required: true,
     trim: true,
   })
-  name!: string;
+  className!: string;
 
   @Prop({
     required: true,
@@ -22,13 +22,6 @@ export class Class implements IClass {
     maxlength: 6,
   })
   enrollCode!: string; // Teacher generated code
-
-  @Prop({
-    type: Types.ObjectId,
-    ref: 'User',
-    required: true,
-  })
-  instructorId!: Types.ObjectId;
 
   @Prop({
     trim: true,
@@ -46,8 +39,11 @@ export class Class implements IClass {
   @Prop({ default: '#3B82F6' }) // Default blue
   themeColor!: string;
 
-  @Prop({ default: null })
-  coverImage?: string;
+  @Prop({
+    type: String,
+    default: null,
+  })
+  coverImage?: string | null;
 
   @Prop({
     enum: Object.values(ClassStatus),
@@ -63,4 +59,4 @@ export class Class implements IClass {
 export const ClassSchema = SchemaFactory.createForClass(Class);
 
 // ==================== Indexes ====================
-ClassSchema.index({ name: 'text', about: 'text', tags: 'text' }); // for text search
+ClassSchema.index({ className: 'text' }); // for text search

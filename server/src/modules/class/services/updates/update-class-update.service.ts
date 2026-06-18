@@ -4,30 +4,25 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
+
+// Entities
 import { Class, ClassDocument } from '../../../../infrastructure/database/entities/class.entity';
-import { ClassStatus } from '../../../../infrastructure/database/interface/class.interface';
-import {
-  ClassUpdate,
-  ClassUpdateDocument,
-} from '../../../../infrastructure/database/entities/update.entity';
-import {
-  Material,
-  MaterialDocument,
-} from '../../../../infrastructure/database/entities/material.entity';
-import { UpdateClassUpdateRequestDto } from '../../dto/update-class-update.dto';
-import { UpdateClassUpdateResponseDto } from '../../dto/update-class-update.dto';
-
-import {
-  Enrollment,
-  EnrollmentDocument,
-} from '../../../../infrastructure/database/entities/enrollment.entity';
-import { EnrollmentRole } from '../../../../infrastructure/database/interface/enrollment.interface';
-
-import { NotificationService } from '../../../notification/services/notification.service';
+import { ClassUpdate, ClassUpdateDocument } from '../../../../infrastructure/database/entities/update.entity';
+import { Material, MaterialDocument } from '../../../../infrastructure/database/entities/material.entity';
+import { Enrollment, EnrollmentDocument } from '../../../../infrastructure/database/entities/enrollment.entity';
 import { NotificationType } from '../../../../infrastructure/database/entities/notification.entity';
+
+// Interfaces
+import { ClassStatus } from '../../../../infrastructure/database/interface/class.interface';
+import { UpdateCategory } from '../../../../infrastructure/database/interface/update.interface';
+
+// DTOs & Services
+import { UpdateClassUpdateRequestDto, UpdateClassUpdateResponseDto } from '../../dto/update-class-update.dto';
+import { NotificationService } from '../../../notification/services/notification.service';
 
 @Injectable()
 export class UpdateClassUpdateService {
@@ -45,26 +40,31 @@ export class UpdateClassUpdateService {
     private readonly enrollmentModel: Model<EnrollmentDocument>,
 
     private readonly notificationService: NotificationService,
-  ) { }
+  ) {}
 
   async execute(
-    userId: string,
     classId: string,
     updateId: string,
     dto: UpdateClassUpdateRequestDto,
   ): Promise<UpdateClassUpdateResponseDto> {
-    const userObjectId = new Types.ObjectId(userId);
+    
+    // 1. Validation check (ObjectId)
+    if (!Types.ObjectId.isValid(classId)) {
+      throw new NotFoundException('Invalid class id');
+    }
+
+    if (!Types.ObjectId.isValid(updateId)) {
+      throw new NotFoundException('Invalid update id');
+    }
+
     const classObjectId = new Types.ObjectId(classId);
     const updateObjectId = new Types.ObjectId(updateId);
 
-    console.log(
-      `Updating Update - Class: ${classId}, Update: ${updateId}, User: ${userId}, Body: ${JSON.stringify(dto)}`,
-    );
-
-    // Step 1: check if class exists
-    const classData = await this.classModel.findOne({
-      _id: classObjectId,
-    });
+    // 2. Fetch class data and check status
+    const classData = await this.classModel
+      .findById(classObjectId)
+      .select('name status')
+      .lean<{ name: string; status: ClassStatus }>();
 
     if (!classData) {
       throw new NotFoundException('Class not found');
@@ -74,113 +74,124 @@ export class UpdateClassUpdateService {
       throw new ForbiddenException('Cannot modify updates of an ended class');
     }
 
-    // Step 2: Permission check
-    const isInstructor = classData.instructorId.equals(userObjectId);
-    const isAssistant = await this.enrollmentModel.exists({
-      userId: userObjectId,
-      classId: classObjectId,
-      role: EnrollmentRole.ASSISTANT,
-    });
-
-    if (!isInstructor && !isAssistant) {
-      throw new ForbiddenException(
-        'Only instructors and assistants can edit updates',
-      );
-    }
-
-    // Step 3: Check if the update exists
-    const existingUpdate = await this.classUpdateModel.findOne({
-      _id: updateObjectId,
-      classId: classObjectId,
-    });
+    // 3. Find the existing update
+    const existingUpdate = await this.classUpdateModel
+      .findOne({
+        _id: updateObjectId,
+        classId: classObjectId,
+      })
+      .select('title description category eventAt postedBy')
+      .lean<{
+        title: string;
+        description: string;
+        category: UpdateCategory;
+        eventAt?: Date | null;
+        postedBy: Types.ObjectId;
+      }>();
 
     if (!existingUpdate) {
       throw new NotFoundException('Update not found');
     }
 
-    // Step 4: Determine what fields are being updated (for notification message)
-    const changes: string[] = []; // For logging purposes, track what fields are being changed
+    // 4. Track changes for notifications
+    const changes: string[] = [];
 
     if (dto.title !== undefined && dto.title !== existingUpdate.title) {
-      changes.push(`Title updated: "${existingUpdate.title}" → "${dto.title}"`);
+      changes.push('Title updated');
     }
 
     if (dto.description !== undefined && dto.description !== existingUpdate.description) {
-      changes.push(`Description updated: Previous → Updated`);
+      changes.push('Description updated');
     }
 
     if (dto.category !== undefined && dto.category !== existingUpdate.category) {
-      changes.push(`Category updated: ${existingUpdate.category} → ${dto.category}`);
+      changes.push('Category updated');
     }
 
-    if (dto.eventAt !== undefined && dto.eventAt !== existingUpdate.eventAt?.toISOString()) {
-      const oldDate = existingUpdate.eventAt
-        ? new Date(existingUpdate.eventAt).toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric',
-        })
-        : 'None';
+    if (dto.eventAt !== undefined) {
+      const oldDate = existingUpdate.eventAt ? existingUpdate.eventAt.toISOString() : null;
+      const newDate = dto.eventAt ? new Date(dto.eventAt).toISOString() : null;
 
-      const newDate = dto.eventAt
-        ? new Date(dto.eventAt).toLocaleDateString('en-US', {
-          month: 'short', day: 'numeric', year: 'numeric',
-        })
-        : 'None';
-
-      changes.push(`Event date updated: ${oldDate} → ${newDate}`);
-    }
-
-    if (dto.materials !== undefined) {
-      changes.push(`Materials updated: Previous → Updated`);
-    }
-
-    // Step 5: Update fields prepare
-    const updateFields: Record<string, unknown> = {};
-    if (dto.title !== undefined) updateFields.title = dto.title;
-    if (dto.description !== undefined)
-      updateFields.description = dto.description;
-    if (dto.category !== undefined) updateFields.category = dto.category;
-    if (dto.isPinned !== undefined) updateFields.isPinned = dto.isPinned;
-    if (dto.eventAt !== undefined) updateFields.eventAt = dto.eventAt;
-
-    // Step 6: Update the class update document
-    await this.classUpdateModel.findByIdAndUpdate(updateObjectId, {
-      $set: updateFields,
-    });
-
-    // Step 7: Materials update if provided
-    if (dto.materials !== undefined) {
-      // Old materials delete
-      await this.materialModel.deleteMany({ updateId: updateObjectId });
-
-      // New materials create
-      if (dto.materials.length > 0) {
-        const newMaterials = dto.materials.map((m) => ({
-          classId: classObjectId,
-          updateId: updateObjectId,
-          url: m.url,
-          name: m.name,
-          type: m.type,
-          size: m.size,
-          uploadedBy: userObjectId,
-        }));
-
-        const savedMaterials =
-          await this.materialModel.insertMany(newMaterials);
-
-        await this.classUpdateModel.findByIdAndUpdate(updateObjectId, {
-          $set: {
-            materials: savedMaterials.map((m) => m._id),
-          },
-        });
-      } else {
-        // If materials array is empty, just clear the materials field
-        await this.classUpdateModel.findByIdAndUpdate(updateObjectId, {
-          $set: { materials: [] },
-        });
+      if (oldDate !== newDate) {
+        changes.push('Event date updated');
       }
     }
 
-    // Step 8: Updated document populate করে return করো
+    if (dto.materials !== undefined) {
+      changes.push('Materials updated');
+    }
+
+    // 5. Prepare update fields
+    const updateFields: Record<string, unknown> = {};
+
+    if (dto.title !== undefined) updateFields.title = dto.title;
+    if (dto.description !== undefined) updateFields.description = dto.description;
+    if (dto.category !== undefined) updateFields.category = dto.category;
+    if (dto.isPinned !== undefined) updateFields.isPinned = dto.isPinned;
+    if (dto.eventAt !== undefined) {
+      updateFields.eventAt = dto.eventAt ? new Date(dto.eventAt) : undefined;
+    }
+
+    // 6. Start database transaction
+    const session = await this.classModel.db.startSession();
+    session.startTransaction();
+
+    try {
+      await this.classUpdateModel.findByIdAndUpdate(
+        updateObjectId,
+        { $set: updateFields },
+        { session },
+      );
+
+      // Handle material updates
+      if (dto.materials !== undefined) {
+        await this.materialModel.deleteMany(
+          { updateId: updateObjectId },
+          { session },
+        );
+
+        if (dto.materials.length > 0) {
+          const newMaterials = dto.materials.map((m) => ({
+            classId: classObjectId,
+            updateId: updateObjectId,
+            url: m.url,
+            name: m.name,
+            type: m.type,
+            size: m.size,
+            uploadedBy: existingUpdate.postedBy,
+          }));
+
+          const savedMaterials = await this.materialModel.insertMany(newMaterials, {
+            session,
+          });
+
+          await this.classUpdateModel.findByIdAndUpdate(
+            updateObjectId,
+            {
+              $set: {
+                materials: savedMaterials.map((m) => m._id),
+              },
+            },
+            { session },
+          );
+        } else {
+          await this.classUpdateModel.findByIdAndUpdate(
+            updateObjectId,
+            { $set: { materials: [] } },
+            { session },
+          );
+        }
+      }
+
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw new InternalServerErrorException('Failed to modify class update');
+    } finally {
+      session.endSession();
+    }
+
+    // 7. Fetch updated data and send notifications
     const updatedDoc = await this.classUpdateModel
       .findById(updateObjectId)
       .populate<{
@@ -190,7 +201,8 @@ export class UpdateClassUpdateService {
           avatarUrl: string | null;
         };
       }>('postedBy', 'name avatarUrl')
-      .lean();
+      .lean()
+      .exec();
 
     if (!updatedDoc) {
       throw new NotFoundException('Update not found after save');
@@ -198,43 +210,27 @@ export class UpdateClassUpdateService {
 
     const materials = await this.materialModel
       .find({ updateId: updateObjectId })
-      .lean();
+      .lean()
+      .exec();
 
-    /**
-     * After successfully updating the class update and associated materials,
-     * we need to notify all relevant users (learners, assistants, instructor).
-     * This is done after the transaction commits to ensure we only notify if the update was modified successfully.
-     */
-
-    // ── 1. Get all enrolled learners ───────────────────────
     const enrollments = await this.enrollmentModel
       .find({ classId: classObjectId })
       .select('userId')
-      .lean();
+      .lean<{ userId: Types.ObjectId }[]>()
+      .exec();
 
-    // Extract userIds from enrollments
-    const enrollmentIds = enrollments.map((e) => e.userId.toString());
+    const recipientIds = [
+      ...new Set(enrollments.map((e) => e.userId.toString())),
+    ].filter((id) => id !== updatedDoc.postedBy._id.toString());
 
-    // ── 2. Get assistants and instructor ───────────────────
-    const instructorId = classData.instructorId.toString();
+    const message = changes.length > 0 ? changes.join(', ') : 'An update has been modified.';
 
-    // ── 3. Combine all recipient IDs and remove duplicates ──
-    const allRecipients = [...new Set([...enrollmentIds, instructorId])].filter(
-      (id) => id !== userId,
-    ); // remove whoever posted
-
-    // Make the notification message more informative based on what was changed
-    const message = changes.length > 0
-      ? changes.join(', ')
-      : `An update has been modified.`;
-
-    // ── 4. Send notifications ───────────────────────────────
-    if (allRecipients.length > 0) {
+    if (recipientIds.length > 0) {
       await this.notificationService.createBulk({
-        recipientIds: allRecipients,
-        senderId: userObjectId.toString(),
+        recipientIds,
+        senderId: updatedDoc.postedBy._id.toString(),
         title: classData.name,
-        message: message,
+        message,
         type: NotificationType.UPDATE,
         metadata: {
           classId,
@@ -243,6 +239,7 @@ export class UpdateClassUpdateService {
       });
     }
 
+    // 8. Return response
     return {
       success: true,
       message: 'Update modified successfully',
@@ -259,9 +256,9 @@ export class UpdateClassUpdateService {
             name: updatedDoc.postedBy.name,
             avatarUrl: updatedDoc.postedBy.avatarUrl ?? null,
           },
-          eventAt: updatedDoc.eventAt ?? null,
-          createdAt: updatedDoc.createdAt || new Date(),
-          updatedAt: updatedDoc.updatedAt || new Date(),
+          eventAt: updatedDoc.eventAt ? updatedDoc.eventAt.toISOString() : null,
+          createdAt: updatedDoc.createdAt.toISOString(),
+          updatedAt: updatedDoc.updatedAt.toISOString(),
           materials: materials.map((m) => ({
             _id: m._id.toString(),
             url: m.url,

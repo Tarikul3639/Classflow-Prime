@@ -2,11 +2,20 @@ import {
   Injectable,
   ForbiddenException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Agent, AgentDocument } from '../../../infrastructure/database/entities/agent.entity';
+import { InjectModel } from '@nestjs/mongoose';
+
+import {
+  Model,
+  Types,
+} from 'mongoose';
+
+import {
+  Agent,
+  AgentDocument,
+} from '../../../infrastructure/database/entities/agent.entity';
 
 @Injectable()
 export class DeleteAgentService {
@@ -15,22 +24,39 @@ export class DeleteAgentService {
     private readonly agentModel: Model<AgentDocument>,
   ) {}
 
-  async execute(userId: string, agentId: string) {
+  async execute(
+    userId: string,
+    agentId: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+
+    if (!Types.ObjectId.isValid(agentId)) {
+      throw new BadRequestException('Invalid agent id');
+    }
+
     const agent = await this.agentModel
       .findById(agentId)
-      .select('userId')
+      .select('_id userId')
       .lean()
       .exec();
 
     if (!agent) {
-      throw new NotFoundException('Agent not found');
+      throw new NotFoundException(
+        'Agent not found',
+      );
     }
 
     if (agent.userId.toString() !== userId) {
-      throw new ForbiddenException('You do not have permission to delete this agent');
+      throw new ForbiddenException(
+        'You do not have permission to delete this agent',
+      );
     }
 
-    await this.agentModel.findByIdAndDelete(agentId).exec();
+    await this.agentModel.deleteOne({
+      _id: agent._id,
+    });
 
     return {
       success: true,

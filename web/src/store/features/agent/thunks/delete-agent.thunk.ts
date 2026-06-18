@@ -1,6 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { apiClient, getErrorMessage } from '@/api/axios';
-import type { IDeleteAgentResponse } from '../agent.types';
+
+interface IDeleteAgentResponse {
+    success: boolean;
+    message: string;
+    data: {
+        agentId: string;
+    };
+}
 
 export const deleteAgentThunk = createAsyncThunk<
     IDeleteAgentResponse,

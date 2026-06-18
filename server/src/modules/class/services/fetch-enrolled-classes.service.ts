@@ -1,133 +1,130 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, PipelineStage } from 'mongoose';
-import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
-import { FetchClassesResponseDto } from '../dto/fetch-enrolled-classes.dto';
+import { Model, Types } from 'mongoose';
+
+import {
+  Class,
+  ClassDocument,
+} from '../../../infrastructure/database/entities/class.entity';
+import {
+  Enrollment,
+  EnrollmentDocument,
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import {
+  User,
+  UserDocument,
+} from '../../../infrastructure/database/entities/user.entity';
+
+import {
+  FetchClassesResponseDto,
+  ClassItemDto,
+} from '../dto/fetch-enrolled-classes.dto';
 import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 
 @Injectable()
 export class FetchEnrolledClassesService {
   constructor(
-    @InjectModel(Class.name)
-    private readonly classModel: Model<ClassDocument>,
+    @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
+    @InjectModel(Enrollment.name)
+    private readonly enrollmentModel: Model<EnrollmentDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) { }
 
   async execute(userId: string): Promise<FetchClassesResponseDto> {
+    // ── Validate User ID ──────────────────────────
+    if (!Types.ObjectId.isValid(userId)) {
+      return {
+        success: false,
+        message: 'Invalid user id',
+        data: { classes: [] },
+      };
+    }
+
     const userObjectId = new Types.ObjectId(userId);
 
-    const pipeline: PipelineStage[] = [
-      // 1️) Lookup all enrollments for this class to count students
-      {
-        $lookup: {
-          from: 'enrollments',
-          let: { classId: '$_id' },
-          pipeline: [
-            { $match: { $expr: { $eq: ['$classId', '$$classId'] } } },
-          ],
-          as: 'allEnrollments',
-        },
-      },
+    // ── Fetch My Enrollments ──────────────────────
+    const myEnrollments = await this.enrollmentModel
+      .find({ userId: userObjectId })
+      .select('userId classId role')
+      .lean()
+      .exec();
 
-      // 2️) Lookup current user's enrollment (to check if student)
-      {
-        $lookup: {
-          from: 'enrollments',
-          let: { classId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$classId', '$$classId'] },
-                    { $eq: ['$userId', userObjectId] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'currentUserEnrollment',
-        },
-      },
+    if (!myEnrollments.length) {
+      return {
+        success: true,
+        message: 'Classes fetched successfully',
+        data: { classes: [] },
+      };
+    }
 
-      // 3️) Lookup instructor details
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'instructorId',
-          foreignField: '_id',
-          as: 'instructorDetails',
-        },
-      },
-      { $unwind: { path: '$instructorDetails', preserveNullAndEmptyArrays: true } },
+    const classIds = myEnrollments.map((e) => e.classId);
 
-      // 4️) Add isAssistant field from enrollments
-      {
-        $addFields: {
-          isAssistant: {
-            $in: [
-              userObjectId,
-              {
-                $map: {
-                  input: {
-                    $filter: {
-                      input: '$allEnrollments',
-                      cond: { $eq: ['$$this.role', EnrollmentRole.ASSISTANT] },
-                    },
-                  },
-                  as: 'e',
-                  in: '$$e.userId',
-                },
-              },
-            ],
-          },
-        },
-      },
+    // ── Fetch Classes & All Related Enrollments ──
+    const [classes, allEnrollments] = await Promise.all([
+      this.classModel
+        .find({ _id: { $in: classIds } })
+        .lean()
+        .exec(),
+      this.enrollmentModel
+        .find({ classId: { $in: classIds } })
+        .select('userId classId role')
+        .lean()
+        .exec(),
+    ]);
 
-      // 5️) Access control: only instructor / assistant / enrolled student
-      {
-        $match: {
-          $expr: {
-            $or: [
-              { $eq: ['$instructorId', userObjectId] },
-              { $eq: ['$isAssistant', true] },
-              { $gt: [{ $size: '$currentUserEnrollment' }, 0] },
-            ],
-          },
-        },
-      },
-
-      // 6️) Project final response
-      {
-        $project: {
-          _id: 0,
-          classId: { $toString: '$_id' },
-          title: '$name',
-          department: { $ifNull: ['$department', 'General'] },
-          students: { $size: '$allEnrollments' },
-          instructor: { $ifNull: ['$instructorDetails.name', 'Staff'] },
-          avatarUrl: { $ifNull: ['$instructorDetails.avatarUrl', null] },
-          semester: { $ifNull: ['$semester', 'TBA'] },
-          themeColor: '$themeColor',
-          coverImage: { $ifNull: ['$coverImage', null] },
-          status: {
-            $cond: {
-              if: { $eq: ['$status', 'ended'] },
-              then: 'archived',
-              else: 'active',
-            },
-          },
-          isInstructor: { $eq: ['$instructorId', userObjectId] },
-          isAssistant: 1,
-        },
-      },
+    // ── Fetch Instructors ─────────────────────────
+    const instructorIds = [
+      ...new Set(
+        allEnrollments
+          .filter((e) => e.role === EnrollmentRole.INSTRUCTOR)
+          .map((e) => e.userId),
+      ),
     ];
 
-    const classes = await this.classModel.aggregate(pipeline).exec();
+    const instructors = await this.userModel
+      .find({ _id: { $in: instructorIds } })
+      .select('name avatarUrl')
+      .lean()
+      .exec();
+
+    // ── Build Response DTOs ───────────────────────
+    const responseClasses: ClassItemDto[] = classes.map((classData) => {
+      const classIdStr = classData._id.toString();
+
+      const enrollments = allEnrollments.filter(
+        (e) => e.classId.toString() === classIdStr,
+      );
+      const myEnrollment = myEnrollments.find(
+        (e) => e.classId.toString() === classIdStr,
+      );
+      const instructorEnrollment = enrollments.find(
+        (e) => e.role === EnrollmentRole.INSTRUCTOR,
+      );
+      const instructorUser = instructors.find(
+        (u) => u._id.toString() === instructorEnrollment?.userId.toString(),
+      );
+
+      return {
+        classId: classIdStr,
+        title: classData.className ?? 'Unknown',
+        department: classData.department ?? 'General',
+        students: enrollments.length,
+        instructor: instructorUser?.name ?? 'Unknown',
+        semester: classData.semester ?? 'TBA',
+        themeColor: classData.themeColor ?? '#3B82F6',
+        coverImage: classData.coverImage ?? null,
+        avatarUrl: instructorUser?.avatarUrl ?? null,
+        isInstructor: myEnrollment?.role === EnrollmentRole.INSTRUCTOR,
+        isAssistant: myEnrollment?.role === EnrollmentRole.ASSISTANT,
+        status: classData.status,
+      };
+    });
 
     return {
       success: true,
       message: 'Classes fetched successfully',
-      data: { classes },
+      data: { classes: responseClasses },
     };
   }
 }

@@ -1,16 +1,5 @@
-import {
-    Body,
-    Controller,
-    Delete,
-    Param,
-    Patch,
-    Post,
-    Get,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import {
     FetchClassFacultiesResponseDto,
@@ -25,8 +14,11 @@ import { FetchClassFacultiesService } from '../services/facultys/fetch-class-fac
 import { CreateClassFacultyService } from '../services/facultys/create-class-faculty.service';
 import { UpdateSingleClassFacultyService } from '../services/facultys/update-single-class-faculty.service';
 import { DeleteClassFacultyService } from '../services/facultys/delete-class-faculty.service';
-
 import { FetchSingleClassFacultyService } from '../services/facultys/fetch-single-class-faculty.service';
+
+import { ClassRoleGuard } from '../guards/class-role.guard';
+import { ClassRole } from '../decorators/class-role.decorator';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
 @ApiTags('Class Faculty')
 @Controller('classes/:classId/faculties')
@@ -40,59 +32,78 @@ export class ClassFacultyController {
     ) { }
 
     @Get()
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+        EnrollmentRole.LEARNER,
+    )
     @ApiOperation({ summary: 'Fetch all faculties of a class' })
-    @ApiResponse({ status: 200, type: FetchClassFacultiesResponseDto })
+    @ApiResponse({
+        status: 200,
+        type: FetchClassFacultiesResponseDto,
+    })
     async fetchFaculties(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
     ): Promise<FetchClassFacultiesResponseDto> {
-        return await this.fetchClassFacultiesService.execute(
-            user.userId.toString(),
-            classId,
-        );
+        return this.fetchClassFacultiesService.execute(classId);
     }
 
     @Get(':facultyId')
-    @ApiOperation({ summary: 'Fetch a single faculty of a class' })
-    @ApiResponse({ status: 200, type: FetchSingleClassFacultyResponseDto })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+        EnrollmentRole.LEARNER,
+    )
+    @ApiOperation({
+        summary: 'Fetch a single faculty of a class',
+    })
+    @ApiResponse({
+        status: 200,
+        type: FetchSingleClassFacultyResponseDto,
+    })
     async fetchSingleFaculty(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Param('facultyId') facultyId: string,
     ): Promise<FetchSingleClassFacultyResponseDto> {
-        return await this.fetchSingleClassFacultyService.execute(
-            user.userId.toString(),
+        return this.fetchSingleClassFacultyService.execute(
             classId,
             facultyId,
         );
     }
 
     @Post()
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
     @ApiOperation({ summary: 'Add a faculty to a class' })
     @ApiResponse({ status: 201, type: ClassFacultyResponseDto })
     async createFaculty(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Body() dto: CreateClassFacultyRequestDto,
     ): Promise<ClassFacultyResponseDto> {
-        return await this.createClassFacultyService.execute(
-            user.userId.toString(),
-            classId,
-            dto,
-        );
+        return this.createClassFacultyService.execute(classId, dto);
     }
 
     @Patch(':facultyId')
-    @ApiOperation({ summary: 'Update a faculty in a class' })
-    @ApiResponse({ status: 200, type: ClassFacultyResponseDto })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+    )
+    @ApiOperation({
+        summary: 'Update a faculty in a class',
+    })
+    @ApiResponse({
+        status: 200,
+        type: ClassFacultyResponseDto,
+    })
     async updateFaculty(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Param('facultyId') facultyId: string,
         @Body() dto: UpdateSingleClassFacultyRequestDto,
     ): Promise<ClassFacultyResponseDto> {
-        return await this.updateSingleClassFacultyService.execute(
-            user.userId.toString(),
+        return this.updateSingleClassFacultyService.execute(
             classId,
             facultyId,
             dto,
@@ -100,15 +111,21 @@ export class ClassFacultyController {
     }
 
     @Delete(':facultyId')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(
+        EnrollmentRole.INSTRUCTOR,
+        EnrollmentRole.ASSISTANT,
+    )
     @ApiOperation({ summary: 'Remove a faculty from a class' })
-    @ApiResponse({ status: 200, type: DeleteClassFacultyResponseDto })
+    @ApiResponse({
+        status: 200,
+        type: DeleteClassFacultyResponseDto,
+    })
     async deleteFaculty(
-        @CurrentUser() user: IJwtPayload,
         @Param('classId') classId: string,
         @Param('facultyId') facultyId: string,
     ): Promise<DeleteClassFacultyResponseDto> {
-        return await this.deleteClassFacultyService.execute(
-            user.userId.toString(),
+        return this.deleteClassFacultyService.execute(
             classId,
             facultyId,
         );

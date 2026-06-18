@@ -113,21 +113,21 @@ export class ClassUpdateItemDto {
     required: false,
     nullable: true,
   })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  eventAt!: Date | null;
+  @ApiProperty({
+    example: '2026-03-15T10:30:00.000Z',
+    nullable: true,
+  })
+  eventAt!: string | null;
 
-  @ApiProperty({ type: Date, example: '2026-03-24T05:00:00Z' })
-  @IsDate()
-  @Type(() => Date)
-  createdAt!: Date;
+  @ApiProperty({
+    example: '2026-03-15T10:30:00.000Z',
+  })
+  createdAt!: string;
 
-  @ApiProperty({ type: Date, example: '2026-03-24T06:00:00Z', required: false })
-  @IsOptional()
-  @IsDate()
-  @Type(() => Date)
-  updatedAt?: Date;
+  @ApiProperty({
+    example: '2026-03-15T10:30:00.000Z',
+  })
+  updatedAt!: string;
 
   @ApiProperty({ type: [MaterialDto], required: false })
   @IsOptional()

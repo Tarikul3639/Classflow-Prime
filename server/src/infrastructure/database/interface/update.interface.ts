@@ -16,6 +16,6 @@ export interface IClassUpdate {
   eventAt?: Date; // Optional date related to the update (e.g., exam date)
   materials: Types.ObjectId[]; // Array of material IDs related to the update
   postedBy: Types.ObjectId; // ID of the user (instructor or assistant) who posted the update
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

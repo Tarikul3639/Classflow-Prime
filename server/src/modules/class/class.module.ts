@@ -31,6 +31,11 @@ import {
   FacultySchema,
 } from '../../infrastructure/database/entities/faculty.entity';
 
+import {
+  Agent,
+  AgentSchema,
+} from '../../infrastructure/database/entities/agent.entity';
+
 import { CreateClassController } from './controllers/create-class.controller';
 import { CreateClassService } from './services/create-class.service';
 
@@ -89,15 +94,15 @@ import { FetchClassSettingsService } from './services/settings/fetch-class-setti
 import { RegenerateClassCodeService } from './services/settings/regenerate-class-code.service';
 import { ClassJoinAllowedToggleService } from './services/settings/class-join-allowed-toggle.service';
 
-import { ClassAccessService } from './services/class-access.service';
-import { AgentModule } from '../agent/agent.module';
+import { UpdateClassController } from './controllers/update-class.controller';
+import { UpdateClassService } from './services/update-class.service';
 
 import { ClassRoleGuard } from './guards/class-role.guard';
-// import { ClassRole } from './decorators/class-role.decorator';
+import { AgentClassUpdateController } from './controllers/agent-class-update.controller';
+
 
 @Module({
   imports: [
-    AgentModule,
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Class.name, schema: ClassSchema },
@@ -106,6 +111,7 @@ import { ClassRoleGuard } from './guards/class-role.guard';
       { name: Material.name, schema: MaterialSchema },
       { name: Faculty.name, schema: FacultySchema },
       { name: ClassGroup.name, schema: ClassGroupSchema },
+      { name: Agent.name, schema: AgentSchema },
     ]),
   ],
   controllers: [
@@ -128,10 +134,16 @@ import { ClassRoleGuard } from './guards/class-role.guard';
     ClassGroupController,
     // class settings controller
     ClassActionsController,
+    // Update Class Controller
+    UpdateClassController,
+
+    // Agent Controller
+    AgentClassUpdateController,
   ],
   providers: [
     // Services
     CreateClassService,
+    UpdateClassService,
     FetchEnrolledClassesService,
     EnrollClassService,
     FetchClassService,
@@ -170,9 +182,6 @@ import { ClassRoleGuard } from './guards/class-role.guard';
     FetchClassSettingsService,
     RegenerateClassCodeService,
     ClassJoinAllowedToggleService,
-
-    // Access
-    ClassAccessService,
 
     // Guards
     ClassRoleGuard,

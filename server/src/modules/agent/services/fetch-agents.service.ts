@@ -2,92 +2,63 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Agent, AgentDocument } from '../../../infrastructure/database/entities/agent.entity';
-import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
-import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
-import { FetchAgentsResponseDto } from '../dto/fetch-agents.dto';
-
-interface IClass {
-    _id: Types.ObjectId;
-    name: string;
-}
+import {
+    Agent,
+    AgentDocument,
+} from '../../../infrastructure/database/entities/agent.entity';
+import {
+    FetchAgentsResponseDto,
+    AgentItemDto,
+    AgentClassDto,
+} from '../dto/fetch-agents.dto';
 
 @Injectable()
 export class FetchAgentsService {
     constructor(
-        @InjectModel(Agent.name) private agentModel: Model<AgentDocument>,
-        @InjectModel(Class.name) private classModel: Model<ClassDocument>,
-        @InjectModel(Enrollment.name) private enrollmentModel: Model<EnrollmentDocument>,
-    ) {}
+        @InjectModel(Agent.name)
+        private readonly agentModel: Model<AgentDocument>,
+    ) { }
 
     async execute(userId: string): Promise<FetchAgentsResponseDto> {
-        const userObjectId = new Types.ObjectId(userId);
+        // 1. Fetch agents associated with the user
+        const agents = await this.agentModel
+            .find({
+                userId: new Types.ObjectId(userId),
+            })
+            .populate<{ classId: AgentClassDto }>({
+                path: 'classId',
+                select: '_id className',
+            })
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
 
-        const [agents, instructorClasses, enrollments] = await Promise.all([
-            this.agentModel
-                .find({ userId: userObjectId })
-                .sort({ createdAt: -1 })
-                .lean()
-                .exec(),
-            this.classModel
-                .find({ instructorId: userObjectId })
-                .select('_id name')
-                .lean()
-                .exec(),
-            this.enrollmentModel
-                .find({ userId: userObjectId })
-                .populate<{ classId: IClass }>('classId', '_id name')
-                .lean()
-                .exec(),
-        ]);
+        const responseAgents: AgentItemDto[] = agents.map((agent) => ({
+            _id: agent._id.toString(),
+            name: agent.name,
+            apiKey: agent.apiKey,
+            apiKeyPrefix: agent.apiKeyPrefix,
+            scopes: {
+                create: agent.scopes?.create ?? false,
+                update: agent.scopes?.update ?? false,
+                delete: agent.scopes?.delete ?? false,
+            },
+            class: {
+                _id: agent.classId?._id.toString() ?? null,
+                className: agent.classId?.className ?? null,
+            },
+            status: agent.status,
+            expiresAt: agent.expiresAt ? agent.expiresAt.toISOString() : null,
+            createdAt: agent.createdAt.toISOString(),
+            updatedAt: agent.updatedAt.toISOString(),
+        }));
 
-        const classMap = new Map<string, { _id: string; name: string }>();
-
-        // Instructor classes
-        for (const cls of instructorClasses) {
-            classMap.set(cls._id.toString(), {
-                _id: cls._id.toString(),
-                name: cls.name,
-            });
-        }
-
-        // Enrolled classes
-        for (const enrollment of enrollments) {
-            const cls = enrollment.classId;
-            classMap.set(cls._id.toString(), {
-                _id: cls._id.toString(),
-                name: cls.name,
-            });
-        }
-
+        // 2. Map agents to the response DTO
         return {
             success: true,
             message: 'Agents loaded successfully',
             data: {
-                agents: agents.map((agent) => {
-                    const allowedSet = new Set(
-                        agent.allowedClassIds.map((id) => id.toString())
-                    );
-
-                    return {
-                        _id: agent._id.toString(),
-                        name: agent.name,
-                        apiKey: agent.apiKey,
-                        apiKeyPrefix: agent.apiKeyPrefix,
-                        scopes: {
-                            create: agent.scopes?.create ?? false,
-                            update: agent.scopes?.update ?? false,
-                            delete: agent.scopes?.delete ?? false,
-                        },
-                        classList: Array.from(classMap.values()).map((cls) => ({
-                            _id: cls._id,
-                            name: cls.name,
-                            allowed: allowedSet.has(cls._id),
-                        })),
-                        status: agent.status,
-                        expiresAt: agent.expiresAt ? agent.expiresAt.toISOString() : null,
-                    };
-                }),
+                agents: responseAgents,
             },
         };
     }

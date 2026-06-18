@@ -35,7 +35,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '2',
+    defaultVersion: '3',
   });
 
   app.useGlobalPipes(
@@ -61,7 +61,7 @@ async function bootstrap() {
       **Example:** \`x-api-key: hat_live_xxxxxxxxxxxxxxxxxxxxxxxxx\`
     `,
     )
-    .setVersion('2.0')
+    .setVersion('3.0')
     .addBearerAuth(
       {
         type: 'http',
@@ -88,8 +88,6 @@ async function bootstrap() {
     )
     .addTag('Profile', 'User profile endpoints')
     .addTag('Dashboard', 'Dashboard statistics endpoints')
-    .addTag('Classes', 'Class management endpoints')
-    .addTag('Notifications', 'Notification endpoints')
     .addTag('Agent', 'AI Agent endpoints authenticated using x-api-key')
     .build();
 

@@ -16,7 +16,7 @@ export class UiConfigDto {
 
 export class DashboardClassDto {
   @ApiProperty() _id!: string;
-  @ApiProperty() name!: string;
+  @ApiProperty() className!: string;
   @ApiPropertyOptional() department?: string;
   @ApiPropertyOptional() semester?: string;
   @ApiProperty() themeColor!: string;

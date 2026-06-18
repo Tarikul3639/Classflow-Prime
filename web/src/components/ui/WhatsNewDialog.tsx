@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { APP_CONFIG } from "@/config/app-config";
 
 const STORAGE_KEY = "classflow_whats_new_seen";
-const PUBLISH_DATE = "May 13, 2026";
+const PUBLISH_DATE = "Jun 19, 2026";
 
 interface WhatsNewDialogProps {
     open?: boolean;
@@ -15,58 +15,68 @@ interface UpdateItem {
     iconBg: string;
     title: string;
     description: string;
-    badge: 'New' | 'Improved' | 'Fixed';
+    badge: 'New' | 'Improved' | 'Fixed' | 'Updated';
 }
 
 const BADGE_STYLES = {
     New: 'bg-green-50 text-green-800',
     Improved: 'bg-slate-100 text-blue-500',
     Fixed: 'bg-slate-100 text-red-500',
+    Updated: 'bg-slate-100 text-yellow-500',
 };
 
 const updates: UpdateItem[] = [
     {
         icon: <Check size={15} strokeWidth={2.5} className="text-primary" />,
         iconBg: "bg-primary/10",
-        title: "Major routine system upgrade",
+        title: "AI Agent system introduced",
         description:
-            "Introduced a fully redesigned routine system with dynamic periods, slot-based scheduling, weekly support, break periods, and inline editing for subjects, teachers, and rooms.",
+            "Added a dedicated AI Agent system with secure API key authentication, scoped permissions, and class-specific access for automated classroom actions.",
         badge: "New",
     },
 
     {
         icon: <Check size={15} strokeWidth={2.5} className="text-blue-500" />,
         iconBg: "bg-blue-50",
-        title: "Improved routine UI (Desktop + Mobile)",
+        title: "Agent powered class updates",
         description:
-            "Redesigned both desktop table and mobile timeline views with active day highlighting, cleaner layout, and better period visualization.",
-        badge: "Improved",
+            "AI Agents can now create class updates through dedicated endpoints using API keys with role-based permissions and class restrictions.",
+        badge: "New",
     },
 
     {
         icon: <Check size={15} strokeWidth={2.5} className="text-purple-500" />,
         iconBg: "bg-purple-50",
-        title: "Enhanced editing & controls",
+        title: "Instructor ownership migrated",
         description:
-            "Teachers and admins can now directly edit routine slots and safely delete routines with confirmation dialogs.",
+            "Moved instructor ownership from the Class schema to Enrollment for a more flexible and scalable permission system supporting multiple roles.",
         badge: "Improved",
     },
 
     {
         icon: <Check size={15} strokeWidth={2.5} className="text-green-500" />,
         iconBg: "bg-green-50",
-        title: "Consistent loading system",
+        title: "Backend API upgraded to v3",
         description:
-            "Implemented a unified skeleton → empty → data pattern across all pages including routine, members, faculty, groups, and settings.",
+            "Migrated backend APIs to version 3 with improved routing, Swagger documentation, cleaner guards, and a more maintainable architecture.",
         badge: "Improved",
     },
 
     {
         icon: <Check size={15} strokeWidth={2.5} className="text-yellow-500" />,
         iconBg: "bg-yellow-50",
-        title: "Stability & UI fixes",
+        title: "Agent dashboard redesigned",
         description:
-            "Fixed class hero flicker on refresh and improved overall loading stability with proper guard conditions.",
+            "Redesigned the Agent dashboard with single-class selection, searchable class picker, simplified management, and Google AI Studio inspired API key experience.",
+        badge: "Updated",
+    },
+
+    {
+        icon: <Check size={15} strokeWidth={2.5} className="text-emerald-500" />,
+        iconBg: "bg-emerald-50",
+        title: "Authentication architecture simplified",
+        description:
+            "Removed hybrid authentication and introduced separate user and agent flows for better security, scalability, and easier maintenance.",
         badge: "Fixed",
     },
 ];

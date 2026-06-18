@@ -1,8 +1,9 @@
 import {
-  Injectable,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { InjectModel } from '@nestjs/mongoose';
@@ -22,43 +23,39 @@ export class ClassRoleGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // 1. Check if specific roles are required
     const requiredRoles = this.reflector.getAllAndOverride<EnrollmentRole[]>(CLASS_ROLE_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (!requiredRoles || requiredRoles.length === 0) return true;
-
-    const request = context.switchToHttp().getRequest();
-    const { actor, params } = request;
-    const classId = params?.classId;
-
-    if (!classId || !Types.ObjectId.isValid(classId)) {
-      throw new ForbiddenException('Valid Class ID is required');
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
     }
 
-    if (!actor || actor.type !== 'user') {
-      throw new ForbiddenException('Only class members can access this route');
+    const request = context.switchToHttp().getRequest();
+    const { user, params } = request;
+    const classId = params?.classId;
+
+    // 2. Validate Request Data
+    if (!classId || !Types.ObjectId.isValid(classId)) {
+      throw new ForbiddenException('Valid class ID is required');
+    }
+
+    if (!user?.userId) {
+      throw new ForbiddenException('Authentication required');
     }
 
     const classObjectId = new Types.ObjectId(classId);
-    const userObjectId = new Types.ObjectId(actor.userId);
+    const userObjectId = new Types.ObjectId(user.userId);
 
-    // 1. Instructor Check
-    const isInstructor = await this.classModel.exists({
-      _id: classObjectId,
-      instructorId: userObjectId,
-    });
-
-    if (isInstructor) {
-      if (requiredRoles.includes('instructor' as EnrollmentRole)) {
-        request.classRole = 'instructor';
-        return true;
-      }
-      throw new ForbiddenException(`Access denied. Required roles: ${requiredRoles.join(', ')}`);
+    // 3. Verify Class Existence
+    const existingClass = await this.classModel.findById(classObjectId).select('_id').lean();
+    if (!existingClass) {
+      throw new NotFoundException('Class not found');
     }
 
-    // 2. Enrollment Check
+    // 4. Verify Enrollment & Roles
     const enrollment = await this.enrollmentModel.findOne({
       classId: classObjectId,
       userId: userObjectId,
@@ -72,6 +69,7 @@ export class ClassRoleGuard implements CanActivate {
       throw new ForbiddenException(`Access denied. Required roles: ${requiredRoles.join(', ')}`);
     }
 
+    // 5. Attach context to request
     request.enrollment = enrollment;
     request.classRole = enrollment.role;
 

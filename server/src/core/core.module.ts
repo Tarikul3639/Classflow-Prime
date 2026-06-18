@@ -7,14 +7,9 @@ import type { StringValue } from 'ms';
 
 import { LoggerMiddleware } from '../common/middleware/logger.middleware';
 import { TransformInterceptor } from '../common/interceptors/transform.interceptor';
-
-import { HybridAuthGuard } from '../common/guards/hybrid-auth.guard';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { PermissionsGuard } from '../modules/class/permissions/permissions.guard';
 
 import { AuthModule } from '../modules/auth/auth.module';
-import { AgentModule } from '../modules/agent/agent.module';
 
 @Global()
 @Module({
@@ -22,7 +17,6 @@ import { AgentModule } from '../modules/agent/agent.module';
     ConfigModule,
     PassportModule,
     AuthModule,
-    AgentModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -33,20 +27,9 @@ import { AgentModule } from '../modules/agent/agent.module';
   ],
   providers: [
     JwtAuthGuard,
-    HybridAuthGuard,
-    RolesGuard,
-    PermissionsGuard,
     {
       provide: APP_GUARD,
-      useClass: HybridAuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionsGuard,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_INTERCEPTOR,
@@ -56,9 +39,6 @@ import { AgentModule } from '../modules/agent/agent.module';
   exports: [
     JwtModule,
     JwtAuthGuard,
-    HybridAuthGuard,
-    RolesGuard,
-    PermissionsGuard,
   ],
 })
 export class CoreModule implements NestModule {

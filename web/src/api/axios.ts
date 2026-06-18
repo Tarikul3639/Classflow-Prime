@@ -2,7 +2,7 @@ import axios, { AxiosError } from "axios";
 
 // NEXT_PUBLIC_ prefix = accessible on both server and browser
 // Without NEXT_PUBLIC_ prefix = server only, undefined in browser
-const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "/api/v2";
+const API_PREFIX = process.env.NEXT_PUBLIC_API_PREFIX || "/api/v3";
 
 /**
  * Axios instance with base URL and credentials enabled.

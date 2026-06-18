@@ -14,6 +14,9 @@ export class Agent implements IAgent {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   userId!: Types.ObjectId;
 
+  @Prop({ required: true, type: Types.ObjectId, ref: 'Class' })
+  classId!: Types.ObjectId;
+
   @Prop({ required: true, unique: true })
   apiKey!: string;
 
@@ -30,10 +33,11 @@ export class Agent implements IAgent {
   })
   scopes!: IAgentScopes;
 
-  @Prop({ type: [Types.ObjectId], ref: 'Class', default: [] })
-  allowedClassIds!: Types.ObjectId[];
-
-  @Prop({ required: true, enum: AgentStatus, default: AgentStatus.ACTIVE })
+  @Prop({
+    required: true,
+    enum: AgentStatus,
+    default: AgentStatus.ACTIVE,
+  })
   status!: AgentStatus;
 
   @Prop()
@@ -41,12 +45,19 @@ export class Agent implements IAgent {
 
   @Prop()
   lastUsedAt?: Date;
+
+  @Prop()
+  createdAt!: Date;
+  
+  @Prop()
+  updatedAt!: Date;
 }
 
 export const AgentSchema = SchemaFactory.createForClass(Agent);
 
 // ==================== Indexes ====================
 AgentSchema.index({ userId: 1 });
+AgentSchema.index({ classId: 1 });
 AgentSchema.index({ apiKey: 1 });
 AgentSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 

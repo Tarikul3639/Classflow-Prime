@@ -12,15 +12,17 @@ export interface IAgentScopes {
 }
 
 export interface IAgent {
-    name: string;
-    userId: Types.ObjectId;
-    apiKey: string;
-    apiKeyPrefix: string;
-    scopes: IAgentScopes; 
-    allowedClassIds: Types.ObjectId[];
-    status: AgentStatus;
-    expiresAt?: Date;
-    lastUsedAt?: Date;
+  name: string;
+  userId: Types.ObjectId;
+  classId: Types.ObjectId;
+  apiKey: string;
+  apiKeyPrefix: string;
+  scopes: IAgentScopes;
+  status: AgentStatus;
+  expiresAt?: Date;
+  lastUsedAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface IAgentMethods {

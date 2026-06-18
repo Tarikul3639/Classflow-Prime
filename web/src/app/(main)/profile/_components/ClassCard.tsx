@@ -16,14 +16,14 @@ interface ClassCardProps {
 }
 
 export default function ClassCard({
-  className: name,
+  className,
   themeColor,
   role,
   status,
   enrolledAt,
 }: ClassCardProps) {
   const isEnded = status === ClassStatus.ENDED;
-
+  console.log(className);
   return (
     <div
       className={`flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 ${
@@ -39,10 +39,10 @@ export default function ClassCard({
           }}
           className={`h-10 w-10 rounded-lg flex items-center justify-center font-semibold text-base`}
         >
-          {name.charAt(0).toUpperCase()}
+          {className.charAt(0).toUpperCase()}
         </div>
         <div>
-          <p className="font-bold text-slate-900 text-sm">{name}</p>
+          <p className="font-bold text-slate-900 text-sm">{className}</p>
           <p className="text-xs text-slate-500 capitalize">
             {role} •{" "}
             {new Date(enrolledAt).toLocaleDateString(undefined, {

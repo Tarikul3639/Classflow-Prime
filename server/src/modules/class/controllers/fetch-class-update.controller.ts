@@ -1,42 +1,35 @@
-import { Get, Param, Controller } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
 
 import { FetchClassUpdateResponseDto } from '../dto/fetch-class-update.dto';
 import { FetchClassUpdateService } from '../services/updates/fetch-class-update.service';
+import { ClassRoleGuard } from '../guards/class-role.guard';
+import { ClassRole } from '../decorators/class-role.decorator';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 
-@ApiTags('Class')
-@Controller('classes')
+@ApiTags('Class Updates')
+@Controller('classes/:classId/updates')
 export class FetchClassUpdateController {
   constructor(
     private readonly fetchClassUpdateService: FetchClassUpdateService,
   ) {}
 
-  @Get(':classId/update')
-  @ApiOperation({ summary: 'Fetch class updates by class ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Class updates fetched successfully',
-    type: FetchClassUpdateResponseDto,
+  @Get()
+  @UseGuards(ClassRoleGuard)
+  @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT, EnrollmentRole.LEARNER)
+  @ApiOperation({ summary: 'Fetch all class updates' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Class updates fetched successfully', 
+    type: FetchClassUpdateResponseDto 
   })
-  @ApiResponse({ status: 404, description: 'Class not found' })
-  async fetchClassUpdate(
-    @CurrentUser() user: IJwtPayload,
-    @Param('classId') classId: string,
-  ): Promise<FetchClassUpdateResponseDto> {
-    // DEBUG: Log the classId and userId received from the request
-    console.log(
-      'Fetching Updates - Class ID:',
-      classId,
-      'User ID:',
-      user.userId,
-    );
-
-    return await this.fetchClassUpdateService.execute(
-      user.userId.toString(),
-      classId,
-    );
+  @ApiResponse({ 
+    status: 404, 
+    description: 'Class not found' 
+  })
+  async fetchClassUpdate(@Param('classId') classId: string): Promise<FetchClassUpdateResponseDto> {
+    console.log('➡️ FetchClassUpdate API Called');
+  console.log('Class ID:', classId);
+    return this.fetchClassUpdateService.execute(classId);
   }
 }

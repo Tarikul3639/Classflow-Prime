@@ -1,5 +1,4 @@
-// delete-class.service.ts
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
@@ -22,26 +21,21 @@ export class DeleteClassService {
         @InjectModel(ClassGroup.name) private readonly groupModel: Model<GroupDocument>,
     ) { }
 
-    async execute(userId: string, classId: string): Promise<DeleteClassResponseDto> {
-        const userObjectId = new Types.ObjectId(userId);
+    async execute(classId: string): Promise<DeleteClassResponseDto> {
         const classObjectId = new Types.ObjectId(classId);
 
-        // Check if class exists
-        const existingClass = await this.classModel.findById(classObjectId);
+        // ── Validate Class Existence ──────────
+        const existingClass = await this.classModel.findById(classObjectId).select('_id').lean();
         if (!existingClass) throw new NotFoundException('Class not found');
 
-        if (!existingClass.instructorId.equals(userObjectId)) {
-            throw new ForbiddenException('Only the instructor can delete this class');
-        }
-
-        // Delete all related data
+        // ── Delete All Related Data ──────────
         await Promise.all([
             this.enrollmentModel.deleteMany({ classId: classObjectId }),
             this.materialModel.deleteMany({ classId: classObjectId }),
             this.updateModel.deleteMany({ classId: classObjectId }),
             this.facultyModel.deleteMany({ classId: classObjectId }),
             this.groupModel.deleteMany({ classId: classObjectId }),
-            this.classModel.findByIdAndDelete(classObjectId),
+            this.classModel.deleteOne({ _id: classObjectId }),
         ]);
 
         return {

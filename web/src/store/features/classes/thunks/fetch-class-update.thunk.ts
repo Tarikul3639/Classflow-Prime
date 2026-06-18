@@ -17,7 +17,7 @@ export const fetchClassUpdate = createAsyncThunk<
     async (classId, { rejectWithValue }) => {
         try {
             const { data } = await apiClient.get<FetchClassUpdateResponse>(
-                `/classes/${classId}/update`
+                `/classes/${classId}/updates`
             );
             if (!data.success) {
                 return rejectWithValue({ message: data.message || "Failed to fetch updates." });

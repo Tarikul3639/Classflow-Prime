@@ -11,10 +11,6 @@ import { Material, MaterialDocument } from '../../../infrastructure/database/ent
 import { Faculty, FacultyDocument } from '../../../infrastructure/database/entities/faculty.entity';
 import { ClassGroup, GroupDocument } from '../../../infrastructure/database/entities/group.entity';
 
-import { IClass } from '../../../infrastructure/database/interface/class.interface';
-import { IClassUpdate } from '../../../infrastructure/database/interface/update.interface';
-import { IFaculty } from '../../../infrastructure/database/interface/faculty.interface';
-import { IClassGroup } from '../../../infrastructure/database/interface/group.interface';
 import { IMaterial } from '../../../infrastructure/database/interface/material.interface';
 
 import {
@@ -26,25 +22,20 @@ import {
     DashboardMaterialDto,
 } from '../dto/dashboard.dto';
 
-// ─── Internal populated types ─────────────────────────────────────────────────
-
-interface PopulatedInstructor {
-    name: string;
-}
-
-interface PopulatedClass extends Omit<IClass, 'instructorId'> {
+type LeanUser = {
     _id: Types.ObjectId;
-    instructorId: PopulatedInstructor;
-}
+    name: string;
+};
 
-interface PopulatedEnrollment extends Omit<EnrollmentDocument, 'classId'> {
-    classId: PopulatedClass;
-}
+type LeanInstructorEnrollment = {
+    classId: Types.ObjectId;
+    userId: LeanUser;
+};
 
-interface StudentCountAggResult {
+type StudentCountAggResult = {
     _id: Types.ObjectId;
     count: number;
-}
+};
 
 @Injectable()
 export class DashboardService {
@@ -71,185 +62,180 @@ export class DashboardService {
     async execute(userId: string): Promise<DashboardResponseDto> {
         const userObjectId = new Types.ObjectId(userId);
 
-        // ── Step 1: Collect all classes this user belongs to ──────────────────
-        //
-        // Enrollment only stores LEARNER and ASSISTANT roles.
-        // Instructors are identified via Class.instructorId directly.
-        // Query both sources in parallel, then union their class IDs.
+        // 1) Get every class the current user belongs to.
+        const memberships = await this.enrollmentModel
+            .find({ userId: userObjectId })
+            .populate<{
+                classId: {
+                    _id: Types.ObjectId;
+                    name: string;
+                    department?: string;
+                    semester?: string;
+                    themeColor?: string;
+                    coverImage?: string | null;
+                    status: ClassStatus;
+                    allowEnroll?: boolean;
+                }
+            }>('classId')
+            .lean()
+            .exec();
 
-        const [enrollments, instructedClasses] = await Promise.all([
-            // Classes where user is a LEARNER or ASSISTANT
-            this.enrollmentModel
-                .find({
-                    userId: userObjectId,
-                    role: { $in: [EnrollmentRole.LEARNER, EnrollmentRole.ASSISTANT] },
-                })
-                .populate<{ classId: PopulatedClass }>({
-                    path: 'classId',
-                    populate: { path: 'instructorId', select: 'name' },
-                })
-                .lean<PopulatedEnrollment[]>(),
-
-            // Classes where user is the instructor
-            this.classModel
-                .find({ instructorId: userObjectId, status: { $ne: ClassStatus.ENDED } })
-                .populate<{ instructorId: PopulatedInstructor }>('instructorId', 'name')
-                .lean<PopulatedClass[]>(),
-        ]);
-
-        // IDs from enrollment
-        const enrolledClassIds = enrollments
-            .map((e) => e.classId?._id)
-            .filter(Boolean) as Types.ObjectId[];
-
-        // Instructed classes — deduplicate against enrolled ones
-        const enrolledIdSet = new Set(enrolledClassIds.map((id) => id.toString()));
-        const uniqueInstructedClasses = instructedClasses.filter(
-            (cls) => !enrolledIdSet.has((cls._id as Types.ObjectId).toString()),
-        );
-        const instructedClassIds = uniqueInstructedClasses.map(
-            (cls) => cls._id as Types.ObjectId,
+        const activeMemberships = memberships.filter(
+            (m) => m.classId && m.classId.status !== ClassStatus.ENDED,
         );
 
-        // Union of all class IDs
-        const classIds = [...enrolledClassIds, ...instructedClassIds];
+        const classIds = Array.from(
+            new Set(
+                activeMemberships
+                    .map((m) => m.classId?._id?.toString())
+                    .filter((id): id is string => Boolean(id)),
+            ),
+        ).map((id) => new Types.ObjectId(id));
 
-        // ── Step 2: Parallel queries ──────────────────────────────────────────
-        const [updates, faculty, groups, studentCounts] = await Promise.all([
-            this.updateModel
-                .find({
-                    classId: { $in: classIds },
-                    $or: [
-                        { eventAt: { $exists: false } }, // Include updates without eventAt (e.g., general announcements)
-                        { eventAt: { $gte: new Date() } }, // Upcoming events
-                    ]
-
-                })
-                .sort({ isPinned: -1, createdAt: -1 })
-                .limit(10)
-                .lean<IClassUpdate[]>(),
-
-            this.facultyModel
-                .find({ classId: { $in: classIds } })
-                .lean<IFaculty[]>(),
-
-            this.groupModel
-                .find({ classId: { $in: classIds } })
-                .lean<IClassGroup[]>(),
-
-            // Only count LEARNER role as students
-            this.enrollmentModel.aggregate<StudentCountAggResult>([
-                {
-                    $match: {
-                        classId: { $in: classIds },
-                        role: EnrollmentRole.LEARNER,
-                    },
+        if (classIds.length === 0) {
+            return {
+                success: true,
+                message: 'Dashboard data fetched successfully',
+                data: {
+                    classes: [],
+                    updates: [],
+                    faculty: [],
+                    groups: [],
                 },
-                { $group: { _id: '$classId', count: { $sum: 1 } } },
-            ]),
-        ]);
+            };
+        }
 
-        // ── Step 3: Populate materials for updates that have them ─────────────
+        // 2) Fetch classes, instructor enrollments, updates, faculty, groups, and counts in parallel.
+        const [classes, instructorEnrollments, updates, faculty, groups, studentCounts] =
+            await Promise.all([
+                this.classModel
+                    .find({ _id: { $in: classIds }, status: { $ne: ClassStatus.ENDED } })
+                    .lean()
+                    .exec(),
+
+                this.enrollmentModel
+                    .find({
+                        classId: { $in: classIds },
+                        role: EnrollmentRole.INSTRUCTOR,
+                    })
+                    .populate<{ userId: LeanUser }>('userId', 'name')
+                    .lean<LeanInstructorEnrollment[]>()
+                    .exec(),
+
+                this.updateModel
+                    .find({
+                        classId: { $in: classIds },
+                        $or: [
+                            { eventAt: { $exists: false } },
+                            { eventAt: { $gte: new Date() } },
+                        ],
+                    })
+                    .sort({ isPinned: -1, createdAt: -1 })
+                    .limit(10)
+                    .lean()
+                    .exec(),
+
+                this.facultyModel
+                    .find({ classId: { $in: classIds } })
+                    .lean<FacultyDocument[]>()
+                    .exec(),
+
+                this.groupModel
+                    .find({ classId: { $in: classIds } })
+                    .lean<GroupDocument[]>()
+                    .exec(),
+
+                this.enrollmentModel.aggregate<StudentCountAggResult>([
+                    {
+                        $match: {
+                            classId: { $in: classIds },
+                            role: EnrollmentRole.LEARNER,
+                        },
+                    },
+                    { $group: { _id: '$classId', count: { $sum: 1 } } },
+                ]),
+            ]);
+
+        // 3) Fetch materials for the visible updates.
         const updateIds = updates
-            .filter((u) => u.materials?.length > 0)
-            .map((u) => u._id as Types.ObjectId);
+            .filter((u) => (u as { materials?: Types.ObjectId[] }).materials?.length)
+            .map((u) => u._id);
 
         const materials: IMaterial[] = updateIds.length
             ? await this.materialModel
                 .find({ updateId: { $in: updateIds } })
-                .lean<IMaterial[]>()
+                .lean()
+                .exec()
             : [];
 
-        // ── Step 4: Lookup maps ───────────────────────────────────────────────
+        // 4) Build lookup maps.
         const studentCountMap = new Map<string, number>(
             studentCounts.map((s) => [s._id.toString(), s.count]),
         );
 
         const materialsByUpdate = new Map<string, IMaterial[]>();
-        for (const mat of materials) {
-            const key = (mat.updateId as Types.ObjectId).toString();
-            if (!materialsByUpdate.has(key)) materialsByUpdate.set(key, []);
-            materialsByUpdate.get(key)!.push(mat);
+        for (const material of materials) {
+            const key = material.updateId.toString();
+            const bucket = materialsByUpdate.get(key) ?? [];
+            bucket.push(material);
+            materialsByUpdate.set(key, bucket);
         }
 
-        // Class name map — built from both sources
-        const classNameMap = new Map<string, string>([
-            ...enrollments.map((e): [string, string] => [
-                e.classId?._id?.toString(),
-                e.classId?.name ?? 'Unknown',
+        const classNameMap = new Map<string, string>(
+            classes.map((cls) => [cls._id.toString(), cls.className ?? 'Unknown']),
+        );
+
+        const instructorNameMap = new Map<string, string>(
+            instructorEnrollments.map((row) => [
+                row.classId.toString(),
+                row.userId?.name ?? 'Unknown',
             ]),
-            ...uniqueInstructedClasses.map((cls): [string, string] => [
-                (cls._id as Types.ObjectId).toString(),
-                cls.name ?? 'Unknown',
-            ]),
-        ]);
+        );
 
-        // ── Step 5: Shape DTOs ────────────────────────────────────────────────
-
-        const enrolledClassDto: DashboardClassDto[] = enrollments.map((e) => {
-            const cls = e.classId;
-            return {
-                _id: cls._id.toString(),
-                name: cls.name,
-                department: cls.department,
-                semester: cls.semester,
-                themeColor: cls.themeColor ?? '',
-                coverImage: cls.coverImage ?? null,
-                status: cls.status,
-                allowEnroll: cls.allowEnroll ?? true,
-                instructorName: cls.instructorId?.name ?? 'Unknown',
-                studentCount: studentCountMap.get(cls._id.toString()) ?? 0,
-            };
-        });
-
-        const instructedClassDto: DashboardClassDto[] = uniqueInstructedClasses.map((cls) => ({
-            _id: (cls._id as Types.ObjectId).toString(),
-            name: cls.name,
+        // 5) Shape DTOs.
+        const classDto: DashboardClassDto[] = classes.map((cls) => ({
+            _id: cls._id.toString(),
+            className: cls.className,
             department: cls.department,
             semester: cls.semester,
             themeColor: cls.themeColor ?? '',
             coverImage: cls.coverImage ?? null,
             status: cls.status,
             allowEnroll: cls.allowEnroll ?? true,
-            instructorName: cls.instructorId?.name ?? 'Unknown',
-            studentCount: studentCountMap.get((cls._id as Types.ObjectId).toString()) ?? 0,
+            instructorName: instructorNameMap.get(cls._id.toString()) ?? 'Unknown',
+            studentCount: studentCountMap.get(cls._id.toString()) ?? 0,
         }));
-
-        const classDto: DashboardClassDto[] = [
-            ...enrolledClassDto,
-            ...instructedClassDto,
-        ];
 
         const updateDto: DashboardUpdateDto[] = updates.map((u) => {
             const mats: DashboardMaterialDto[] = (
-                materialsByUpdate.get((u._id as Types.ObjectId).toString()) ?? []
+                materialsByUpdate.get(u._id.toString()) ?? []
             ).map((m) => ({
-                _id: (m._id as Types.ObjectId).toString(),
+                _id: m._id.toString(),
                 url: m.url,
-                name: m.name,
+                name: m.name ?? undefined,
                 type: m.type,
-                size: (m as IMaterial & { size?: number }).size,
+                size: m.size ?? undefined,
             }));
 
             return {
-                _id: (u._id as Types.ObjectId).toString(),
-                classId: (u.classId as Types.ObjectId).toString(),
-                className: classNameMap.get((u.classId as Types.ObjectId).toString()) ?? 'Unknown',
+                _id: u._id.toString(),
+                classId: u.classId.toString(),
+                className: classNameMap.get(u.classId.toString()) ?? 'Unknown',
                 title: u.title,
                 description: u.description,
                 category: u.category,
-                eventAt: u.eventAt ? (u.eventAt as Date).toISOString() : null,
+                eventAt: u.eventAt ? u.eventAt.toISOString() : null,
                 materials: mats,
-                isPinned: (u as IClassUpdate & { isPinned: boolean }).isPinned,
-                postedBy: (u.postedBy as Types.ObjectId)?.toString() ?? '',
-                createdAt: (u as IClassUpdate & { createdAt: Date }).createdAt.toISOString(),
-                updatedAt: (u as IClassUpdate & { updatedAt: Date }).updatedAt.toISOString(),
+                isPinned: u.isPinned,
+                postedBy: u.postedBy.toString(),
+                createdAt: u.createdAt.toISOString(),
+                updatedAt: u.updatedAt.toISOString(),
             };
         });
 
         const facultyDto: DashboardFacultyDto[] = faculty.map((f) => ({
-            _id: (f._id as Types.ObjectId).toString(),
-            classId: (f.classId as Types.ObjectId).toString(),
+            _id: f._id.toString(),
+            classId: f.classId.toString(),
             name: f.name,
             avatarUrl: f.avatarUrl ?? null,
             designation: f.designation,
@@ -260,14 +246,14 @@ export class DashboardService {
         }));
 
         const groupDto: DashboardGroupDto[] = groups.map((g) => ({
-            _id: (g._id as Types.ObjectId).toString(),
-            classId: (g.classId as Types.ObjectId).toString(),
+            _id: g._id.toString(),
+            classId: g.classId.toString(),
             name: g.name,
             description: g.description ?? '',
             link: g.link,
             platform: g.platform,
             uiConfig: g.uiConfig ?? undefined,
-            memberCount: studentCountMap.get((g.classId as Types.ObjectId).toString()) ?? 0,
+            memberCount: studentCountMap.get(g.classId.toString()) ?? 0,
         }));
 
         return {

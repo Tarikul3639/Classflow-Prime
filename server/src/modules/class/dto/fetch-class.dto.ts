@@ -1,5 +1,6 @@
-import { IsOptional, IsNotEmpty, IsString } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 
 export class FetchClassRequestDto {
   @ApiProperty({
@@ -11,7 +12,7 @@ export class FetchClassRequestDto {
   classId!: string;
 }
 
-class ClassDetailsDto {
+export class ClassDetailsDto {
   @ApiProperty({
     example: '123',
     description: 'Unique identifier of the class',
@@ -28,7 +29,7 @@ class ClassDetailsDto {
     example: 'Introduction to Programming',
     description: 'Name of the class',
   })
-  name!: string;
+  className!: string;
 
   @ApiProperty({
     example: 30,
@@ -59,14 +60,16 @@ class ClassDetailsDto {
     example: 'https://example.com/cover.jpg',
     description: 'URL of the class cover image',
     required: false,
+    nullable: true,
   })
   @IsOptional()
-  coverImage?: string;
+  coverImage?: string | null;
 
   @ApiProperty({
     example: 'https://example.com/avatar.jpg',
     description: "URL of the instructor's avatar image",
     required: false,
+    nullable: true,
   })
   @IsOptional()
   avatarUrl?: string | null;
@@ -75,7 +78,8 @@ class ClassDetailsDto {
     example: 'active',
     description: 'Status of the class (e.g., active, archived)',
   })
-  status!: 'active' | 'archived';
+  @IsEnum(ClassStatus)
+  status!: ClassStatus;
 
   @ApiProperty({
     example: true,
@@ -88,6 +92,12 @@ class ClassDetailsDto {
     description: 'Indicates if the current user is an assistant of the class',
   })
   isAssistant!: boolean;
+
+  @ApiProperty({
+    example: true,
+    description: 'Indicates if enrollment is allowed for the class',
+  })
+  allowEnroll!: boolean;
 }
 
 export class FetchClassDataDto {

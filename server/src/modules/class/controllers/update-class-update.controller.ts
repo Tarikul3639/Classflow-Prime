@@ -1,39 +1,40 @@
-import { Patch, Param, Controller, Body } from '@nestjs/common';
+import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import type { IJwtPayload } from '../../auth/interfaces/jwt-payload.interface';
-
-import { UpdateClassUpdateRequestDto } from '../dto/update-class-update.dto';
-import { UpdateClassUpdateResponseDto } from '../dto/update-class-update.dto';
+import { ClassRole } from '../decorators/class-role.decorator';
+import { ClassRoleGuard } from '../guards/class-role.guard';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
+import {
+  UpdateClassUpdateRequestDto,
+  UpdateClassUpdateResponseDto,
+} from '../dto/update-class-update.dto';
 import { UpdateClassUpdateService } from '../services/updates/update-class-update.service';
 
-@ApiTags('Class')
-@Controller('classes')
+@ApiTags('Class Updates')
+@Controller('classes/:classId/updates')
 export class UpdateClassUpdateController {
   constructor(
     private readonly updateClassUpdateService: UpdateClassUpdateService,
   ) {}
 
-  @Patch(':classId/updates/:updateId')
-  @ApiOperation({ summary: 'Update a class update (partial)' })
+  @Patch(':updateId')
+  @UseGuards(ClassRoleGuard)
+  @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
+  @ApiOperation({ summary: 'Update a class update' })
   @ApiResponse({
     status: 200,
     description: 'Class update updated successfully',
     type: UpdateClassUpdateResponseDto,
   })
-  @ApiResponse({ status: 404, description: 'Update or Class not found' })
+  @ApiResponse({
+    status: 404,
+    description: 'Class or update not found',
+  })
   async updateClassUpdate(
-    @CurrentUser() user: IJwtPayload,
     @Param('classId') classId: string,
     @Param('updateId') updateId: string,
     @Body() body: UpdateClassUpdateRequestDto,
   ): Promise<UpdateClassUpdateResponseDto> {
-    return await this.updateClassUpdateService.execute(
-      user.userId.toString(),
-      classId,
-      updateId,
-      body,
-    );
+    return this.updateClassUpdateService.execute(classId, updateId, body);
   }
 }

@@ -6,16 +6,9 @@ import {
     Param,
     Patch,
     Post,
-} from "@nestjs/common";
-
-import {
-    ApiOperation,
-    ApiResponse,
-    ApiTags,
-} from "@nestjs/swagger";
-
-import { CurrentUser } from "../../common/decorators/current-user.decorator";
-import type { IJwtPayload } from "../auth/interfaces/jwt-payload.interface";
+    UseGuards,
+} from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import {
     AddSlotService,
@@ -24,14 +17,18 @@ import {
     CreateRoutineService,
     RemoveSlotService,
     DeleteRoutineService,
-} from "./services";
+} from './services';
 
-import { AddSlotDto } from "./dto/add-slot.dto";
-import { EditSlotDto } from "./dto/edit-slot.dto";
-import { CreateRoutineDto } from "./dto/create-routine.dto";
+import { AddSlotDto } from './dto/add-slot.dto';
+import { EditSlotDto } from './dto/edit-slot.dto';
+import { CreateRoutineDto } from './dto/create-routine.dto';
 
-@ApiTags("Class Routine")
-@Controller("classes/:classId/routine")
+import { ClassRoleGuard } from '../class/guards/class-role.guard';
+import { ClassRole } from '../class/decorators/class-role.decorator';
+import { EnrollmentRole } from '../../infrastructure/database/interface/enrollment.interface';
+
+@ApiTags('Class Routine')
+@Controller('classes/:classId/routine')
 export class RoutineController {
     constructor(
         private readonly createRoutineService: CreateRoutineService,
@@ -42,202 +39,70 @@ export class RoutineController {
         private readonly deleteRoutineService: DeleteRoutineService,
     ) { }
 
-    /**
-     * Create routine
-     */
     @Post()
-    @ApiOperation({
-        summary: "Create class routine",
-
-        description:
-            "Create a new routine with period structure for a class",
-    })
-    @ApiResponse({
-        status: 201,
-        description: "Routine created successfully",
-    })
-    @ApiResponse({
-        status: 400,
-        description: "Invalid request data",
-    })
-    @ApiResponse({
-        status: 409,
-        description: "Routine already exists for this class",
-    })
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR)
+    @ApiOperation({ summary: 'Create class routine', description: 'Create a new routine with period structure for a class' })
+    @ApiResponse({ status: 201, description: 'Routine created successfully' })
+    @ApiResponse({ status: 400, description: 'Invalid request data' })
+    @ApiResponse({ status: 403, description: 'Only instructors can create the routine' })
+    @ApiResponse({ status: 409, description: 'Routine already exists' })
     async createRoutine(
-        @CurrentUser() user: IJwtPayload,
-
-        @Param("classId") classId: string,
-
+        @Param('classId') classId: string,
         @Body() dto: CreateRoutineDto,
     ) {
-        return this.createRoutineService.execute(
-            user.userId.toString(),
-            classId,
-            dto,
-        );
+        return this.createRoutineService.execute(classId, dto);
     }
 
-    /**
-     * Add routine slot
-     */
-    @Patch("add-slot")
-    @ApiOperation({
-        summary: "Add routine slot",
-
-        description:
-            "Add a new subject slot to a specific day and period",
-    })
-    @ApiResponse({
-        status: 200,
-        description: "Slot added successfully",
-    })
-    @ApiResponse({
-        status: 400,
-        description: "Invalid request data",
-    })
-    @ApiResponse({
-        status: 404,
-        description: "Routine or class not found",
-    })
+    @Patch('add-slot')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
+    @ApiOperation({ summary: 'Add routine slot', description: 'Add a new subject slot to a specific day and period' })
+    @ApiResponse({ status: 200, description: 'Slot added successfully' })
     async addSlot(
-        @CurrentUser() user: IJwtPayload,
-
-        @Param("classId") classId: string,
-
+        @Param('classId') classId: string,
         @Body() dto: AddSlotDto,
     ) {
-        return this.addSlotService.execute(
-            user.userId.toString(),
-            classId,
-            dto,
-        );
+        return this.addSlotService.execute(classId, dto);
     }
 
-    /**
-     * Edit routine slot
-     */
-    @Patch("edit-slot/:slotId")
-    @ApiOperation({
-        summary: "Edit routine slot",
-
-        description:
-            "Update subject, teacher, room, day, or period for an existing slot",
-    })
-    @ApiResponse({
-        status: 200,
-        description: "Slot updated successfully",
-    })
-    @ApiResponse({
-        status: 400,
-        description: "Invalid request data",
-    })
-    @ApiResponse({
-        status: 404,
-        description: "Slot or class not found",
-    })
+    @Patch('edit-slot/:slotId')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
+    @ApiOperation({ summary: 'Edit routine slot', description: 'Update subject, teacher, room, day, or period for an existing slot' })
+    @ApiResponse({ status: 200, description: 'Slot updated successfully' })
     async editSlot(
-        @CurrentUser() user: IJwtPayload,
-
-        @Param("classId") classId: string,
-
-        @Param("slotId") slotId: string,
-
+        @Param('classId') classId: string,
+        @Param('slotId') slotId: string,
         @Body() dto: EditSlotDto,
     ) {
-        return this.editSlotService.execute(
-            user.userId.toString(),
-            classId,
-            slotId,
-            dto,
-        );
+        return this.editSlotService.execute(classId, slotId, dto);
     }
 
-    /**
-     * Get full routine
-     */
     @Get()
-    @ApiOperation({
-        summary: "Get class routine",
-
-        description:
-            "Fetch the complete weekly routine for a specific class",
-    })
-    @ApiResponse({
-        status: 200,
-        description: "Routine fetched successfully",
-    })
-    @ApiResponse({
-        status: 404,
-        description: "Class routine not found",
-    })
-    async getRoutine(
-        @Param("classId") classId: string,
-    ) {
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT, EnrollmentRole.LEARNER)
+    @ApiOperation({ summary: 'Get class routine', description: 'Fetch the complete weekly routine for a specific class' })
+    @ApiResponse({ status: 200, description: 'Routine fetched successfully' })
+    async getRoutine(@Param('classId') classId: string) {
         return this.getRoutineService.execute(classId);
     }
 
-    /**
-     * Remove routine slot
-     */
-    @Delete("remove-slot/:slotId")
-    @ApiOperation({
-        summary: "Remove routine slot",
-
-        description:
-            "Delete a specific subject slot from the routine",
-    })
-    @ApiResponse({
-        status: 200,
-        description: "Slot removed successfully",
-    })
-    @ApiResponse({
-        status: 404,
-        description: "Slot or class not found",
-    })
-    async removeSlot(
-        @CurrentUser() user: IJwtPayload,
-        @Param("classId") classId: string,
-        @Param("slotId") slotId: string,
-    ) {
-        return this.removeSlotService.execute(
-            user.userId.toString(),
-            classId,
-            slotId,
-        );
+    @Delete('remove-slot/:slotId')
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
+    @ApiOperation({ summary: 'Remove routine slot', description: 'Delete a specific subject slot from the routine' })
+    @ApiResponse({ status: 200, description: 'Slot removed successfully' })
+    async removeSlot(@Param('classId') classId: string, @Param('slotId') slotId: string) {
+        return this.removeSlotService.execute(classId, slotId);
     }
 
-    /**
- * Delete routine
- */
     @Delete()
-    @ApiOperation({
-        summary: "Delete class routine",
-
-        description:
-            "Delete the full routine and all associated slots for a class",
-    })
-    @ApiResponse({
-        status: 200,
-        description: "Routine deleted successfully",
-    })
-    @ApiResponse({
-        status: 404,
-        description: "Routine or class not found",
-    })
-    @ApiResponse({
-        status: 403,
-        description:
-            "Only instructors and assistants can delete the routine",
-    })
-    async deleteRoutine(
-        @CurrentUser() user: IJwtPayload,
-
-        @Param("classId") classId: string,
-    ) {
-        return this.deleteRoutineService.execute(
-            user.userId.toString(),
-            classId,
-        );
+    @UseGuards(ClassRoleGuard)
+    @ClassRole(EnrollmentRole.INSTRUCTOR, EnrollmentRole.ASSISTANT)
+    @ApiOperation({ summary: 'Delete class routine', description: 'Delete the full routine and all associated slots for a class' })
+    @ApiResponse({ status: 200, description: 'Routine deleted successfully' })
+    async deleteRoutine(@Param('classId') classId: string) {
+        return this.deleteRoutineService.execute(classId);
     }
 }
