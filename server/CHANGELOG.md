@@ -1,3 +1,10 @@
+# [server-v3.0.1](https://github.com/Tarikul3639/classflow-prime/compare/server-v3.0.0...server-v3.0.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* update search-classes service and API configurations ([537f398](https://github.com/Tarikul3639/classflow-prime/commit/537f39866e3b6e67a6049bc505245d47e69d926a))
+
 # [server-v1.3.0](https://github.com/Tarikul3639/classflow-prime/compare/server-v1.2.0...server-v1.3.0) (2026-06-18)
 
 
