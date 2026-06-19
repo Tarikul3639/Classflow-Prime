@@ -7,7 +7,7 @@ import {
     EnrollmentDocument,
 } from '../../../infrastructure/database/entities/enrollment.entity';
 import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
-import { EnrollmentRole } from 'src/infrastructure/database/interface/enrollment.interface';
+import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
 import { SearchClassesResponseDto } from '../dto/search-classes.dto';
 
 @Injectable()
