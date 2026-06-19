@@ -1,3 +1,15 @@
+# [web-v2.11.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.10.2...web-v2.11.0) (2026-06-19)
+
+
+### Bug Fixes
+
+* update search-classes service and API configurations ([cfde6a4](https://github.com/Tarikul3639/classflow-prime/commit/cfde6a46bc8742ae0a5f18994d32f3c6e0fc2758))
+
+
+### Features
+
+* add AI agent class update support and migrate instructor ownership to enrollment ([c9ae9b5](https://github.com/Tarikul3639/classflow-prime/commit/c9ae9b5b3af649f06e92c5b1d4ae7df720437651))
+
 # [web-v2.10.2](https://github.com/Tarikul3639/Classflow-Prime/compare/web-v2.10.1...web-v2.10.2) (2026-06-15)
 
 
