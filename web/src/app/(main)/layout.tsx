@@ -40,7 +40,7 @@ export default function MainLayout({
       });
   }, [dispatch]);
 
-  if (loading || !isFetched) {
+  if (!loading || !isFetched) {
     return <Loader />;
   }
   return (

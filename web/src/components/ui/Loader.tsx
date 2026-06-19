@@ -6,9 +6,9 @@ import { GraduationCapIcon } from "lucide-react";
 export const Loader = () => {
   return (
     <div className="fixed inset-0 z-999 bg-white flex items-center justify-center">
-      <div className="flex flex-col items-center gap-6">
+      <div className="flex flex-col items-center gap-4 sm:gap-6">
         {/* Logo badge with orbiting dots */}
-        <div className="relative w-24 h-24 flex items-center justify-center">
+        <div className="relative w-28 h-28 flex items-center justify-center">
           {/* Orbiting dots */}
           <motion.div
             animate={{ rotate: 360 }}
