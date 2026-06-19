@@ -65,9 +65,9 @@ export const updateClassUpdate = createAsyncThunk<
                 });
             }
 
-            if (description.length < 10) {
+            if (description.length < 5) {
                 return rejectWithValue({
-                    message: "Description must be at least 10 characters.",
+                    message: "Description must be at least 5 characters.",
                     field: UpdateErrorField.description,
                     code: "VALIDATION_ERROR",
                 });

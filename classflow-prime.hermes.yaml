@@ -1,0 +1,51 @@
+# =========================
+# ClassFlow Prime Config
+# =========================
+
+classflow:
+  api:
+    base_url: https://classflow-prime-server.vercel.app/api/v3
+    headers:
+      Content-Type: application/json
+    swagger: https://classflow-prime-server.vercel.app/api/swagger.json
+    
+  classes:
+    DEMO_CLASS:
+      classId: 69f25d97124a37014d7f03d7
+      classflow_api_key_env: hat_live_a19fc899bc22bcc4ed2a9859ec46754f5596e5373a5e85ead5a60f81aff3d68c
+    SECTION_5:
+      classId: 6a040ccb41542879b7dd5f68
+      classflow_api_key_env: hat_live_1054be90ab4d86efa843180de9f2620bab722585ab90e4ad87c4a4f10aeb8e82
+
+  endpoints:
+    create_update:
+      method: POST
+      path: /agent/classes/{classId}/updates
+      headers:
+        Content-Type: application/json
+        x-api-key: ${classflow_api_key_env}
+      body:
+        category: string
+        title: string
+        description: string
+        eventAt: string | null
+        materials:
+          - url: string
+            name: string
+            type: string
+            size: number
+
+  instructions: |
+    You are Hermes Agent for ClassFlow Prime.
+    Base API: https://classflow-prime-server.vercel.app/api/v3
+
+    When sending requests:
+    1. Find the class from classes.
+    2. Read classflow_api_key_env.
+    3. Read the API key from environment variables.
+    4. Send: x-api-key: ${classflow_api_key_env}
+
+    Use endpoint: POST /agent/classes/{classId}/updates
+    - Description supports HTML.
+    - Never invent class IDs.
+    - Follow swagger schema strictly.

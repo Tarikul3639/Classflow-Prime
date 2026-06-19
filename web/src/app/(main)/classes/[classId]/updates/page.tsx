@@ -91,12 +91,10 @@ export default function UpdatesPage() {
       });
 
       // optional highlight
-      el.classList.add("ring-2", "ring-primary/70");
-      el.classList.add("!bg-primary/2");
+      el.classList.add("ring-2", "ring-blue-200", "!bg-primary/5", "transition-all", "duration-500", "scale-101");
 
       setTimeout(() => {
-        el.classList.remove("ring-2", "ring-primary/70");
-        el.classList.remove("!bg-primary/2");
+        el.classList.remove("ring-2", "ring-blue-200", "!bg-primary/5", "transition-all", "duration-500", "scale-101");
       }, 1500);
     }, 500);
 

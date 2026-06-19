@@ -3,7 +3,7 @@ import { apiClient } from "@/api/axios";
 import { CreateUpdateFormData, ClassUpdateItem } from "@/types/update.types";
 import { mapToApiError } from "@/api/extract-error";
 import type { ApiError } from "@/api/extract-error";
-import type { UpdateErrorFieldType } from "../class.types";
+import { UpdateErrorField, type UpdateErrorFieldType } from "../class.types";
 
 interface CreateClassUpdatePayload {
     classId: string;
@@ -35,6 +35,31 @@ export const createClassUpdate = createAsyncThunk<
             return rejectWithValue({
                 field: "type", // or change to "category"
                 message: "Update type is required",
+            });
+        }
+        if (!updateData.description) {
+            return rejectWithValue({
+                field: "description",
+                message: "Description is required for the update",
+            });
+        }
+
+        const title = updateData.title.trim();
+        const description = updateData.description.trim();
+
+        if (title.length < 3) {
+            return rejectWithValue({
+                message: "Title must be at least 3 characters.",
+                field: UpdateErrorField.title,
+                code: "VALIDATION_ERROR",
+            });
+        }
+
+        if (description.length < 5) {
+            return rejectWithValue({
+                message: "Description must be at least 5 characters.",
+                field: UpdateErrorField.description,
+                code: "VALIDATION_ERROR",
             });
         }
 

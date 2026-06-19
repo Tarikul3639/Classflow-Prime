@@ -65,15 +65,18 @@ export function RichTextContent({
             />
 
             {/* Gradient only if needed */}
-            {!expanded && shouldShowButton && (
+            {/* {!expanded && shouldShowButton && (
                 <div className="h-8 -mt-8 bg-linear-to-t from-white to-transparent pointer-events-none" />
-            )}
+            )} */}
 
             {/* Button only if needed */}
             {shouldShowButton && (
                 <div className="flex justify-end">
                     <button
-                        onClick={() => setExpanded((prev) => !prev)}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setExpanded((prev) => !prev)
+                        }}
                         className="text-blue-600 text-xs mt-1 hover:underline cursor-pointer"
                     >
                         {expanded ? "Show less" : "Show more"}

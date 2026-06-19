@@ -12,7 +12,7 @@ export class ClassUpdate implements IClassUpdate {
   @Prop({ required: true })
   title!: string; // e.g., "CT-2 Date Fixed"
 
-  @Prop()
+  @Prop({minlength: 5, maxlength: 8000, required: true})
   description!: string; // Detail information
 
   @Prop({ enum: UpdateCategory, default: UpdateCategory.ANNOUNCEMENT })
