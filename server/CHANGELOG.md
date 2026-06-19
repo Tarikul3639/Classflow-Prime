@@ -1,3 +1,11 @@
+# [server-v3.2.0](https://github.com/Tarikul3639/classflow-prime/compare/server-v3.1.0...server-v3.2.0) (2026-06-19)
+
+
+### Features
+
+* improve class update tracking, notifications and UI experience ([2e6f0ad](https://github.com/Tarikul3639/classflow-prime/commit/2e6f0ad4ae5e9aade74522b9232665b521171a01))
+* improve push notifications and service worker handling ([de191d3](https://github.com/Tarikul3639/classflow-prime/commit/de191d397f18ee7869788f28109dcd409662d0ef))
+
 # [server-v3.1.0](https://github.com/Tarikul3639/classflow-prime/compare/server-v3.0.1...server-v3.1.0) (2026-06-19)
 
 
