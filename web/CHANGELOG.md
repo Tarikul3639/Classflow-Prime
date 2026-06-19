@@ -1,3 +1,11 @@
+# [web-v2.12.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.11.0...web-v2.12.0) (2026-06-19)
+
+
+### Features
+
+* update class/enrollment architecture, agent integration, and frontend loading UX ([f3b8df6](https://github.com/Tarikul3639/classflow-prime/commit/f3b8df6740490ad0b97d8d887d2bddf9a3ab33fe))
+* update class/enrollment architecture, agent integration, and frontend loading UX ([467e332](https://github.com/Tarikul3639/classflow-prime/commit/467e3321086945a1adee0552bd476d5da0ca734b))
+
 # [web-v2.11.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.10.2...web-v2.11.0) (2026-06-19)
 
 
