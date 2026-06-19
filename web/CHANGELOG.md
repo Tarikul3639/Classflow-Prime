@@ -1,3 +1,10 @@
+# [web-v2.13.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.12.0...web-v2.13.0) (2026-06-19)
+
+
+### Features
+
+* improve push notifications and service worker handling ([de191d3](https://github.com/Tarikul3639/classflow-prime/commit/de191d397f18ee7869788f28109dcd409662d0ef))
+
 # [web-v2.12.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.11.0...web-v2.12.0) (2026-06-19)
 
 
