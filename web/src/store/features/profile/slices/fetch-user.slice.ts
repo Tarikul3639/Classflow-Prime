@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IRequestStatus } from "../../auth/auth.types";
+import { IRequestStatus } from "../profile.types";
 import { meThunk } from "../thunks/fetch-user.thunk";
 
 import { IUser } from "../profile.types";

@@ -28,7 +28,6 @@ export type ISignUpRequest = {
  */
 export interface IRequestStatus {
   loading: boolean;
-  isFetched: boolean;
   error: string | null;
   message: string | null;
 }
