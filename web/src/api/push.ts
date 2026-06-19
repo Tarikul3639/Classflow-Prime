@@ -29,7 +29,7 @@ export async function subscribeToPush(userId: string) {
         console.log('[push] Push subscription created:', subscription.endpoint);
 
         // Send subscription to backend
-        const res = await fetch('/api/v2/notifications/subscribe', {
+        const res = await fetch('/api/v3/notifications/subscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, subscription }),
@@ -91,7 +91,7 @@ export async function unsubscribeFromPush(userId: string) {
         console.log('[push] Service worker unsubscribed');
 
         // Notify backend to remove subscription
-        const res = await fetch('/api/v2/notifications/unsubscribe', {
+        const res = await fetch('/api/v3/notifications/unsubscribe', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 

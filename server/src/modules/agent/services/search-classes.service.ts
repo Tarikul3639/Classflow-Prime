@@ -5,8 +5,8 @@ import { Model, Types } from 'mongoose';
 import {
     Enrollment,
     EnrollmentDocument,
-} from 'src/infrastructure/database/entities/enrollment.entity';
-import { ClassStatus } from 'src/infrastructure/database/interface/class.interface';
+} from '../../../infrastructure/database/entities/enrollment.entity';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 import { EnrollmentRole } from 'src/infrastructure/database/interface/enrollment.interface';
 import { SearchClassesResponseDto } from '../dto/search-classes.dto';
 

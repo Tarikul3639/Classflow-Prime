@@ -13,7 +13,7 @@ export interface CloudinarySignature {
  * Get signed Cloudinary info from backend
  */
 export async function getCloudinarySignature(subfolder = "uploads"): Promise<CloudinarySignature> {
-  const res = await axios.get("/api/v2/cloudinary/signature", { params: { subfolder } });
+  const res = await axios.get("/api/v3/cloudinary/signature", { params: { subfolder } });
   return res.data.data;
 }
 
