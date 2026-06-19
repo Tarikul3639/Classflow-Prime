@@ -22,6 +22,7 @@ export const Sidebar: React.FC = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const user = useAppSelector((state) => state.profile.fetchUser.user);
+  const unreadCount = useAppSelector((state) => state.notification.unreadCount);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -93,9 +94,9 @@ export const Sidebar: React.FC = () => {
             <Link
               key={item.id}
               href={item.href}
-              className={`relative flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
-                  ? "text-primary cursor-default"
-                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
+              className={`relative flex items-center gap-4 px-4 py-3 rounded-sm transition-all duration-200 ${isActive
+                ? "text-primary cursor-default"
+                : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/60"
                 }`}
               title={!isExpanded ? item.label : undefined}
             >
@@ -113,6 +114,14 @@ export const Sidebar: React.FC = () => {
                 strokeWidth={isActive ? 2.5 : 2}
                 className="shrink-0"
               />
+
+              {/* Unread badge for notifications */}
+              {item.id === "notifications" && unreadCount > 0 && (
+                <span className="absolute right-2 top-1.5 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-medium text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+
               <AnimatePresence>
                 {isExpanded && (
                   <motion.span
