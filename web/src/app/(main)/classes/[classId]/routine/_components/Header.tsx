@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className={`w-full flex gap-4 sm:flex-row items-center justify-between px-4 pt-6 pb-2.5 ${isAdmin ? "flex-col" : ""}`}
+        className={`w-full flex gap-4 flex-row items-center justify-between px-4 pt-6 pb-2.5`}
       >
         {/* Left Section */}
         <div
