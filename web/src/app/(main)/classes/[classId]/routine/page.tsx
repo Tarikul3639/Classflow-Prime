@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { useParams } from "next/navigation";
 
@@ -15,11 +15,7 @@ import { RoutineSkeleton } from "./_components/RoutineSkeleton";
 import { buildSubjectColorMap } from "./_components/SubjectColors";
 import { toast } from "sonner";
 
-import type {
-    RoutineSlot,
-    RoutinePeriod,
-    DayOfWeek,
-} from "@/types/routine.types";
+import type { RoutineSlot, RoutinePeriod, DayOfWeek } from "@/types/routine.types";
 
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
@@ -45,10 +41,8 @@ const DAYS: DayOfWeek[] = [
 export default function ClassRoutine() {
     const dispatch = useAppDispatch();
     const { classId } = useParams() as { classId: string };
-    const printRef = useRef<HTMLDivElement | null>(null);
 
     // ── Redux state ────────────────────────────────────────────────────────
-
     const { loading: fetching, isFetched, error: fetchError } = useAppSelector(
         (state) => state.classes.routine.fetchRoutine,
     );
@@ -65,10 +59,10 @@ export default function ClassRoutine() {
         (state) => state.classes.routine.editSlot,
     );
 
-    const { loading: deletingRoutine, error: deleteRoutineError } =
-        useAppSelector((state) => state.classes.routine.deleteRoutine);
+    const { loading: deletingRoutine, error: deleteRoutineError } = useAppSelector(
+        (state) => state.classes.routine.deleteRoutine,
+    );
 
-    // Class details for admin check and refetching on class change
     const classEntry = useAppSelector(
         (state) => state.classes.fetchSingleClass.classesByClassId[classId],
     );
@@ -82,7 +76,6 @@ export default function ClassRoutine() {
     );
 
     // ── Memoized subject wise color map ────────────────────────────────────
-
     const colorMap = useMemo(
         () =>
             buildSubjectColorMap(routine?.schedule.map((d) => d.slots ?? []) ?? []),
@@ -90,7 +83,6 @@ export default function ClassRoutine() {
     );
 
     // ── Local state ────────────────────────────────────────────────────────
-
     const [activeDay, setActiveDay] = useState<DayOfWeek>("Sunday");
     const [slotDialogOpen, setSlotDialogOpen] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
@@ -98,13 +90,11 @@ export default function ClassRoutine() {
     const [selectedDay, setSelectedDay] = useState<string | undefined>();
 
     // ── Fetch routine ──────────────────────────────────────────────────────
-
     useEffect(() => {
         if (classId) dispatch(fetchRoutine(classId));
     }, [classId, dispatch]);
 
     // ── Auto-select today's day once routine loads ─────────────────────────
-
     useEffect(() => {
         if (!routine?.schedule?.length) return;
 
@@ -115,7 +105,6 @@ export default function ClassRoutine() {
     }, [routine?.routineId]);
 
     // ── Handlers ───────────────────────────────────────────────────────────
-
     function onEdit(day: string, slot: RoutineSlot) {
         setSelectedDay(day);
         setSelectedSlot(slot);
@@ -206,45 +195,32 @@ export default function ClassRoutine() {
     }
 
     // ── Print ──────────────────────────────────────────────────────────────
-
-    // function onPrint() {
-    //     const printArea = printRef.current;
-    //     if (!printArea) return window.print();
-
-    //     const clone = printArea.cloneNode(true) as HTMLElement;
-    //     clone.id = "__print_clone__";
-    //     document.body.appendChild(clone);
-    //     window.print();
-    //     document.body.removeChild(clone);
-    // }
-
     function onPrint() {
-        const printArea = printRef.current;
+        const printArea = document.getElementById("routine-print-area");
         if (!printArea) return window.print();
 
-        // Temporarily make the hidden element visible for cloning
-        const wasHidden = printArea.classList.contains('hidden');
-        if (wasHidden) {
-            printArea.classList.remove('hidden');
-            printArea.classList.add('block');
-        }
+        const bodyChildren = Array.from(document.body.children) as HTMLElement[];
+        const prevDisplay: string[] = bodyChildren.map((el) => el.style.display);
+
+        bodyChildren.forEach((el) => {
+            el.style.display = "none";
+        });
 
         const clone = printArea.cloneNode(true) as HTMLElement;
-
-        // Restore original classes
-        if (wasHidden) {
-            printArea.classList.add('hidden');
-            printArea.classList.remove('block');
-        }
-
-        clone.id = "__print_clone__";
+        clone.style.display = "block";
+        clone.style.position = "static";
+        clone.style.width = "100%";
         document.body.appendChild(clone);
+
         window.print();
+
         document.body.removeChild(clone);
+        bodyChildren.forEach((el, i) => {
+            el.style.display = prevDisplay[i];
+        });
     }
 
     // ── Error ──────────────────────────────────────────────────────────────
-
     if (fetchError) {
         return (
             <div className="min-h-screen bg-[#F5F4FE] flex items-center justify-center">
@@ -257,7 +233,6 @@ export default function ClassRoutine() {
     const isLoading = fetching || classFetching || !isFetched;
 
     // ── Render ─────────────────────────────────────────────────────────────
-
     return (
         <>
             {isLoading ? (
@@ -278,11 +253,7 @@ export default function ClassRoutine() {
                                     onPrint={onPrint}
                                 />
 
-                                {/* Desktop */}
-                                <div
-                                    ref={printRef}
-                                    className="print-area hidden px-4 py-6 md:block"
-                                >
+                                <div id="routine-print-area" className="hidden px-4 py-6 md:block">
                                     <DesktopTable
                                         isAdmin={isAdmin}
                                         periods={routine.periods}
@@ -296,16 +267,35 @@ export default function ClassRoutine() {
                                             addRoutineToGoogleCalendar(routine, slotId, periodNo)
                                         }
                                     />
+
+                                    {/* Signature — only visible on print */}
+                                    <div className="hidden print:block px-5 py-4 text-right">
+                                        <div className="inline-block">
+                                            <div className="w-40 border-t border-slate-400 mb-1" />
+                                            <p className="text-[11px] text-slate-600">classflow-prime.vercel.app</p>
+                                            <p className="text-[10px] text-slate-400">Tarikul Islam</p>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                {/* Mobile */}
-                                <div className="md:hidden">
+                                <div className="md:hidden print:hidden">
                                     <DayTabs
                                         activeDay={activeDay}
-                                        days={routine.schedule.map((d) => d.day) as DayOfWeek[]}
+                                        days={(() => {
+                                            const scheduleDays = routine.schedule.map(
+                                                (d) => d.day,
+                                            ) as DayOfWeek[];
+                                            const todayName = DAYS[new Date().getDay()];
+                                            const todayIndex = scheduleDays.indexOf(todayName);
+                                            if (todayIndex <= 0) return scheduleDays;
+                                            return [
+                                                todayName,
+                                                ...scheduleDays.slice(0, todayIndex),
+                                                ...scheduleDays.slice(todayIndex + 1),
+                                            ];
+                                        })()}
                                         onDayChange={setActiveDay}
                                     />
-
                                     <div className="px-4 pb-24 pt-3">
                                         {(() => {
                                             const daySchedule = routine.schedule.find(
@@ -334,7 +324,11 @@ export default function ClassRoutine() {
                                                                 onEdit={(slot) => onEdit(activeDay, slot)}
                                                                 onRemove={(slot) => onRemove(slot)}
                                                                 addRoutineToGoogleCalendar={(slotId, periodNo) =>
-                                                                    addRoutineToGoogleCalendar(routine, slotId, periodNo)
+                                                                    addRoutineToGoogleCalendar(
+                                                                        routine,
+                                                                        slotId,
+                                                                        periodNo,
+                                                                    )
                                                                 }
                                                             />
                                                         );
@@ -370,7 +364,6 @@ export default function ClassRoutine() {
                 </div>
             )}
 
-            {/* Slot Dialog */}
             <PeriodSlotDialog
                 loading={addingSlot || editingSlot}
                 error={addSlotError || editSlotError}
@@ -382,7 +375,6 @@ export default function ClassRoutine() {
                 onSubmit={selectedSlot ? handleEdit : handleAdd}
             />
 
-            {/* Create Routine */}
             <CreateRoutineDialog
                 loading={creating}
                 error={createError}

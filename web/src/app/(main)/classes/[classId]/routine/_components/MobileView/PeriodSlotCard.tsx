@@ -234,7 +234,7 @@ export function PeriodSlotCard({
                 <div className="flex items-center gap-1.5 sm:gap-2 mt-2.5 min-w-0">
                     <div
                         className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center text-[10px] sm:text-[12px] font-bold shrink-0",
+                            "w-6 h-6 p-0.5 rounded-full flex items-center justify-center text-[10px] sm:text-[12px] font-bold shrink-0",
                             !color && !isActive && "bg-primary/10 text-primary",
                             isActive && "bg-white/20 text-primary-foreground",
                         )}

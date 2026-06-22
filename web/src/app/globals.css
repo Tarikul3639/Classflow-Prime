@@ -87,32 +87,31 @@ html {
 }
 
 @media print {
-  /* Force to landscape mode */
   @page {
-    size: landscape; 
+    size: landscape;
+    margin: 0;
   }
+}
 
-  body > *:not(#__print_clone__) {
-    display: none !important;
-  }
-
-  #__print_clone__ {
-    display: block !important;
-    position: static !important;
-    width: 100% !important;
-    visibility: visible !important;
-  }
+/* Ensure background colors are printed correctly */
+* {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 
 /* Custom Scrollbar Styles */
 * {
-  scrollbar-width: thin; /* Firefox */
-  scrollbar-color: #777c82b2 #fdfcfc; /* thumb, track */
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: #777c82b2 #fdfcfc;
+  /* thumb, track */
 }
 
 *::-webkit-scrollbar {
-  width: 2px; /* vertical scroll */
-  height: 2px; /* horizontal scroll */
+  width: 2px;
+  /* vertical scroll */
+  height: 2px;
+  /* horizontal scroll */
 }
 
 *::-webkit-scrollbar-track {
@@ -135,6 +134,7 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;

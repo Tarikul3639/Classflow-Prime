@@ -103,22 +103,22 @@ export function DesktopTable({
                         return (
                             <tr
                                 key={dayData.day}
-                                className={`border-b border-slate-100 last:border-0 ${isToday ? "bg-red-50/50" : ""
+                                className={`border-b border-slate-100 last:border-0 print:bg-transparent ${isToday ? "bg-red-50/50" : ""
                                     }`}
                             >
                                 <td
-                                    className={`pr-2 py-2 align-middle border-r border-b border-slate-200 ${isToday ? "bg-red-50" : "bg-slate-100"
+                                    className={`pr-2 py-2 align-middle border-r border-b border-slate-200 print:bg-slate-100 ${isToday ? "bg-red-50" : "bg-slate-100"
                                         }`}
                                 >
                                     <div className="flex flex-col items-center justify-center gap-1">
                                         <span
-                                            className={`text-[11px] font-bold uppercase tracking-widest ${isToday ? "text-red-500" : "text-slate-400"
+                                            className={`text-[11px] font-bold uppercase tracking-widest print:text-slate-400 ${isToday ? "text-red-500" : "text-slate-400"
                                                 }`}
                                         >
                                             {dayData.day.slice(0, 3)}
                                         </span>
                                         {isToday && (
-                                            <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                                            <span className="w-1 h-1 rounded-full bg-red-400 shrink-0 print:hidden" />
                                         )}
                                     </div>
                                 </td>
