@@ -1,3 +1,10 @@
+# [web-v2.14.1](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.14.0...web-v2.14.1) (2026-06-22)
+
+
+### Bug Fixes
+
+* Add status to API responses & refactor enroll flow ([6a44e03](https://github.com/Tarikul3639/classflow-prime/commit/6a44e03d1bac5a50bad03f004a6bd2c79d7fa3aa))
+
 # [web-v2.14.0](https://github.com/Tarikul3639/classflow-prime/compare/web-v2.13.0...web-v2.14.0) (2026-06-19)
 
 
