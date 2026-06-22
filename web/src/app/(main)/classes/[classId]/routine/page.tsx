@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect,useRef, useState, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useReactToPrint } from "react-to-print";
 
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Header } from "./_components/Header";
@@ -39,6 +40,7 @@ const DAYS: DayOfWeek[] = [
 ];
 
 export default function ClassRoutine() {
+    const printRef = useRef<HTMLDivElement>(null);
     const dispatch = useAppDispatch();
     const { classId } = useParams() as { classId: string };
 
@@ -195,30 +197,28 @@ export default function ClassRoutine() {
     }
 
     // ── Print ──────────────────────────────────────────────────────────────
-    function onPrint() {
-        const printArea = document.getElementById("routine-print-area");
-        if (!printArea) return window.print();
+// hook
+const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    pageStyle: `
+        @page {
+            size: landscape;
+            margin: 10mm;
+        }
+        * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        #routine-print-area {
+            display: block !important;
+            visibility: visible !important;
+        }
+    `,
+});
 
-        const bodyChildren = Array.from(document.body.children) as HTMLElement[];
-        const prevDisplay: string[] = bodyChildren.map((el) => el.style.display);
-
-        bodyChildren.forEach((el) => {
-            el.style.display = "none";
-        });
-
-        const clone = printArea.cloneNode(true) as HTMLElement;
-        clone.style.display = "block";
-        clone.style.position = "static";
-        clone.style.width = "100%";
-        document.body.appendChild(clone);
-
-        window.print();
-
-        document.body.removeChild(clone);
-        bodyChildren.forEach((el, i) => {
-            el.style.display = prevDisplay[i];
-        });
-    }
+function onPrint() {
+    handlePrint();
+}
 
     // ── Error ──────────────────────────────────────────────────────────────
     if (fetchError) {
@@ -253,7 +253,7 @@ export default function ClassRoutine() {
                                     onPrint={onPrint}
                                 />
 
-                                <div id="routine-print-area" className="hidden px-4 py-6 md:block">
+                                <div id="routine-print-area" ref={printRef} className="hidden px-4 py-6 md:block">
                                     <DesktopTable
                                         isAdmin={isAdmin}
                                         periods={routine.periods}
