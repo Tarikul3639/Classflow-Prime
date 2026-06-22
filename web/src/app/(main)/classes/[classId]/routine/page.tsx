@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect,useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { CalendarDays } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useReactToPrint } from "react-to-print";
@@ -197,13 +197,13 @@ export default function ClassRoutine() {
     }
 
     // ── Print ──────────────────────────────────────────────────────────────
-// hook
-const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    pageStyle: `
+    // hook
+    const handlePrint = useReactToPrint({
+        contentRef: printRef,
+        pageStyle: `
         @page {
-            size: landscape;
-            margin: 10mm;
+            size: A4 landscape;
+            margin: 0;
         }
         * {
             -webkit-print-color-adjust: exact;
@@ -214,11 +214,11 @@ const handlePrint = useReactToPrint({
             visibility: visible !important;
         }
     `,
-});
+    });
 
-function onPrint() {
-    handlePrint();
-}
+    function onPrint() {
+        handlePrint();
+    }
 
     // ── Error ──────────────────────────────────────────────────────────────
     if (fetchError) {
@@ -254,6 +254,25 @@ function onPrint() {
                                 />
 
                                 <div id="routine-print-area" ref={printRef} className="hidden px-4 py-6 md:block">
+
+                                    {/* Print-only header */}
+                                    <div className="hidden print:block text-center mb-6">
+                                        <p className="text-[10px] tracking-[0.3em] uppercase text-slate-400 mb-1">Academic Schedule</p>
+                                        <h1 className="text-[22px] font-bold tracking-tight text-slate-800">
+                                            Class Routine
+                                        </h1>
+                                        <div className="flex items-center justify-center gap-2 mt-2">
+                                            <div className="h-px w-12 bg-slate-300" />
+                                            <p className="text-[10px] text-slate-400 tracking-widest uppercase">
+                                                {new Date().toLocaleDateString("en-US", {
+                                                    year: "numeric",
+                                                    month: "long",
+                                                })}
+                                            </p>
+                                            <div className="h-px w-12 bg-slate-300" />
+                                        </div>
+                                    </div>
+                                    
                                     <DesktopTable
                                         isAdmin={isAdmin}
                                         periods={routine.periods}
