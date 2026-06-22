@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
             onClick={onPrint}
-            className="flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-sm font-semibold text-xs shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
+            className="hidden md:flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-600 px-4 py-2.5 rounded-sm font-semibold text-xs shadow-sm hover:bg-gray-50 hover:border-gray-300 transition-colors cursor-pointer"
           >
             <Printer strokeWidth={2.5} className="size-4" />
             <span className="truncate sm:hidden">Print</span>
