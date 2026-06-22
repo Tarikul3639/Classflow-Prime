@@ -4,5 +4,6 @@
         "facultys",
         "STLYES",
         "webpush"
-    ]
+    ],
+    "snyk.advanced.autoSelectOrganization": true
 }

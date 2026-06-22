@@ -1,171 +1,88 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, PipelineStage } from 'mongoose';
+import { Model, Types } from 'mongoose';
+
 import { Class, ClassDocument } from '../../../infrastructure/database/entities/class.entity';
-import {
-  Enrollment,
-  EnrollmentDocument,
-} from '../../../infrastructure/database/entities/enrollment.entity';
-import {
-  EnrollClassRequestDto,
-  EnrollClassResponseDto,
-} from '../dto/enroll-class.dto';
+import { Enrollment, EnrollmentDocument } from '../../../infrastructure/database/entities/enrollment.entity';
+import { EnrollClassRequestDto, EnrollClassResponseDto } from '../dto/enroll-class.dto';
 import { EnrollmentRole } from '../../../infrastructure/database/interface/enrollment.interface';
+import { ClassStatus } from '../../../infrastructure/database/interface/class.interface';
 
 @Injectable()
 export class EnrollClassService {
   constructor(
-    @InjectModel(Class.name)
-    private readonly classModel: Model<ClassDocument>,
-    @InjectModel(Enrollment.name)
-    private readonly enrollmentModel: Model<EnrollmentDocument>,
-  ) { }
+    @InjectModel(Class.name) private readonly classModel: Model<ClassDocument>,
+    @InjectModel(Enrollment.name) private readonly enrollmentModel: Model<EnrollmentDocument>,
+  ) {}
 
-  async execute(
-    userId: string,
-    dto: EnrollClassRequestDto,
-  ): Promise<EnrollClassResponseDto> {
-
-    // ── Validate userId string before converting to ObjectId ──────────────
+  async execute(userId: string, dto: EnrollClassRequestDto): Promise<EnrollClassResponseDto> {
     if (!Types.ObjectId.isValid(userId)) {
       throw new BadRequestException('Invalid user ID format');
     }
 
-    const userObjId = new Types.ObjectId(userId);
+    const userObjectId = new Types.ObjectId(userId);
 
-    // ── Single aggregation pipeline to validate class and user state ───────
-    // This avoids multiple round-trips by checking enrollment status,
-    // instructor status, and class settings all at once.
-    const pipeline: PipelineStage[] = [
-      // Match the class by enroll code
-      { $match: { enrollCode: dto.enrollCode } },
+    // 1. Find class
+    const targetClass = await this.classModel
+      .findOne({ enrollCode: dto.enrollCode })
+      .select('_id className allowEnroll status')
+      .lean();
 
-      // Look up any existing enrollment for this user in this class
-      {
-        $lookup: {
-          from: 'enrollments',
-          let: { cid: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$classId', '$$cid'] },
-                    { $eq: ['$userId', userObjId] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'userEnrollment',
-        },
-      },
-
-      // Look up assistant enrollments to check if this user is an assistant.
-      // Assistants are stored in the Enrollment collection (not on the class doc),
-      // so we need a separate lookup instead of relying on a class-level field.
-      {
-        $lookup: {
-          from: 'enrollments',
-          let: { cid: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$classId', '$$cid'] },
-                    { $eq: ['$userId', userObjId] },
-                    { $eq: ['$role', EnrollmentRole.ASSISTANT] },
-                  ],
-                },
-              },
-            },
-          ],
-          as: 'assistantEnrollment',
-        },
-      },
-
-      {
-        $project: {
-          name: 1,
-          allowEnroll: 1,
-          status: 1,
-          instructorId: 1,
-
-          // True if the user already has any enrollment record in this class
-          isAlreadyEnrolled: { $gt: [{ $size: '$userEnrollment' }, 0] },
-
-          // True if the user is the instructor OR an assistant —
-          // renamed from isInstructor to avoid confusion
-          isPrivilegedUser: {
-            $or: [
-              { $eq: ['$instructorId', userObjId] },
-              { $gt: [{ $size: '$assistantEnrollment' }, 0] },
-            ],
-          },
-        },
-      },
-    ];
-
-    const classInfo = await this.classModel
-      .aggregate(pipeline)
-      .exec()
-      .then((results) => results[0]);
-
-    // ── Business logic checks ──────────────────────────────────────────────
-
-    if (!classInfo) {
+    if (!targetClass) {
       return {
         success: false,
+        status: 'invalid_code',
         message: 'Invalid enroll code. Class not found.',
         data: { classId: null },
       };
     }
 
-    if (classInfo.isAlreadyEnrolled) {
+    // 2. Validate class
+    if (!targetClass.allowEnroll || targetClass.status === ClassStatus.ENDED) {
       return {
         success: false,
-        message: 'You are already a member of this class.',
-        data: { classId: classInfo._id.toString() },
-      };
-    }
-
-    // Instructors and assistants cannot enroll as learners
-    if (classInfo.isPrivilegedUser) {
-      return {
-        success: false,
-        message: 'Teachers or assistants cannot enroll as students.',
-        data: { classId: classInfo._id.toString() },
-      };
-    }
-
-    if (!classInfo.allowEnroll || classInfo.status === 'ended') {
-      return {
-        success: false,
+        status: 'closed',
         message: 'This class is currently closed for new enrollments.',
-        data: { classId: classInfo._id.toString() },
+        data: { classId: targetClass._id.toString() },
       };
     }
 
-    // ── Perform the enrollment write ───────────────────────────────────────
+    // 3. Check existing enrollment
+    const existingEnrollment = await this.enrollmentModel
+      .findOne({ classId: targetClass._id, userId: userObjectId })
+      .select('_id role')
+      .lean();
+
+    if (existingEnrollment) {
+      return {
+        success: false,
+        status: 'already_joined',
+        message: 'You are already enrolled in this class.',
+        data: { classId: targetClass._id.toString() },
+      };
+    }
+
+    // 4. Perform enrollment
     try {
       await this.enrollmentModel.create({
-        userId: userObjId,
-        classId: classInfo._id,
+        userId: userObjectId,
+        classId: targetClass._id,
         role: EnrollmentRole.LEARNER,
         enrolledAt: new Date(),
       });
 
       return {
         success: true,
-        message: `Successfully enrolled in ${classInfo.name}`,
-        data: { classId: classInfo._id.toString() },
+        status: 'enrolled',
+        message: `Successfully enrolled in ${targetClass.className}`,
+        data: { classId: targetClass._id.toString() },
       };
-    } catch (error) {
+    } catch {
       return {
         success: false,
+        status: 'error',
         message: 'Enrollment failed. Please try again later.',
-        data: { classId: classInfo._id.toString() },
+        data: { classId: targetClass._id.toString() },
       };
     }
   }

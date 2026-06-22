@@ -32,7 +32,7 @@ export function proxy(req: NextRequest) {
   if (!refreshToken && protectedRoute) {
     const url = req.nextUrl.clone();
     url.pathname = '/sign-in';
-    url.searchParams.set('next', pathname);
+    url.searchParams.set("next", req.nextUrl.pathname + req.nextUrl.search);
     return NextResponse.redirect(url);
   }
 

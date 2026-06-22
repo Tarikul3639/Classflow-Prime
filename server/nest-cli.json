@@ -6,7 +6,7 @@
     "deleteOutDir": true,
     "assets": [
       {
-        "include": "modules/mail/templates/**/*",
+        "include": "infrastructure/mail/templates/**/*",
         "watchAssets": true
       }
     ]

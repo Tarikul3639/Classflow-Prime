@@ -207,11 +207,36 @@ export default function ClassRoutine() {
 
     // ── Print ──────────────────────────────────────────────────────────────
 
+    // function onPrint() {
+    //     const printArea = printRef.current;
+    //     if (!printArea) return window.print();
+
+    //     const clone = printArea.cloneNode(true) as HTMLElement;
+    //     clone.id = "__print_clone__";
+    //     document.body.appendChild(clone);
+    //     window.print();
+    //     document.body.removeChild(clone);
+    // }
+
     function onPrint() {
         const printArea = printRef.current;
         if (!printArea) return window.print();
 
+        // Temporarily make the hidden element visible for cloning
+        const wasHidden = printArea.classList.contains('hidden');
+        if (wasHidden) {
+            printArea.classList.remove('hidden');
+            printArea.classList.add('block');
+        }
+
         const clone = printArea.cloneNode(true) as HTMLElement;
+
+        // Restore original classes
+        if (wasHidden) {
+            printArea.classList.add('hidden');
+            printArea.classList.remove('block');
+        }
+
         clone.id = "__print_clone__";
         document.body.appendChild(clone);
         window.print();

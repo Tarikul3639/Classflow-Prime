@@ -87,6 +87,11 @@ html {
 }
 
 @media print {
+  /* Force to landscape mode */
+  @page {
+    size: landscape; 
+  }
+
   body > *:not(#__print_clone__) {
     display: none !important;
   }

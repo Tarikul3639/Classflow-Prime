@@ -47,7 +47,7 @@ export const EmailInputStep: React.FC<StepEmailInputProps> = ({
         <button
           type="submit"
           disabled={!email.trim()}
-          className="w-full py-3 bg-[#399aef] text-white text-xs md:text-sm font-medium rounded-lg hover:bg-[#3289d6] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full py-3 bg-[#399aef] text-white text-xs md:text-sm font-medium rounded-lg hover:bg-[#3289d6] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#399aef] cursor-pointer group"
         >
           Continue <ArrowRight className="size-4 md:size-4.5" />
         </button>

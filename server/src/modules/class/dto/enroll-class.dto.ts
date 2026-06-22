@@ -56,6 +56,13 @@ export class EnrollClassResponseDto {
   message!: string;
 
   @ApiProperty({
+    example: 'already_joined',
+    description: 'Status code representing the result of the enroll attempt',
+  })
+  @IsString()
+  status!: string;
+
+  @ApiProperty({
     description: 'Data returned upon enrolling',
     type: EnrollClassDataDto,
   })

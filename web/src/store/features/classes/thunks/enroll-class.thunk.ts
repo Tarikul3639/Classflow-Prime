@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiClient } from "@/api/axios";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 interface IEnrollRequest {
   enrollCode: string;
@@ -9,6 +9,7 @@ interface IEnrollRequest {
 export interface IEnrollResponse {
   success: boolean;
   message: string;
+  status: string;
   data: {
     classId: string;
   };
@@ -17,36 +18,42 @@ export interface IEnrollResponse {
 export const enrollClass = createAsyncThunk<
   IEnrollResponse,
   IEnrollRequest,
-  { rejectValue: { message: string } }
->("classes/enroll", async (payload, { rejectWithValue }) => {
-  try {
+  { rejectValue: { message: string; status?: string } }
+>(
+  "classes/enroll",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const { data } = await apiClient.post<IEnrollResponse>(
+        "/classes/enroll",
+        payload
+      );
+console.log("Data: ", data);
+      return data;
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        const err = error as AxiosError<{
+          message?: string;
+          status?: string;
+        }>;
 
-    // Assuming enroll codes are exactly 6 characters
-    if (!payload.enrollCode || payload.enrollCode.length !== 6) {
+        return rejectWithValue({
+          message:
+            err.response?.data?.message ||
+            err.message ||
+            "Something went wrong",
+          status: err.response?.data?.status,
+        });
+      }
+
+      if (error instanceof Error) {
+        return rejectWithValue({
+          message: error.message,
+        });
+      }
+
       return rejectWithValue({
-        message: "Invalid enroll code. Please enter a 6-character code.",
+        message: "Unexpected error occurred",
       });
     }
-
-    const { data } = await apiClient.post<IEnrollResponse>(
-      "/classes/enroll",
-      payload
-    );
-
-    // console.log("Enroll: ",data);
-
-    if (!data.success) {
-      return rejectWithValue({
-        message: data.message || "Failed to enroll class",
-      });
-    }
-
-    return data;
-  } catch (error: unknown) {
-    const err = error as AxiosError<{ message?: string }>;
-    return rejectWithValue({
-      message:
-        err.response?.data?.message || "An error occurred while enrolling the class",
-    });
   }
-});
+);

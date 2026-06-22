@@ -30,26 +30,48 @@ function EnrollClassContent() {
 
     // ── Handlers ───────────────────────────────────────────────────────────
 
-    const handleSubmit = useCallback((enrollCode: string) => {
-        dispatch(enrollClass({ enrollCode }))
-            .unwrap()
-            .then((response) => {
-                toast.success("Successfully enrolled the class", {
-                    description: response.message,
-                });
+    const handleSubmit = useCallback(
+        (enrollCode: string) => {
+            dispatch(enrollClass({ enrollCode }))
+                .unwrap()
+                .then((res) => {
+                    switch (res.status) {
+                        case "enrolled":
+                            toast.success(res.message);
+                            router.push(`/classes/${res.data.classId}/updates`);
+                            break;
 
-                if (response.data.classId) {
-                    router.push(`/classes/${response.data.classId}/updates`);
+                        case "already_joined":
+                            toast.info(res.message);
+                            router.push(`/classes/${res.data.classId}/updates`);
+                            break;
+
+                        case "invalid_code":
+                            toast.error(res.message);
+                            break;
+
+                        case "closed":
+                            toast.warning(res.message);
+                            break;
+
+                        case "forbidden_role":
+                            toast.error(res.message);
+                            break;
+
+                        default:
+                            toast.success(res.message);
+                    }
+
                     dispatch(resetEnrollState());
-                }
-            })
-            .catch((err) => {
-                toast.error("Failed to enroll class", {
-                    description: err.message,
-                    position: "top-center",
+                })
+                .catch((err) => {
+                    toast.error(err.message || "Failed to enroll class", {
+                        position: "top-center",
+                    });
                 });
-            });
-    }, [dispatch, router]);
+        },
+        [dispatch, router]
+    );
 
     // ── Auto-fill from URL code ────────────────────────────────────────────
 
@@ -67,11 +89,12 @@ function EnrollClassContent() {
 
         setCode(cleaned.split(""));
 
-        const timer = setTimeout(() => {
-            handleSubmit(cleaned);
-        }, 200);
+        // Automatically submit the form with the cleaned code
+        // handleSubmit(cleaned);
 
-        return () => clearTimeout(timer);
+        // Optionally, focus the last input box after auto-filling
+        inputRefs.current[5]?.focus();
+
     }, [searchParams, handleSubmit]);
 
     const handleChange = (index: number, value: string) => {
@@ -176,7 +199,7 @@ function EnrollClassContent() {
                                 <button
                                     type="submit"
                                     disabled={isEnrolling || code.join("").length !== 6}
-                                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl shadow-lg shadow-primary/20 transition-all text-sm mt-6 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-lg shadow-lg shadow-primary/20 transition-all text-sm mt-6 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                                 >
                                     {isEnrolling ? "Enrolling..." : "Enroll Class"}
                                 </button>
