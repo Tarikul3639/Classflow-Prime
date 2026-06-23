@@ -89,7 +89,7 @@ export class NotificationService {
                 if (result.status === 'rejected') {
                     console.error(`Push failed for subscription ${i}:`, result.reason);
                 } else {
-                    console.log(`Push sent successfully for subscription ${i}`);
+                    // console.log(`Push sent successfully for subscription ${i}`);
                 }
             });
         }
@@ -97,7 +97,7 @@ export class NotificationService {
 
     // ─── Get Paginated List ───────────────────────────────────
     async getUserNotifications(userId: string, query: QueryNotificationDto) {
-        console.log('Call for all notifications: ', userId);
+        // console.log('Call for all notifications: ', userId);
         const { page = 1, limit = 20, onlyUnread, type } = query;
         const skip = (page - 1) * limit;
 

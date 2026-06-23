@@ -52,6 +52,12 @@ export class CreateClassFacultyRequestDto {
     @IsString()
     @MaxLength(50, { message: 'Classroom code must be at most 50 characters' })
     classroomCode?: string;
+
+    @ApiProperty({ example: 'https://classroom.example.com/invite/abc123', required: false })
+    @IsOptional()
+    @IsString()
+    @MaxLength(255, { message: 'Invite link must be at most 255 characters' })
+    classroomInviteLink?: string;
 }
 
 export class UpdateSingleClassFacultyRequestDto {
@@ -96,6 +102,12 @@ export class UpdateSingleClassFacultyRequestDto {
     @IsString()
     @MaxLength(50)
     classroomCode?: string;
+
+    @ApiProperty({ example: 'https://classroom.example.com/invite/abc123', required: false })
+    @IsOptional()
+    @IsString()
+    @MaxLength(255, { message: 'Invite link must be at most 255 characters' })
+    classroomInviteLink?: string;
 }
 
 // ─── Response DTOs ────────────────────────────────────────────────────────────
@@ -124,6 +136,9 @@ class FacultyDataDto {
 
     @ApiProperty({ example: 'CSE-101', required: false })
     classroomCode?: string;
+
+    @ApiProperty({ example: 'https://classroom.example.com/invite/abc123', required: false })
+    classroomInviteLink?: string;
 }
 
 class ClassFacultyDataDto {

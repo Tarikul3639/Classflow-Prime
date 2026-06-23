@@ -17,16 +17,16 @@ export async function subscribeToPush(userId: string) {
             throw new Error('VAPID public key is not configured');
         }
 
-        console.log('[push] Starting subscription for user:', userId);
+        // console.log('[push] Starting subscription for user:', userId);
         const registration = await navigator.serviceWorker.ready;
-        console.log('[push] Service worker ready:', registration);
+        // console.log('[push] Service worker ready:', registration);
 
         const subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
             applicationServerKey: urlBase64ToUint8Array(PUBLIC_KEY),
         });
 
-        console.log('[push] Push subscription created:', subscription.endpoint);
+        // console.log('[push] Push subscription created:', subscription.endpoint);
 
         // Send subscription to backend
         const res = await fetch('/api/v3/notifications/subscribe', {
@@ -35,7 +35,7 @@ export async function subscribeToPush(userId: string) {
             body: JSON.stringify({ userId, subscription }),
         });
 
-        console.log('[push] Subscribe API response:', res.status);
+        // console.log('[push] Subscribe API response:', res.status);
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
@@ -45,7 +45,7 @@ export async function subscribeToPush(userId: string) {
         }
 
         const data = await res.json();
-        console.log('[push] Subscription successful:', data);
+        // console.log('[push] Subscription successful:', data);
         return data;
 
     } catch (error) {
@@ -74,21 +74,21 @@ export async function unsubscribeFromPush(userId: string) {
             throw new Error('User ID is required');
         }
 
-        console.log('[push] Starting unsubscription for user:', userId);
+        // console.log('[push] Starting unsubscription for user:', userId);
         
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
         
         if (!subscription) {
-            console.log('[push] No active subscription found');
+            // console.log('[push] No active subscription found');
             return;
         }
 
-        console.log('[push] Removing subscription:', subscription.endpoint);
+        // console.log('[push] Removing subscription:', subscription.endpoint);
 
         // Unsubscribe from service worker
         await subscription.unsubscribe();
-        console.log('[push] Service worker unsubscribed');
+        // console.log('[push] Service worker unsubscribed');
 
         // Notify backend to remove subscription
         const res = await fetch('/api/v3/notifications/unsubscribe', {
@@ -100,7 +100,7 @@ export async function unsubscribeFromPush(userId: string) {
             }),
         });
 
-        console.log('[push] Unsubscribe API response:', res.status);
+        // console.log('[push] Unsubscribe API response:', res.status);
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
@@ -110,7 +110,7 @@ export async function unsubscribeFromPush(userId: string) {
         }
 
         const data = await res.json();
-        console.log('[push] Unsubscription successful:', data);
+        // console.log('[push] Unsubscription successful:', data);
         return data;
 
     } catch (error) {

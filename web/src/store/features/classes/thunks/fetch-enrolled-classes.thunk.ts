@@ -47,7 +47,7 @@ export const fetchEnrolledClasses = createAsyncThunk<
 
         return data.data.classes;
     } catch (error: unknown) {
-        console.log("Error fetching classes:", error);
+        // console.log("Error fetching classes:", error);
         const err = error as AxiosError<{ message?: string }>;
 
         return rejectWithValue({

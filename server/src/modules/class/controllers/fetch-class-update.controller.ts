@@ -28,8 +28,8 @@ export class FetchClassUpdateController {
     description: 'Class not found' 
   })
   async fetchClassUpdate(@Param('classId') classId: string): Promise<FetchClassUpdateResponseDto> {
-    console.log('➡️ FetchClassUpdate API Called');
-  console.log('Class ID:', classId);
+    // console.log('➡️ FetchClassUpdate API Called');
+  // console.log('Class ID:', classId);
     return this.fetchClassUpdateService.execute(classId);
   }
 }

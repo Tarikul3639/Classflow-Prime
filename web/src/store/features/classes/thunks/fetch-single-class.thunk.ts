@@ -49,7 +49,7 @@ export const fetchSingleClass = createAsyncThunk<
 
         return data.data.class;
     } catch (error: unknown) {
-        console.log("Error fetching class details:", error);
+        // console.log("Error fetching class details:", error);
         const err = error as Error;
         return rejectWithValue({
             message: err.message || "An error occurred while fetching class details",

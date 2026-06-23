@@ -1,36 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { toast } from "sonner";
+
 import { EditorHeader } from "../create/_components/EditorHeader";
 import PhotoUpload from "../create/_components/PhotoUpload";
 import BasicInfoSection from "../create/_components/BasicInfoSection";
 import ContactInfoSection from "../create/_components/ContactInfoSection";
 import FormNote from "../create/_components/FormNote";
 import FacultyPreview from "../create/_components/FacultyPreview";
-import { toast } from "sonner";
 
-import type { ClassFaculty } from "@/store/features/classes/class.types";
 import { fetchSingleClassFaculty } from "@/store/features/classes/thunks/fetch-single-class-faculty.thunk";
 import { updateSingleClassFaculty } from "@/store/features/classes/thunks/update-single-class-faculty.thunk";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { getDirtyFields } from "@/utils/form.utils";
 import { useFileUpload } from "@/hooks/useCloudinary";
 
-// Selectors
-import {
-  selectSingleFaculty
-} from "@/store/features/classes/selectors/class-faculty.selectors";
+import type { ClassFaculty } from "@/store/features/classes/class.types";
 
 export default function EditFacultyPage() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const params = useParams();
+
   const classId = params.classId as string;
   const facultyId = params.facultyId as string;
 
-  // Original snapshot — for dirty field tracking
   const originalFormRef = useRef<Omit<ClassFaculty, "facultyId"> | null>(null);
+  const { upload, loading: uploadLoading } = useFileUpload();
 
   const [formData, setFormData] = useState<Omit<ClassFaculty, "facultyId">>({
     name: "",
@@ -40,77 +38,61 @@ export default function EditFacultyPage() {
     email: "",
     phone: "",
     classroomCode: "",
+    classroomInviteLink: "",
   });
 
-  // ── Selectors ──────────────────────────────────────────────────────────────
+  // ── Store State ─────────────────────────────────────────────
+  const facultyBucket = useAppSelector((state) => state.classes.classFaculty.facultiesByClass[classId]);
+  const cachedFaculty = facultyBucket?.faculties?.find((f) => f.facultyId === facultyId);
 
-  // Try to get faculty from normalized store first
-  const cachedFaculty = useAppSelector((state) =>
-    selectSingleFaculty(state, classId, facultyId)
-  );
+  const isFetching = facultyBucket?.fetchSingle?.loading ?? false;
+  const fetchError = facultyBucket?.fetchSingle?.error ?? null;
+  const isUpdating = facultyBucket?.update?.loading ?? false;
+  const updateError = facultyBucket?.update?.error ?? null;
 
-  const { loading: isFetching, isFetched, error: fetchError } = useAppSelector(
-    (state) =>
-      state.classes.classFaculty.facultiesByClass[classId].fetchSingle || {},
-  );
-  const { loading: isUpdating, error: updateError } = useAppSelector(
-    (state) =>
-      state.classes.classFaculty.facultiesByClass[classId].update || {},
-  );
-
-  const { upload, loading: uploadLoading } = useFileUpload();
-
-  // ── Initialization ─────────────────────────────────────────────────────────
+  // ── Initialization ──────────────────────────────────────────
   useEffect(() => {
-    // If already cached in store, use it directly without fetching
+    if (!classId || !facultyId) return;
+
     if (cachedFaculty) {
-      const { name, designation, avatarUrl, location, email, phone, classroomCode } =
-        cachedFaculty;
       const initialData = {
-        name,
-        designation,
-        avatarUrl: avatarUrl || "",
-        location,
-        email,
-        phone: phone || "",
-        classroomCode: classroomCode || "",
+        name: cachedFaculty.name,
+        designation: cachedFaculty.designation,
+        avatarUrl: cachedFaculty.avatarUrl ?? "",
+        location: cachedFaculty.location,
+        email: cachedFaculty.email,
+        phone: cachedFaculty.phone ?? "",
+        classroomCode: cachedFaculty.classroomCode ?? "",
       };
       originalFormRef.current = initialData;
       setFormData(initialData);
       return;
     }
 
-    // Not in store — fetch from API
     dispatch(fetchSingleClassFaculty({ classId, facultyId }))
       .unwrap()
       .then((res) => {
-        const { name, designation, avatarUrl, location, email, phone, classroomCode } =
-          res;
         const initialData = {
-          name,
-          designation,
-          avatarUrl: avatarUrl || "",
-          location,
-          email,
-          phone: phone || "",
-          classroomCode: classroomCode || "",
+          name: res.name,
+          designation: res.designation,
+          avatarUrl: res.avatarUrl ?? "",
+          location: res.location,
+          email: res.email,
+          phone: res.phone ?? "",
+          classroomCode: res.classroomCode ?? "",
         };
         originalFormRef.current = initialData;
         setFormData(initialData);
       })
-      .catch((err) => {
-        toast.error("Failed to load faculty details", { description: err });
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      .catch((err) => toast.error("Failed to load faculty details", { description: err }));
+  }, [classId, facultyId, cachedFaculty, dispatch]);
 
-  // ── Event Handlers ─────────────────────────────────────────────────────────
+  // ── Avatar Upload ──────────────────────────────────────────
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const promise = upload(file, "avatars");
-
     toast.promise(promise, {
       loading: "Uploading image...",
       success: "Image uploaded",
@@ -125,10 +107,9 @@ export default function EditFacultyPage() {
     }
   };
 
-  const removeAvatar = () => {
-    setFormData((prev) => ({ ...prev, avatarUrl: "" }));
-  };
+  const removeAvatar = () => setFormData((prev) => ({ ...prev, avatarUrl: "" }));
 
+  // ── Form Handlers ──────────────────────────────────────────
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -138,16 +119,12 @@ export default function EditFacultyPage() {
     if (!originalFormRef.current) return;
 
     const dirtyFields = getDirtyFields(originalFormRef.current, formData);
-
     if (Object.keys(dirtyFields).length === 0) {
-      toast.info("Nothing changed.", { position: "top-center" });
+      toast.info("Nothing changed.");
       return;
     }
 
-    const promise = dispatch(
-      updateSingleClassFaculty({ classId, facultyId, facultyData: dirtyFields })
-    ).unwrap();
-
+    const promise = dispatch(updateSingleClassFaculty({ classId, facultyId, facultyData: dirtyFields })).unwrap();
     toast.promise(promise, {
       loading: "Updating faculty...",
       success: "Faculty updated successfully",
@@ -162,8 +139,8 @@ export default function EditFacultyPage() {
     }
   };
 
-  // ── Loading State ──────────────────────────────────────────────────────────
-  if (isFetching|| !isFetched) {
+  // ── Render ─────────────────────────────────────────────────
+  if (!cachedFaculty && isFetching) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50">
         <p className="text-sm text-slate-500">Loading faculty details...</p>
@@ -171,7 +148,6 @@ export default function EditFacultyPage() {
     );
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50">
       <EditorHeader
@@ -181,14 +157,11 @@ export default function EditFacultyPage() {
         onSubmit={handleSubmit}
       />
 
-      {/* Error Alert */}
-      {/* {(fetchError || updateError) && ( */}
+      {(fetchError || updateError) && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mx-4 mt-4">
-          <p className="text-sm">
-            {fetchError || updateError || "An error occurred. Please try again."}
-          </p>
+          <p className="text-sm">{fetchError || updateError || "An error occurred."}</p>
         </div>
-      {/* )} */}
+      )}
 
       <main className="p-4 pb-24">
         <form className="grid gap-6 md:grid-cols-2">
@@ -201,21 +174,9 @@ export default function EditFacultyPage() {
             />
           </div>
 
-          <BasicInfoSection
-            formData={formData}
-            onInputChange={handleInputChange}
-          />
-
-          <ContactInfoSection
-            formData={formData}
-            onInputChange={handleInputChange}
-          />
-
-          <FacultyPreview
-            formData={formData}
-            imagePreview={formData.avatarUrl || null}
-          />
-
+          <BasicInfoSection formData={formData} onInputChange={handleInputChange} />
+          <ContactInfoSection formData={formData} onInputChange={handleInputChange} />
+          <FacultyPreview formData={formData} imagePreview={formData.avatarUrl || null} />
           <FormNote />
         </form>
       </main>

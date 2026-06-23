@@ -67,13 +67,13 @@ export const createClassUpdate = createAsyncThunk<
             `/classes/${classId}/updates`,
             updateData,
         );
-        console.log("API RESPONSE:", data);
+        // console.log("API RESPONSE:", data);
         if (!data.success) {
             return rejectWithValue({
                 message: data.message || "Failed to create class update",
             });
         }
-        console.log("API RESPONSE:", data.data.update);
+        // console.log("API RESPONSE:", data.data.update);
         return data.data.update; // ← return just the item
     } catch (error: unknown) {
         return rejectWithValue(

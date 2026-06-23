@@ -23,7 +23,7 @@ export default function ClassCard({
   enrolledAt,
 }: ClassCardProps) {
   const isEnded = status === ClassStatus.ENDED;
-  console.log(className);
+  // console.log(className);
   return (
     <div
       className={`flex items-center justify-between p-3 rounded-lg border border-slate-100 bg-slate-50/50 ${

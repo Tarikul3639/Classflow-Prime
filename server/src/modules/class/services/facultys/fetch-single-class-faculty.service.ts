@@ -47,6 +47,7 @@ export class FetchSingleClassFacultyService {
           avatarUrl: faculty.avatarUrl,
           phone: faculty.phone,
           classroomCode: faculty.classroomCode,
+          classroomInviteLink: faculty.classroomInviteLink,
         },
       },
     };

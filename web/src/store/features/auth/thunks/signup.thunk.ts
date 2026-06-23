@@ -80,7 +80,7 @@ export const verifySignupEmailThunk = createAsyncThunk<
   { rejectValue: string }
 >("auth/signupVerify", async (payload, { rejectWithValue }) => {
   try {
-    console.log(payload);
+    // console.log(payload);
     const { data } = await apiClient.post<IEmailVerifyResponse>(
       "/auth/signup/verify",
       payload,

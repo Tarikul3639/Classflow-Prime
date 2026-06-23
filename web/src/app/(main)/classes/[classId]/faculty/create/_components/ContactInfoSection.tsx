@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import type { ClassFaculty } from "@/store/features/classes/class.types";
 
 interface ContactInfoSectionProps {
-  formData: Pick<ClassFaculty, "email" | "phone" | "classroomCode">;
+  formData: Pick<ClassFaculty, "email" | "phone" | "classroomCode" | "classroomInviteLink">;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
@@ -50,6 +50,15 @@ export default function ContactInfoSection({
         placeholder="e.g., SCI-402"
         description="The unique code for the faculty member's classroom."
         icon={BookOpenText}
+      />
+
+      <Input
+        label="Invite Link"
+        name="classroomInviteLink"
+        value={formData.classroomInviteLink ?? ""}
+        onChange={onInputChange}
+        placeholder="e.g., https://classroom.example.com/invite/abc123"
+        description="Optional invite link for students to join the class directly."
       />
     </div>
   );

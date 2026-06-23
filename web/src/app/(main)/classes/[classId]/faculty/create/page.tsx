@@ -29,6 +29,7 @@ export default function AddFacultyPage() {
     email: "",
     phone: "",
     classroomCode: "",
+    classroomInviteLink: "",
   });
 
   // ── Selectors ──────────────────────────────────────────────────────────────

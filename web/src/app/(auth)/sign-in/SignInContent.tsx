@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { SignInThunk } from "@/store/features/auth/thunks/signin.thunks";
 import { resetSignInStatus } from "@/store/features/auth/slices/signin.slice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -25,7 +25,6 @@ interface SignInPayload {
 }
 
 const SignInPage: React.FC = () => {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const redirectUrl = searchParams.get("next");
     const dispatch = useAppDispatch();
@@ -58,15 +57,7 @@ const SignInPage: React.FC = () => {
                 // Successful sign-in
                 // const user = resultAction.payload;
                 // console.log("🎯 Sign-in successful:", user);
-
-                // Redirect to the specified URL or home page
-                const safeRedirect =
-                    redirectUrl && redirectUrl.startsWith("/")
-                        ? redirectUrl
-                        : "/";
-
-                router.replace(safeRedirect);
-
+                window.location.href = redirectUrl || "/";
             } else {
                 // Error - stays on page and shows error
                 console.error("❌ Sign-in failed:", resultAction.payload);

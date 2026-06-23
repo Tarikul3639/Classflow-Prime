@@ -28,7 +28,7 @@ export const fetchDashboardData = createAsyncThunk<
                 message: data.message || "Failed to load dashboard",
             });
         }
-        console.log("Dashboard: ", data.data);
+        // console.log("Dashboard: ", data.data);
         return data.data;
     } catch (error: unknown) {
         return rejectWithValue({

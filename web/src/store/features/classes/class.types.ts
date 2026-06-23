@@ -25,4 +25,5 @@ export interface ClassFaculty {
     email: string;
     phone?: string;
     classroomCode?: string;
+    classroomInviteLink?: string;
 }

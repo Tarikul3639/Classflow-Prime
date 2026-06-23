@@ -92,7 +92,7 @@ export const revokeAssistant = createAsyncThunk<
     try {
         const { data } = await apiClient.post(`/classes/${classId}/members/revoke-assistant`, { userId });
         if (!data.success) {
-            console.log(data.message);
+            // console.log(data.message);
             return rejectWithValue({ message: data.message || "Failed to revoke assistant" });
         }
         return { classId, userId };

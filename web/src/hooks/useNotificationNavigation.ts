@@ -13,7 +13,7 @@ export function useNotificationNavigation() {
       const { type, url } = event.data || {};
 
       if (type === "NOTIFICATION_CLICK" && url) {
-        console.log("[Notification] Navigating to:", url);
+        // console.log("[Notification] Navigating to:", url);
         router.push(url);
       }
     };

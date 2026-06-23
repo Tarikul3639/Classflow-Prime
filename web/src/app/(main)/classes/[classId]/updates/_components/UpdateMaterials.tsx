@@ -16,6 +16,8 @@ export default function UpdateMaterial({ material }: UpdateMaterialProps) {
   const Icon = config.icon;
   const isLink = material.type === "link";
 
+  // console.log(material.url);
+
   const [downloading, setDownloading] = useState(false);
 
   const handleDownload = async (e: React.MouseEvent) => {

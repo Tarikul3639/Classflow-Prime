@@ -44,6 +44,7 @@ export class FetchClassFacultiesService {
                     avatarUrl: f.avatarUrl,
                     phone: f.phone,
                     classroomCode: f.classroomCode,
+                    classroomInviteLink: f.classroomInviteLink ?? '',
                 })),
             },
         };

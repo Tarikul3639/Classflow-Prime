@@ -27,7 +27,7 @@ export const enrollClass = createAsyncThunk<
         "/classes/enroll",
         payload
       );
-console.log("Data: ", data);
+// console.log("Data: ", data);
       return data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

@@ -77,7 +77,7 @@ export default function GroupsPage() {
   };
 
   const handleTogglePin = (groupId: string) => {
-    console.log("Toggle pin for group with ID:", groupId);
+    // console.log("Toggle pin for group with ID:", groupId);
   };
 
   return (

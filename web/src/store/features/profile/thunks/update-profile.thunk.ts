@@ -31,7 +31,7 @@ export const updateProfileThunk = createAsyncThunk<
         if (!data.success) {
             return rejectWithValue(data.message || "Failed to update profile");
         }
-        console.log("Update: ", data.data);
+        // console.log("Update: ", data.data);
         return data;
     }
     catch (error) {

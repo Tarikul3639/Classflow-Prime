@@ -32,6 +32,9 @@ export class Faculty implements IFaculty {
 
   @Prop({ trim: true })
   classroomCode?: string; // Teacher's personal Google Classroom code
+
+  @Prop({ trim: true })
+  classroomInviteLink?: string; // Optional invite link for students to join the class directly
 }
 
 export const FacultySchema = SchemaFactory.createForClass(Faculty);

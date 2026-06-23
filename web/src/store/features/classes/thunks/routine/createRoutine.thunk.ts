@@ -25,7 +25,7 @@ export const createRoutine = createAsyncThunk(
     "routine/createRoutine",
     async (payload: CreateRoutinePayload, { rejectWithValue }) => {
         try {
-            console.log("Create Routine with periods:", payload.periods);
+            // console.log("Create Routine with periods:", payload.periods);
             const res = await apiClient.post<RoutineResponse>(
                 `/classes/${payload.classId}/routine`,
                 {

@@ -29,6 +29,8 @@ export class UpdateSingleClassFacultyService {
             throw new ForbiddenException('Cannot update faculty in an ended class');
         }
 
+        // console.log('Update DTO:', dto); // Debug log to check incoming data
+
         // ── Prepare Update Data (Remove undefined fields) ──
         const updateData = Object.fromEntries(
             Object.entries(dto).filter(([_, value]) => value !== undefined)
@@ -61,6 +63,7 @@ export class UpdateSingleClassFacultyService {
                     avatarUrl: faculty.avatarUrl,
                     phone: faculty.phone,
                     classroomCode: faculty.classroomCode,
+                    classroomInviteLink: faculty.classroomInviteLink,
                 },
             },
         };

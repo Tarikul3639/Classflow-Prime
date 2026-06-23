@@ -36,7 +36,7 @@ const Notifications: React.FC = () => {
     (state) => state.notification,
   );
 
-  console.log("Meta Data: ", notifications);
+  // console.log("Meta Data: ", notifications);
 
   useEffect(() => {
     dispatch(fetchNotifications({ page: 1, limit: 20 }))

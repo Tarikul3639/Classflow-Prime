@@ -121,7 +121,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className="antialiased font-sans" suppressHydrationWarning>
         <script
           type="application/ld+json"

@@ -10,4 +10,5 @@ export interface IFaculty {
   email: string;
   phone?: string;
   classroomCode?: string; // Teacher's personal Google Classroom code
+  classroomInviteLink?: string; // Optional invite link for students to join the class directly
 }

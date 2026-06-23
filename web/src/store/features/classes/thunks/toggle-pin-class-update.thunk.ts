@@ -44,7 +44,7 @@ export const togglePinClassUpdate = createAsyncThunk<
                 });
             }
 
-            console.log("Toggle Pin Response: ", data.data.update);
+            // console.log("Toggle Pin Response: ", data.data.update);
 
             return data.data.update;
         } catch (error: unknown) {

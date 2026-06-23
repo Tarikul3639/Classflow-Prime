@@ -22,7 +22,7 @@ export class FetchClassController {
     @CurrentUser() user: IJwtPayload,
     @Param('classId') classId: string,
   ): Promise<FetchClassResponseDto> {
-    console.log('Class ID: ', classId, 'User ID: ', user.userId); // DEBUG: Log the classId and userId received from the request
+    // console.log('Class ID: ', classId, 'User ID: ', user.userId); // DEBUG: Log the classId and userId received from the request
     return await this.fetchClassService.execute(
       user.userId.toString(),
       classId,

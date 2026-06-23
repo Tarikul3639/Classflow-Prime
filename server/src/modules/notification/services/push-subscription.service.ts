@@ -30,7 +30,7 @@ export class PushSubscriptionService {
 
     async remove(userId: string, endpoint: string) {
         try {
-            console.log('[push] Removing subscription for user:', userId, 'endpoint:', endpoint);
+            // console.log('[push] Removing subscription for user:', userId, 'endpoint:', endpoint);
 
             if (!userId || !endpoint) {
                 throw new Error('User ID and endpoint are required');
@@ -44,7 +44,7 @@ export class PushSubscriptionService {
             if (!result) {
                 console.warn('[push] Subscription not found for removal:', userId, endpoint);
             } else {
-                console.log('[push] Subscription removed successfully:', result._id);
+                // console.log('[push] Subscription removed successfully:', result._id);
             }
 
             return result;
